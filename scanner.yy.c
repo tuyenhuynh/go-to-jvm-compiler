@@ -1159,77 +1159,77 @@ YY_RULE_SETUP
 case 54:
 YY_RULE_SETUP
 #line 77 "scanner.l"
-
+{printf("APPEND_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
 #line 78 "scanner.l"
-
+{printf("CAP_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 #line 79 "scanner.l"
-
+{printf("CLOSE_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
 #line 80 "scanner.l"
-
+{printf("COMPLEX_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
 #line 81 "scanner.l"
-
+{printf("COPY_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 #line 82 "scanner.l"
-
+{printf("DELETE_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
 #line 83 "scanner.l"
-
+{printf("IMAG_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
 #line 84 "scanner.l"
-
+{printf("LEN_FUNC - %s, line: %i\n", yytext, line);}	
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
 #line 85 "scanner.l"
-
+{printf("MAKE_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
 #line 86 "scanner.l"
-
+{printf("NEW_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
 #line 87 "scanner.l"
-
+{printf("PANIC_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
 #line 88 "scanner.l"
-
+{printf("PRINT_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
 #line 89 "scanner.l"
-
+{printf("PRINTLN_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
 #line 90 "scanner.l"
-
+{printf("REAL_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
 #line 91 "scanner.l"
-
+{printf("RECOVER_FUNC - %s, line: %i\n", yytext, line);}
 	YY_BREAK
 case 69:
 YY_RULE_SETUP

@@ -74,21 +74,21 @@
 
 "nil"			{printf("NIL - %s, line: %i\n", yytext, line);}
 
-"append" 
-"cap" 
-"close" 
-"complex" 
-"copy" 
-"delete" 
-"imag" 
-"len"
-"make" 
-"new" 
-"panic" 
-"print" 
-"println" 
-"real" 
-"recover"
+"append"		{printf("APPEND_FUNC - %s, line: %i\n", yytext, line);}
+"cap"			{printf("CAP_FUNC - %s, line: %i\n", yytext, line);}
+"close"			{printf("CLOSE_FUNC - %s, line: %i\n", yytext, line);}
+"complex"		{printf("COMPLEX_FUNC - %s, line: %i\n", yytext, line);}
+"copy"			{printf("COPY_FUNC - %s, line: %i\n", yytext, line);}
+"delete"		{printf("DELETE_FUNC - %s, line: %i\n", yytext, line);}
+"imag"			{printf("IMAG_FUNC - %s, line: %i\n", yytext, line);}
+"len"			{printf("LEN_FUNC - %s, line: %i\n", yytext, line);}	
+"make"			{printf("MAKE_FUNC - %s, line: %i\n", yytext, line);}
+"new"			{printf("NEW_FUNC - %s, line: %i\n", yytext, line);}
+"panic"			{printf("PANIC_FUNC - %s, line: %i\n", yytext, line);}
+"print"			{printf("PRINT_FUNC - %s, line: %i\n", yytext, line);}
+"println"		{printf("PRINTLN_FUNC - %s, line: %i\n", yytext, line);}
+"real"			{printf("REAL_FUNC - %s, line: %i\n", yytext, line);}
+"recover"		{printf("RECOVER_FUNC - %s, line: %i\n", yytext, line);}
 
 "+"    
 "&"     
