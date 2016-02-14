@@ -11,13 +11,13 @@ int main(int argc, char *argv[])
 
 	yyin = fopen(argv[1], "r");
 	
-	printf("Scanning file %s ...\n", argv[1]);
+	printf("Scanning file %s ...\n\n", argv[1]);
 	
 	yylex();
 
 	fclose(yyin);
 	
-	printf("Scanning is over\n");
+	printf("\nScanning is over");
 	
 	return 0;
 }
