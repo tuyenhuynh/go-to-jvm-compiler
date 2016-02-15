@@ -7,17 +7,21 @@
 	int line = 0;
 %}
 
-%x C_COMMENT
-FLOAT		[0-9]*\.[0-9]*[eE]*[-+]*[0-9]*	
+FLOAT		[0-9]*\.[0-9]+[eE]*[-+]*[0-9]*	
 DECIMAL		[0-9]+
 	
+%x MULTILINE_COMMENT
 
 %%
 
-"/*"            { BEGIN(C_COMMENT); }
-<C_COMMENT>"*/" { BEGIN(INITIAL); }
-<C_COMMENT>.    { }
-"//".*			{ }
+
+\/\/.*			{printf("ONE_LINE_COMMENT - \"%s\", line: %i\n", yytext, line);}
+
+\/\*					   {BEGIN(MULTILINE_COMMENT);}
+<MULTILINE_COMMENT>\*\/    {BEGIN(INITIAL);}
+<MULTILINE_COMMENT>\n      { ++line; } 
+<MULTILINE_COMMENT>.       {printf("MULTILINE_COMMENT - \"%s\", line: %i\n", yytext, line);}   
+
 
 "break"			{printf("BREAK - \"%s\", line: %i\n", yytext, line);}
 "default"		{printf("DEFAULT - \"%s\", line: %i\n", yytext, line);}
@@ -87,6 +91,9 @@ DECIMAL		[0-9]+
 "real"			{printf("REAL_FUNC - \"%s\", line: %i\n", yytext, line);}
 "recover"		{printf("RECOVER_FUNC - \"%s\", line: %i\n", yytext, line);}
 
+\"(\\.|[^\\"])*\"	{printf("STRING_LITERAL - \"%s\", line: %i\n", yytext, line);}
+`(\\.|[^\\"])*`		{printf("STRING_LITERAL - \"%s\", line: %i\n", yytext, line);}
+
 "+"							{printf("PLUS_OP - \"%s\", line: %i\n", yytext, line);}  
 "&"							{printf("AMPERSAND_OP - \"%s\", line: %i\n", yytext, line);}
 "+="						{printf("PLUS_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
@@ -144,13 +151,8 @@ DECIMAL		[0-9]+
 0[1-7][0-7]*					{printf("OCTAL_NUMBER - \"%s\", line: %i\n", yytext, line);}
 {DECIMAL}						{printf("DECIMAL_NUMBER - \"%s\", line: %i\n", yytext, line);}
 
-
-
-
-
 "\n"						{line++;}
-[\t\a\b\f\r\v\\]+			{printf("SPECIAL_VALUE - \"%s\", line: %i\n", yytext, line);}
-[ ]+						{}
+[ \t\a\b\f\r\v\\]+			{}
 .							{printf("->unknown<-: \"%s\", line: %i\n", yytext, line);}
 
 %%

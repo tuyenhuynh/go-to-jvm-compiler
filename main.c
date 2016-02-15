@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 	yylex();
 
 	fclose(yyin);
-	
+
 	printf("\nScanning is over");
 	
 	return 0;
