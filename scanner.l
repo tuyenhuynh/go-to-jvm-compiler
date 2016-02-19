@@ -4,13 +4,16 @@
 
 %{
 	#include <stdio.h>
-	int line = 0;
+	#include <math.h>
+	int line = 1;
 %}
 
 FLOAT		[0-9]*\.[0-9]+[eE]*[-+]*[0-9]*	
 DECIMAL		[0-9]+
 	
 %x MULTILINE_COMMENT
+
+%x MULTILINE_STRING_LITERAL
 
 %%
 
@@ -92,7 +95,11 @@ DECIMAL		[0-9]+
 "recover"		{printf("RECOVER_FUNC - \"%s\", line: %i\n", yytext, line);}
 
 \"(\\.|[^\\"])*\"	{printf("STRING_LITERAL - \"%s\", line: %i\n", yytext, line);}
-`(\\.|[^\\"])*`		{printf("STRING_LITERAL - \"%s\", line: %i\n", yytext, line);}
+
+"`"									{BEGIN(MULTILINE_STRING_LITERAL);}
+<MULTILINE_STRING_LITERAL>"`"			{BEGIN(INITIAL);}
+<MULTILINE_STRING_LITERAL>\n		{ ++line; } 
+<MULTILINE_STRING_LITERAL>.			{printf("MULTILINE_STRING_LITERAL - \"%s\", line: %i\n", yytext, line);}   
 
 "+"							{printf("PLUS_OP - \"%s\", line: %i\n", yytext, line);}  
 "&"							{printf("AMPERSAND_OP - \"%s\", line: %i\n", yytext, line);}
@@ -147,8 +154,8 @@ DECIMAL		[0-9]+
 {FLOAT}[i]						{printf("COMPLEX_FLOAT_NUMBER - \"%s\", line: %i\n", yytext, line);}
 {DECIMAL}[i]					{printf("COMPLEX_DECIMAL_NUMBER - \"%s\", line: %i\n", yytext, line);}
 {FLOAT}							{printf("FLOAT_NUMBER - \"%s\", line: %i\n", yytext, line);}
-0[xX][0-9a-fA-F]+				{printf("HEXADECIMAL_NUMBER - \"%s\", line: %i\n", yytext, line);}
-0[1-7][0-7]*					{printf("OCTAL_NUMBER - \"%s\", line: %i\n", yytext, line);}
+0[xX][0-9a-fA-F]+				{printf("HEXADECIMAL_NUMBER - \"%d\", line: %i\n", hex_decimal(yytext), line);}
+0[1-7][0-7]*					{printf("OCTAL_NUMBER - \"%d\", line: %i\n", octal_decimal(atoi(yytext)), line);}
 {DECIMAL}						{printf("DECIMAL_NUMBER - \"%s\", line: %i\n", yytext, line);}
 
 "\n"						{line++;}
@@ -156,3 +163,49 @@ DECIMAL		[0-9]+
 .							{printf("->unknown<-: \"%s\", line: %i\n", yytext, line);}
 
 %%
+
+int octal_decimal(int n) 
+{
+    int decimal=0, i=0, rem;
+    while (n!=0)
+    {
+        rem = n%10;
+        n/=10;
+        decimal += rem*pow(8,i);
+        ++i;
+    }
+    return decimal;
+}
+
+long hex_decimal(char hex[])
+{
+    char *hexstr;
+    int length = 0;
+    const int base = 16; // Base of Hexadecimal Number
+    unsigned long decnum = 0;
+    int i;
+    // Find length of Hexadecimal Number
+    for (hexstr = hex; *hexstr != '\0'; hexstr++)
+    {
+		length++;
+    }
+    // Find Hexadecimal Number
+    hexstr = hex;
+    for (i = 0; *hexstr != '\0' && i < length; i++, hexstr++)
+    {
+		// Compare *hexstr with ASCII values
+		if (*hexstr >= 48 && *hexstr <= 57)   // is *hexstr Between 0-9
+		{
+			decnum += (((int)(*hexstr)) - 48) * pow(base, length - i - 1);
+		}
+		else if ((*hexstr >= 65 && *hexstr <= 70))   // is *hexstr Between A-F
+		{
+			decnum += (((int)(*hexstr)) - 55) * pow(base, length - i - 1);
+		}
+		else if (*hexstr >= 97 && *hexstr <= 102)   // is *hexstr Between a-f
+		{
+			decnum += (((int)(*hexstr)) - 87) * pow(base, length - i - 1);
+		}
+    }
+    return decnum;
+}

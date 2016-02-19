@@ -212,6 +212,7 @@ extern char *yytext;
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
 #define MULTILINE_COMMENT 1
+#define MULTILINE_STRING_LITERAL 2
 
 #endif
 
@@ -315,9 +316,9 @@ extern int yylex (void);
 #undef YY_DECL
 #endif
 
-#line 158 "scanner.l"
+#line 165 "scanner.l"
 
 
-#line 322 "scanner.h"
+#line 323 "scanner.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */
