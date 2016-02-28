@@ -6,3 +6,4 @@
 3. Other identifiers ✔️
 4. All kinds of numbers ✔️
 5. README
+6.
