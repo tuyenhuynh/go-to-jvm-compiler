@@ -16,10 +16,16 @@
     <Filter Include="Flex Files">
       <UniqueIdentifier>{a8000e27-3e44-4d67-8dfa-4bb660d8548b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Bison Files">
+      <UniqueIdentifier>{1302e2e0-b5ca-48b9-ae7a-5add8eb0c9cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="scanner.l">
       <Filter>Flex Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="parser.y">
+      <Filter>Bison Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -34,5 +40,8 @@
     <ClCompile Include="scanner.yy.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
 </Project>
