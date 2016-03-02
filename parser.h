@@ -88,7 +88,10 @@ extern int yydebug;
     RANGE = 292,
     ENDL = 293,
     NOT_OP = 294,
-    STRUCT = 295
+    STRUCT = 295,
+    DECIMAL_NUMBER = 296,
+    FLOAT_NUMBER = 297,
+    STRING_LITERAL = 298
   };
 #endif
 
