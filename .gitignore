@@ -215,4 +215,13 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+<<<<<<< HEAD
 .DS_Store
+=======
+.DS_Store
+*.vcxproj
+*.vcxproj.filters
+scanner.yy.c
+scanner.h
+parser.h
+>>>>>>> c62731eeb0d7f6674e83757d44bb20607899642f
