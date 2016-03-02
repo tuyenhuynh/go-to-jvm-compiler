@@ -30,8 +30,29 @@
 
 %%
 
-program: statement_list
+program: function_declaration
 	; 
+
+function_declaration:
+	FUNC function_name function
+	|	FUNC function_name signature
+	; 
+function_name: 
+	IDENTIFIER
+	; 
+
+function:
+	signature function_body
+	; 
+function_body:
+	block
+	; 
+
+//block 
+block: 
+	'{'	'}'
+	|	'{' statement_list '}'
+	;
 
 statement_list : 
 		statement	
@@ -206,11 +227,7 @@ return_statement:
 	RETURN expression_list 
 	; 
 
-//block 
-block: 
-	'{'	'}'
-	|	'{' statement_list '}'
-	;
+
 
 //if statement 
 if_statement: 
@@ -328,6 +345,9 @@ literal:
 	; 
 
 basic_literal:
+	DECIMAL_NUMBER
+	|	FLOAT_NUMBER
+	|	STRING_LITERAL
 	; 
 
 composite_literal:
@@ -336,12 +356,7 @@ composite_literal:
 function_literal:
 	FUNC function
 	; 
-function:
-	signature function_body
-	; 
-function_body:
-	block
-	; 
+
 
 operand_name: 
 	IDENTIFIER 
@@ -360,13 +375,7 @@ method_name:
 	IDENTIFIER 
 	; 
 
-function_declaration:
-	FUNC function_name function
-	|	FUNC function_name signature
-	; 
-function_name: 
-	IDENTIFIER
-	; 
+
 
 %%
 
