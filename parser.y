@@ -1,18 +1,35 @@
 
 
+
+%token IDENTIFIER
+%token FUNC RETURN 
+%token ASSIGN_OP PLUS_ASSIGN_OP MINUS_ASSIGN_OP MUL_ASSIGN_OP DIV_ASSIGN_OP
+%token BREAK CONTINUE 
+%token SWITCH CASE DEFAULT 
+%token FOR 
+%token IF ELSE 
+%token CONST VAR 
+%token AND_OP OR_OP BITWISE_OR_OP BITWISE_AND_OP BITWISE_XOR_OP
+%token HIGHER_OP LOWER_OP HIGHER_OR_EQU_OP LOWER_OR_EQU_OP 
+%token ADD_OP MINUS_OP MUL_OP DIV_OP  MOD_OP EQU_OP NOT_EQU_OP 
+%token RANGE 
+%token ENDL
+%token NOT_OP
+%token STRUCT
+
 %%
 
-programa: statement_list
+programa: function_declaration
 ; 
 
 statement_list : 
 		statement	
-	|	statementlist statement
+	|	statement_list statement
 ; 
 
-
+//statement 
 statement :
-		declaration 
+	declaration 
 	|	simple_statement
 	|	return_statement
 	|	BREAK
@@ -23,15 +40,15 @@ statement :
 	|	for_statement
 	; 
 
-//SIMPLE STATEMENT 
+//Simple statement 
 simple_statement: 
-		empty_statement
+	empty_statement
 	|	expression 
 	|	inc_dec_statement
 	|	assignment
 	;
 
-//DECLARATION
+//Declaration
 declaration: 
 		const_declare
 	|	var_declare
@@ -48,8 +65,8 @@ const_spec:
 	; 
 
 identifier_list: 
-		identifier
-	|	identifier_list ',' identifier
+		IDENTIFIER
+	|	identifier_list ',' IDENTIFIER
 	; 
 
 expression_list: 
@@ -64,7 +81,7 @@ type :
 	; 
 
 type_name : 
-	identifier
+	IDENTIFIER
 	|	qualified_ident
 	; 
 
@@ -74,12 +91,20 @@ type_lit :
 	|	function_type
 	;	 
 
+struct_type:
+	STRUCT '{' '}'
+	|	STRUCT '{' field_declaration '}'
+	; 
+
+field_declaration:
+	identifier_list type 
+
 qualified_ident: 
-	package_name '.' identifier
+	package_name '.' IDENTIFIER
 	; 
 
 package_name: 
-	identifier
+	IDENTIFIER
 	; 
 
 array_type : 
@@ -123,10 +148,11 @@ result :
 	| type
 	; 
 
-	//VARIABLE DECLARATION
+//variable declaration
 var_declare :	
 	VAR var_specification
-	| VAR '(' var_specification_list  ')'
+	|	VAR '(' ')'
+	|	VAR '(' var_specification_list  ')'
 	;
 
 var_specification: 
@@ -136,9 +162,8 @@ var_specification:
 	;  
 
 var_specification_list : 
-	/*empty*/
-	|	var_specification ENDL
-	|	var_specification_list var_specication
+	var_specification ENDL
+	|	var_specification_list var_specification
 	; 
 
 empty_statement:
@@ -148,7 +173,7 @@ empty_statement:
 
 //the operand must be addresable 
 inc_dec_statement: 
-	expession "++"
+	expression "++"
 	|	expression "--"
 	;
 
@@ -164,19 +189,21 @@ assign_op:
 	|	DIV_ASSIGN_OP
 	; 
 
-//RETURN STATEMENT 
+//return statement  
 return_statement: 
 	RETURN expression_list 
 	; 
 
+//block 
 block: 
-	'{' statement_list '}'
+	'{'	'}'
+	|	'{' statement_list '}'
 	;
 
-//IF STATEMENT
+//if statement 
 if_statement: 
 	IF if_statement_expression block 
-	| if_statement_expression block else_block 
+	| if_statement_expression block ELSE else_block 
 	; 
 
 if_statement_expression :
@@ -184,13 +211,13 @@ if_statement_expression :
 	|	 statement ';' expression 
 	; 
 
-else_statement : 
+else_block : 
 	if_statement 
 	|	block 
 	; 
 
 
-//SWITCH STATEMENT 
+//switch statement  
 switch_statement: 
 	SWITCH simple_statement ';' '{' expression_case_clause '}'
 	|	SWITCH expression '{' expression_case_clause '}' 
@@ -238,7 +265,7 @@ range_clause :
 range_initial: 
 	/*empty*/
 	|	expression_list '=' 
-	|	identifier_list ':='
+	|	identifier_list ":="
 	; 
 
 expression : 
@@ -251,12 +278,11 @@ expression :
 	|	expression LOWER_OP expression 
 	|	expression HIGHER_OR_EQU_OP expression
 	|	expression LOWER_OR_EQU_OP expression
-	|	expression AND_OP expression
-	|	expression ADD_OP expression
-	|	expression MINUS_OP expression
 	|	expression BITWISE_OR_OP expression
 	|	expression BITWISE_XOR_OP expression
-	|	expression ASTERISK_OP expression
+	|	expression ADD_OP expression
+	|	expression MINUS_OP expression
+	|	expression MUL_OP expression
 	|	expression DIV_OP expression
 	|	expression MOD_OP expression
 	; 
@@ -274,13 +300,41 @@ primary_expression :
 	| primary_expression index 
 	; 
 
-
+index: 
+	'[' expression']'
 operand: 
 	literal
 	|	operand_name 
 	|	method_expression
 	|	'(' expression ')'
 	;
+
+literal: 
+	basic_literal
+	|	composite_literal
+	|	function_literal
+	; 
+
+basic_literal:
+	; 
+
+composite_literal:
+	; 
+
+function_literal:
+	FUNC function
+	; 
+function:
+	signature function_body
+	; 
+function_body:
+	block
+	; 
+
+operand_name: 
+	IDENTIFIER 
+	|	qualified_ident
+	; 
 
 method_expression: 
 	receiver_type '.' method_name 
@@ -291,7 +345,15 @@ receiver_type:
 	; 
 
 method_name:
-	identifier 
+	IDENTIFIER 
+	; 
+
+function_declaration:
+	FUNC function_name function
+	|	FUNC function_name signature
+	; 
+function_name: 
+	IDENTIFIER
 	; 
 
 %%
