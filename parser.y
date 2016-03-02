@@ -250,21 +250,26 @@ else_block :
 
 //switch statement  
 switch_statement: 
-	SWITCH simple_statement ';' '{' expression_case_clause '}'
-	|	SWITCH expression '{' expression_case_clause '}' 
+	SWITCH simple_statement ';' '{' switch_body '}'
+	|	SWITCH expression '{' switch_body '}' 
+	; 
+
+switch_body:
+	/*empty*/
+	|	expression_case_clause_list
+	;
+	 
+expression_case_clause_list: 
+	expression_case_clause
+	|expression_case_clause_list expression_case_clause
 	; 
 
 expression_case_clause: 
-	expression_switch_case ':' statement_list 
+	CASE expression_list ':' statement_list 
+	|	DEFAULT ':' statement_list 
 	; 
 
-expression_switch_case : 
-	CASE expression_list
-	|	DEFAULT
-	; 
-
-
-//FOR STATEMENT 
+//for statement
 
 for_statement:	
 	FOR condition block 
