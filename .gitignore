@@ -212,6 +212,8 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 .DS_Store
-golang-to-jvm.vcxproj
-golang-to-jvm.vcxproj.filters
-scanner.cpp
+*.vcxproj
+*.vcxproj.filters
+scanner.yy.c
+scanner.h
+parser.h
