@@ -5,6 +5,7 @@
 %{
 	#include <stdio.h>
 	#include <math.h>
+	#include "parser.h"
 	int line = 1;
 %}
 
@@ -30,7 +31,7 @@ DECIMAL		[0-9]+
 "default"		{return DEFAULT;}
 "func"			{return FUNC;}
 "interface"		{return INTERFACE;}
-"select"		{retrun SELECT;}
+"select"		{return SELECT;}
 "case"          {return CASE;}
 "defer"         {return DEFER;}
 "go"            {return GOROUTINE;}
@@ -48,7 +49,7 @@ DECIMAL		[0-9]+
 "type"		    {return TYPE;}
 "continue"      {return CONTINUE;}
 "for"           {return FOR;}
-"import"        {return IMPORT:}
+"import"        {return IMPORT;}
 "return"        {return RETURN;}
 "var"			{return VAR;}
 
@@ -122,7 +123,7 @@ DECIMAL		[0-9]+
 "*"							{return ASTERISK_OP;}
 "^"							{return BITWISE_XOR_OP;}
 "*="						{return MUL_ASSIGN_OP;}
-"^="						{retrun BITWISE_XOR_ASSIGN_OP;}
+"^="						{return BITWISE_XOR_ASSIGN_OP;}
 "<-"						{return SEND_RECIEVE_OP;}
 ">"							{return HIGHER_OP;}
 ">="						{return HIGHER_OR_EQU_OP;}
