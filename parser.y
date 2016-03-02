@@ -27,6 +27,8 @@
 %token ENDL
 %token NOT_OP
 %token STRUCT
+%token DECIMAL_NUMBER FLOAT_NUMBER STRING_LITERAL 
+
 
 %%
 
