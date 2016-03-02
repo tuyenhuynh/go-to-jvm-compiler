@@ -1,13 +1,24 @@
+%defines
+%error-verbose
+%{
+	int yylex(void);
 
+%}
+
+%code requires {
+	#include <parser.h>
+}
+
+%start program
 
 %%
 
-programa: statement_list
+program: statement_list
 ; 
 
 statement_list : 
 		statement	
-	|	statementlist statement
+	|	statement_list statement
 ; 
 
 
@@ -37,6 +48,7 @@ declaration:
 	|	var_declare
 	; 
 	//CONST_DECL
+
 const_declare :
 		CONST const_spec
 	|	CONST '(' const_spec ')' 
