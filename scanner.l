@@ -18,149 +18,149 @@ DECIMAL		[0-9]+
 %%
 
 
-\/\/.*			{printf("ONE_LINE_COMMENT - \"%s\", line: %i\n", yytext, line);}
+\/\/.*			{}
 
 \/\*					   {BEGIN(MULTILINE_COMMENT);}
 <MULTILINE_COMMENT>\*\/    {BEGIN(INITIAL);}
-<MULTILINE_COMMENT>\n      { ++line; } 
-<MULTILINE_COMMENT>.       {printf("MULTILINE_COMMENT - \"%s\", line: %i\n", yytext, line);}   
+<MULTILINE_COMMENT>\n      {++line; } 
+<MULTILINE_COMMENT>.       {}   
 
 
-"break"			{printf("BREAK - \"%s\", line: %i\n", yytext, line);}
-"default"		{printf("DEFAULT - \"%s\", line: %i\n", yytext, line);}
-"func"			{printf("FUNC - \"%s\", line: %i\n", yytext, line);}
-"interface"		{printf("INTERFACE - \"%s\", line: %i\n", yytext, line);}
-"select"		{printf("SELECT - \"%s\", line: %i\n", yytext, line);}
-"case"          {printf("CASE - \"%s\", line: %i\n", yytext, line);}
-"defer"         {printf("DEFER - \"%s\", line: %i\n", yytext, line);}
-"go"            {printf("GOROUTINE - \"%s\", line: %i\n", yytext, line);}
-"map"           {printf("MAP - \"%s\", line: %i\n", yytext, line);}
-"struct"	    {printf("STRUCT - \"%s\", line: %i\n", yytext, line);}
-"chan"          {printf("CHANNEL - \"%s\", line: %i\n", yytext, line);}
-"else"          {printf("ELSE - \"%s\", line: %i\n", yytext, line);}
-"goto"          {printf("GOTO - \"%s\", line: %i\n", yytext, line);}
-"package"       {printf("PACKAGE - \"%s\", line: %i\n", yytext, line);}
-"switch"		{printf("SWITCH - \"%s\", line: %i\n", yytext, line);}
-"const"         {printf("CONST - \"%s\", line: %i\n", yytext, line);}
-"fallthrough"   {printf("FALLTHROUGH - \"%s\", line: %i\n", yytext, line);}
-"if"            {printf("IF - \"%s\", line: %i\n", yytext, line);}
-"range"         {printf("RANGE - \"%s\", line: %i\n", yytext, line);}
-"type"		    {printf("TYPE - \"%s\", line: %i\n", yytext, line);}
-"continue"      {printf("CONTINUE - \"%s\", line: %i\n", yytext, line);}
-"for"           {printf("FOR - \"%s\", line: %i\n", yytext, line);}
-"import"        {printf("IMPORT - \"%s\", line: %i\n", yytext, line);}
-"return"        {printf("RETURN - \"%s\", line: %i\n", yytext, line);}
-"var"			{printf("VAR - \"%s\", line: %i\n", yytext, line);}
+"break"			{return BREAK;}
+"default"		{return DEFAULT;}
+"func"			{return FUNC;}
+"interface"		{return INTERFACE;}
+"select"		{retrun SELECT;}
+"case"          {return CASE;}
+"defer"         {return DEFER;}
+"go"            {return GOROUTINE;}
+"map"           {return MAP;}
+"struct"	    {return STRUCT;}
+"chan"          {return CHANNEL;}
+"else"          {return ELSE;}
+"goto"          {return GOTO;}
+"package"       {return PACKAGE;}
+"switch"		{return SWITCH;}
+"const"         {return CONST;}
+"fallthrough"   {return FALLTHROUGH;}
+"if"            {return IF;}
+"range"         {return RANGE;}
+"type"		    {return TYPE;}
+"continue"      {return CONTINUE;}
+"for"           {return FOR;}
+"import"        {return IMPORT:}
+"return"        {return RETURN;}
+"var"			{return VAR;}
 
-"bool"			{printf("BOOL_TYPE - \"%s\", line: %i\n", yytext, line);}
-"byte"			{printf("BYTE_TYPE (uint8) - \"%s\", line: %i\n", yytext, line);}
-"complex64"		{printf("COMPLEX64_TYPE - \"%s\", line: %i\n", yytext, line);}
-"complex128"	{printf("COMPLEX128_TYPE - \"%s\", line: %i\n", yytext, line);}
-"error"			{printf("ERROR_TYPE - \"%s\", line: %i\n", yytext, line);} 
-"float32"		{printf("FLOAT32_TYPE - \"%s\", line: %i\n", yytext, line);}
-"float64"		{printf("FLOAT64_TYPE - \"%s\", line: %i\n", yytext, line);}
-"int"			{printf("INT_TYPE - \"%s\", line: %i\n", yytext, line);}
-"int8"			{printf("INT8_TYPE - \"%s\", line: %i\n", yytext, line);}
-"int16"			{printf("INT16_TYPE - \"%s\", line: %i\n", yytext, line);}
-"int32"			{printf("INT32_TYPE - \"%s\", line: %i\n", yytext, line);}
-"int64"			{printf("INT64_TYPE - \"%s\", line: %i\n", yytext, line);}
-"rune"			{printf("RUNE_TYPE (int32) - \"%s\", line: %i\n", yytext, line);}
-"string"		{printf("STRING_TYPE - \"%s\", line: %i\n", yytext, line);}
-"uint"			{printf("UINT_TYPE - \"%s\", line: %i\n", yytext, line);}
-"uint8"			{printf("UINT8_TYPE - \"%s\", line: %i\n", yytext, line);}
-"uint16"		{printf("UINT16_TYPE - \"%s\", line: %i\n", yytext, line);}
-"uint32"		{printf("UINT32_TYPE - \"%s\", line: %i\n", yytext, line);}
-"uint64"		{printf("UINT64_TYPE - \"%s\", line: %i\n", yytext, line);}
-"uintptr"		{printf("UINTPTR_TYPE - \"%s\", line: %i\n", yytext, line);}
+"bool"			{return BOOL;}
+"byte"			{return BYTE_TYPE;}
+"complex64"		{return COMPLEX64_TYPE;}
+"complex128"	{return COMPLEX128_TYPE;}
+"error"			{return ERROR_TYPE;} 
+"float32"		{return FLOAT32_TYPE;}
+"float64"		{return FLOAT64_TYPE;}
+"int"			{return INT_TYPE;}
+"int8"			{return INT8_TYPE;}
+"int16"			{return INT16_TYPE;}
+"int32"			{return INT32_TYPE;}
+"int64"			{return INT64_TYPE;}
+"rune"			{return RUNE_TYPE;}
+"string"		{return STRING_TYPE;}
+"uint"			{return UINT_TYPE;}
+"uint8"			{return UINT8_TYPE;}
+"uint16"		{return UINT16_TYPE;}
+"uint32"		{return UINT32_TYPE;}
+"uint64"		{return UINT64_TYPE;}
+"uintptr"		{return UINTPTR_TYPE;}
 
-"true"			{printf("TRUE - \"%s\", line: %i\n", yytext, line);}
-"false"			{printf("FALSE - \"%s\", line: %i\n", yytext, line);}
-"iota"			{printf("IOTA - \"%s\", line: %i\n", yytext, line);}
-"nil"			{printf("NIL - \"%s\", line: %i\n", yytext, line);}
+"true"			{return TRUE;}
+"false"			{return FALSE;}
+"iota"			{return IOTA;}
+"nil"			{return NIL;}
 
-"append"		{printf("APPEND_FUNC - \"%s\", line: %i\n", yytext, line);}
-"cap"			{printf("CAP_FUNC - \"%s\", line: %i\n", yytext, line);}
-"close"			{printf("CLOSE_FUNC - \"%s\", line: %i\n", yytext, line);}
-"complex"		{printf("COMPLEX_FUNC - \"%s\", line: %i\n", yytext, line);}
-"copy"			{printf("COPY_FUNC - \"%s\", line: %i\n", yytext, line);}
-"delete"		{printf("DELETE_FUNC - \"%s\", line: %i\n", yytext, line);}
-"imag"			{printf("IMAG_FUNC - \"%s\", line: %i\n", yytext, line);}
-"len"			{printf("LEN_FUNC - \"%s\", line: %i\n", yytext, line);}	
-"make"			{printf("MAKE_FUNC - \"%s\", line: %i\n", yytext, line);}
-"new"			{printf("NEW_FUNC - \"%s\", line: %i\n", yytext, line);}
-"panic"			{printf("PANIC_FUNC - \"%s\", line: %i\n", yytext, line);}
-"print"			{printf("PRINT_FUNC - \"%s\", line: %i\n", yytext, line);}
-"println"		{printf("PRINTLN_FUNC - \"%s\", line: %i\n", yytext, line);}
-"real"			{printf("REAL_FUNC - \"%s\", line: %i\n", yytext, line);}
-"recover"		{printf("RECOVER_FUNC - \"%s\", line: %i\n", yytext, line);}
+"append"		{return APPEND_FUNC;}
+"cap"			{return CAP_FUNC;}
+"close"			{return CLOSE_FUNC;}
+"complex"		{return COMPLEX_FUNC;}
+"copy"			{return COPY_FUNC;}
+"delete"		{return DELETE_FUNC;}
+"imag"			{return IMAG_FUNC;}
+"len"			{return LEN_FUNC;}	
+"make"			{return MAKE_FUNC;}
+"new"			{return NEW_FUNC;}
+"panic"			{return PANIC_FUNC;}
+"print"			{return PRINT_FUNC;}
+"println"		{return PRINTLN_FUNC;}
+"real"			{return REAL_FUNC;}
+"recover"		{return RECOVER_FUNC;}
 
-\"(\\.|[^\\"])*\"	{printf("STRING_LITERAL - \"%s\", line: %i\n", yytext, line);}
+\"(\\.|[^\\"])*\"	{return STRING_LITERAL;}
 
 "`"									{BEGIN(MULTILINE_STRING_LITERAL);}
-<MULTILINE_STRING_LITERAL>"`"			{BEGIN(INITIAL);}
+<MULTILINE_STRING_LITERAL>"`"		{BEGIN(INITIAL);}
 <MULTILINE_STRING_LITERAL>\n		{ ++line; } 
-<MULTILINE_STRING_LITERAL>.			{printf("MULTILINE_STRING_LITERAL - \"%s\", line: %i\n", yytext, line);}   
+<MULTILINE_STRING_LITERAL>.			{return MULTILINE_STRING_LITERAL;}   
 
-"+"							{printf("PLUS_OP - \"%s\", line: %i\n", yytext, line);}  
-"&"							{printf("AMPERSAND_OP - \"%s\", line: %i\n", yytext, line);}
-"+="						{printf("PLUS_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"&="						{printf("BITWISE_AND_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"&&"						{printf("AND_OP - \"%s\", line: %i\n", yytext, line);}
-"=="						{printf("EQU_OP - \"%s\", line: %i\n", yytext, line);}
-"!="						{printf("NOT_EQU_OP - \"%s\", line: %i\n", yytext, line);}
-"("							{printf("LEFT_PAREN - \"%s\", line: %i\n", yytext, line);}
-")"							{printf("RIGHT_PAREN - \"%s\", line: %i\n", yytext, line);}
-"-"							{printf("MINUS_OP - \"%s\", line: %i\n", yytext, line);}
-"|"							{printf("BITWISE_OR_OP - \"%s\", line: %i\n", yytext, line);}
-"-="						{printf("MINUS_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"|="						{printf("BITWISE_OR_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"||"						{printf("OR_OP - \"%s\", line: %i\n", yytext, line);}
-"<"							{printf("LOWER_OP - \"%s\", line: %i\n", yytext, line);}
-"<="						{printf("LOWER_OR_EQU_OP - \"%s\", line: %i\n", yytext, line);}
-"["							{printf("LEFT_BRACKET - \"%s\", line: %i\n", yytext, line);}
-"]"							{printf("RIGHT_BRACKET - \"%s\", line: %i\n", yytext, line);}
-"*"							{printf("ASTERISK_OP - \"%s\", line: %i\n", yytext, line);}
-"^"							{printf("BITWISE_XOR_OP - \"%s\", line: %i\n", yytext, line);}
-"*="						{printf("MUL_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"^="						{printf("BITWISE_XOR_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"<-"						{printf("SEND_RECIEVE_OP - \"%s\", line: %i\n", yytext, line);}
-">"							{printf("HIGHER_OP - \"%s\", line: %i\n", yytext, line);}
-">="						{printf("HIGHER_OR_EQU_OP - \"%s\", line: %i\n", yytext, line);}
-"{"							{printf("LEFT_CURLY_BRACE - \"%s\", line: %i\n", yytext, line);}
-"}"							{printf("RIGHT_CURLY_BRACE - \"%s\", line: %i\n", yytext, line);}
-"/"							{printf("DIV_OP - \"%s\", line: %i\n", yytext, line);}
-"<<"						{printf("LEFT_SHIFT_OP - \"%s\", line: %i\n", yytext, line);}
-"/="						{printf("DIV_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"<<="						{printf("LEFT_SHIFT_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"++"						{printf("INCREMENT_OP - \"%s\", line: %i\n", yytext, line);}
-"="							{printf("ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-":="						{printf("SHORTHAND_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-","							{printf("COMMA - \"%s\", line: %i\n", yytext, line);}
-";"							{printf("SEMICOLON - \"%s\", line: %i\n", yytext, line);}
-"%"							{printf("MOD_OP - \"%s\", line: %i\n", yytext, line);}
-">>"						{printf("RIGHT_SHIFT_OP - \"%s\", line: %i\n", yytext, line);}
-"%="						{printf("MOD_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-">>="						{printf("RIGHT_SHIFT_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
-"--"						{printf("DECREMENT_OP - \"%s\", line: %i\n", yytext, line);}
-"!"							{printf("NOT_OP - \"%s\", line: %i\n", yytext, line);}
-"..."						{printf("ELIPSIS_OP - \"%s\", line: %i\n", yytext, line);}
-"."							{printf("DOT_OP - \"%s\", line: %i\n", yytext, line);}
-":"							{printf("COLON_OP - \"%s\", line: %i\n", yytext, line);}
-"&^"						{printf("AND_NOT_BITWISE_OP - \"%s\", line: %i\n", yytext, line);}
-"&^="						{printf("AND_NOT_BITWISE_ASSIGN_OP - \"%s\", line: %i\n", yytext, line);}
+"+"							{return PLUS_OP;}  
+"&"							{return AMPERSAND_OP;}
+"+="						{return PLUS_ASSIGN_OP;}
+"&="						{return BITWISE_AND_ASSIGN_OP;}
+"&&"						{return AND_OP;}
+"=="						{return EQU_OP;}
+"!="						{return NOT_EQU_OP;}
+"("							{return LEFT_PAREN;}
+")"							{return RIGHT_PAREN;}
+"-"							{return MINUS_OP;}
+"|"							{return BITWISE_OR_OP;}
+"-="						{return MINUS_ASSIGN_OP;}
+"|="						{return BITWISE_OR_ASSIGN_OP;}
+"||"						{return OR_OP;}
+"<"							{return LOWER_OP;}
+"<="						{return LOWER_OR_EQU_OP;}
+"["							{return LEFT_SQUARE_BRACKET;}
+"]"							{return RIGHT_SQUARE_BRACKET;}
+"*"							{return ASTERISK_OP;}
+"^"							{return BITWISE_XOR_OP;}
+"*="						{return MUL_ASSIGN_OP;}
+"^="						{retrun BITWISE_XOR_ASSIGN_OP;}
+"<-"						{return SEND_RECIEVE_OP;}
+">"							{return HIGHER_OP;}
+">="						{return HIGHER_OR_EQU_OP;}
+"{"							{return LEFT_CURLY_BRACE;}
+"}"							{return RIGHT_CURLY_BRACE;}
+"/"							{return DIV_OP;}
+"<<"						{return LEFT_SHIFT_OP;}
+"/="						{return DIV_ASSIGN_OP;}
+"<<="						{return LEFT_SHIFT_ASSIGN_OP;}
+"++"						{return INCREMENT_OP;}
+"="							{return ASSIGN_OP;}
+":="						{return SHORTHAND_ASSIGN_OP;}
+","							{return COMMA;}
+";"							{return SEMICOLON;}
+"%"							{return MOD_OP;}
+">>"						{return RIGHT_SHIFT_OP;}
+"%="						{return MOD_ASSIGN_OP;}
+">>="						{return RIGHT_SHIFT_ASSIGN_OP;}
+"--"						{return DECREMENT_OP;}
+"!"							{return NOT_OP;}
+"..."						{return ELIPSIS_OP;}
+"."							{return DOT_OP;}
+":"							{return COLON_OP;}
+"&^"						{return AND_NOT_BITWISE_OP;}
+"&^="						{return AND_NOT_BITWISE_ASSIGN_OP;}
 
 
-[a-zA-Z_][a-zA-Z0-9_]*			{printf("IDENTIFIER - \"%s\", line: %i\n", yytext, line);}
-{FLOAT}[i]						{printf("COMPLEX_FLOAT_NUMBER - \"%s\", line: %i\n", yytext, line);}
-{DECIMAL}[i]					{printf("COMPLEX_DECIMAL_NUMBER - \"%s\", line: %i\n", yytext, line);}
-{FLOAT}							{printf("FLOAT_NUMBER - \"%s\", line: %i\n", yytext, line);}
-0[xX][0-9a-fA-F]+				{printf("HEXADECIMAL_NUMBER - \"%d\", line: %i\n", hex_decimal(yytext), line);}
-0[1-7][0-7]*					{printf("OCTAL_NUMBER - \"%d\", line: %i\n", octal_decimal(atoi(yytext)), line);}
-{DECIMAL}						{printf("DECIMAL_NUMBER - \"%s\", line: %i\n", yytext, line);}
+[a-zA-Z_][a-zA-Z0-9_]*			{return IDENTIFIER;}
+{FLOAT}[i]						{return COMPLEX_FLOAT_NUMBER;}
+{DECIMAL}[i]					{return COMPLEX_DECIMAL_NUMBER;}
+{FLOAT}							{return FLOAT_NUMBER;}
+0[xX][0-9a-fA-F]+				{return HEXADECIMAL_NUMBER;}
+0[1-7][0-7]*					{return OCTAL_NUMBER;}
+{DECIMAL}						{return DECIMAL_NUMBER;}
 
-"\n"						{line++;}
-[ \t\a\b\f\r\v\\]+			{}
-.							{printf("->unknown<-: \"%s\", line: %i\n", yytext, line);}
+"\n"							{line++;}
+[ \t\a\b\f\r\v\\]+				{}
+.								{printf("->unknown<-: \"%s\", line: %i\n", yytext, line);}
 
 %%
 
