@@ -1,4 +1,15 @@
+%defines
+%error-verbose
+%{
+	int yylex(void);
 
+%}
+
+%code requires {
+	#include <parser.h>
+}
+
+%start program
 
 
 %token IDENTIFIER
@@ -19,7 +30,11 @@
 
 %%
 
+<<<<<<< HEAD
 programa: function_declaration
+=======
+program: statement_list
+>>>>>>> f8af87b7a2ca8485e6170ae858b7bf9efc29bb52
 ; 
 
 statement_list : 
@@ -54,6 +69,7 @@ declaration:
 	|	var_declare
 	; 
 	//CONST_DECL
+
 const_declare :
 		CONST const_spec
 	|	CONST '(' const_spec ')' 
