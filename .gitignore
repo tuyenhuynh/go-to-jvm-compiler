@@ -211,3 +211,7 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+.DS_Store
+golang-to-jvm.vcxproj
+golang-to-jvm.vcxproj.filters
+scanner.cpp
