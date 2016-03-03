@@ -226,5 +226,13 @@ scanner.h
 parser.h
 parser.cpp
 parser.hpp
+<<<<<<< HEAD
 parser.output
 >>>>>>> c62731eeb0d7f6674e83757d44bb20607899642f
+=======
+parser.c
+unistd.h
+scanner.h
+parser.h
+tracking.txt
+>>>>>>> e197506f6a74391349372157815b7782577c57c5
