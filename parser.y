@@ -94,8 +94,8 @@ statement :
 	; 
 
 //Simple statement 
-simple_statement: 
-	empty_statement
+simple_statement:
+	/*empty*/ 
 	|	expression 
 	|	inc_dec_statement
 	|	assignment
@@ -136,7 +136,7 @@ type :
 
 type_name : 
 	IDENTIFIER
-	|	qualified_ident
+	|	IDENTIFIER '.' IDENTIFIER
 	; 
 
 type_lit : 
@@ -153,13 +153,12 @@ struct_type:
 field_declaration:
 	identifier_list type 
 
+	/*
+//the first identifier is package name
 qualified_ident: 
-	package_name '.' IDENTIFIER
+	IDENTIFIER '.' IDENTIFIER
 	; 
-
-package_name: 
-	IDENTIFIER
-	; 
+	*/
 
 array_type : 
 	'[' array_length ']' element_type 
@@ -219,11 +218,6 @@ var_specification_list :
 	var_specification ENDL
 	|	var_specification_list var_specification
 	; 
-
-empty_statement:
-	/*empty*/	
-	;
-
 
 //the operand must be addresable 
 inc_dec_statement: 
@@ -371,7 +365,6 @@ operand:
 
 literal: 
 	basic_literal
-	|	composite_literal
 	|	function_literal
 	; 
 
@@ -381,9 +374,10 @@ basic_literal:
 	|	STRING_LITERAL
 	; 
 
+/*
 composite_literal:
 	; 
-
+	*/
 function_literal:
 	FUNC function
 	; 
@@ -391,7 +385,7 @@ function_literal:
 
 operand_name: 
 	IDENTIFIER 
-	|	qualified_ident
+	|	IDENTIFIER '.' IDENTIFIER	
 	; 
 
 method_expression: 
