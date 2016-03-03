@@ -1,5 +1,9 @@
 %defines
 %error-verbose
+%locations
+
+
+
 %{
 	int yylex(void);
 
@@ -7,6 +11,10 @@
 
 %code requires {
 	#include <parser.h>
+}
+
+%union {
+	int INT;
 }
 
 %start program
@@ -22,13 +30,24 @@
 %token CONST VAR 
 %token AND_OP OR_OP BITWISE_OR_OP BITWISE_AND_OP BITWISE_XOR_OP
 %token HIGHER_OP LOWER_OP HIGHER_OR_EQU_OP LOWER_OR_EQU_OP 
-%token ADD_OP MINUS_OP MUL_OP DIV_OP  MOD_OP EQU_OP NOT_EQU_OP 
+%token ADD_OP MINUS_OP ASTERISK_OP DIV_OP  MOD_OP EQU_OP NOT_EQU_OP 
 %token RANGE 
 %token ENDL
 %token NOT_OP
 %token STRUCT
 %token DECIMAL_NUMBER FLOAT_NUMBER STRING_LITERAL 
+%token TEST 
 
+
+%right '='
+%left AND_OP OR_OP 
+%left EQU_OP
+%left HIGHER_OP LOWER_OP HIGHER_OR_EQU_OP LOWER_OR_EQU_OP 
+%left '+' '-'
+%left '*' '/' '%'
+%left '!'
+%left '[' ']' 
+%nonassoc ')'
 
 %%
 
@@ -261,16 +280,19 @@ switch_body:
 	 
 expression_case_clause_list: 
 	expression_case_clause
-	|expression_case_clause_list expression_case_clause
+	|	expression_case_clause_list expression_case_clause
 	; 
 
 expression_case_clause: 
-	CASE expression_list ':' statement_list 
-	|	DEFAULT ':' statement_list 
+	expression_switch_case ':' statement_list 
+	; 
+
+expression_switch_case: 
+	CASE expression_list 
+	|	DEFAULT 
 	; 
 
 //for statement
-
 for_statement:	
 	FOR condition block 
 	|	FOR for_clause block 
@@ -310,34 +332,36 @@ expression :
 	|	expression OR_OP expression
 	|	expression EQU_OP expression
 	|	expression NOT_EQU_OP expression
-	|	expression HIGHER_OP expression
-	|	expression LOWER_OP expression 
+	|	expression '>' expression
+	|	expression '<' expression 
 	|	expression HIGHER_OR_EQU_OP expression
 	|	expression LOWER_OR_EQU_OP expression
 	|	expression BITWISE_OR_OP expression
 	|	expression BITWISE_XOR_OP expression
-	|	expression ADD_OP expression
-	|	expression MINUS_OP expression
-	|	expression MUL_OP expression
-	|	expression DIV_OP expression
-	|	expression MOD_OP expression
+	|	expression '+' expression
+	|	expression '-' expression
+	|	expression '*' expression
+	|	expression '/' expression
+	|	expression '%' expression
 	; 
 
 unary_expression :
 	primary_expression 
-	|	ADD_OP unary_expression 
-	|	MINUS_OP unary_expression 
-	|	NOT_OP unary_expression
+	|	'+' unary_expression 
+	|	'-' unary_expression 
+	|	'!' unary_expression
 	; 
 
 //Primary expressions are the operands for unary and binary expressions.
 primary_expression :
 	operand 
-	| primary_expression index 
+	| primary_expression index	
 	; 
 
 index: 
 	'[' expression']'
+	;
+
 operand: 
 	literal
 	|	operand_name 
