@@ -231,6 +231,4 @@ unistd.h
 scanner.h
 parser.h
 tracking.txt
-golang-to-jvm.vcxproj
-golang-to-jvm.vcxproj.filters
 >>>>>>> e197506f6a74391349372157815b7782577c57c5
