@@ -28,7 +28,7 @@
 %token FOR 
 %token IF ELSE 
 %token CONST VAR 
-%token AND_OP OR_OP BITWISE_OR_OP BITWISE_AND_OP BITWISE_XOR_OP
+%token AND_OP OR_OP
 %token HIGHER_OP LOWER_OP HIGHER_OR_EQU_OP LOWER_OR_EQU_OP 
 %token ADD_OP MINUS_OP ASTERISK_OP DIV_OP  MOD_OP EQU_OP NOT_EQU_OP 
 %token RANGE 
@@ -46,8 +46,15 @@
 %left '+' '-'
 %left '*' '/' '%'
 %left '!'
-%left '[' ']' 
+%left '[' ']'
+//??? 
 %nonassoc ')'
+%left UNARY_OP
+%right ID_LIST
+
+%precedence "type"
+%precedence "identifier_list"
+
 
 %%
 
@@ -115,7 +122,7 @@ const_declare :
 
 const_spec:
 		identifier_list '=' expression_list
-	| identifier_list type '=' expression_list 
+	| identifier_list_type '=' expression_list 
 	; 
 
 identifier_list: 
@@ -128,30 +135,21 @@ expression_list:
 	|	expression_list ',' expression 
 	; 
 
-type : 
-	type_name 
+type: 
+	IDENTIFIER 
+	| IDENTIFIER '.' IDENTIFIER
 	|	type_lit 
 	|	'(' type ')'
 	; 
 
-type_name : 
-	IDENTIFIER
-	|	IDENTIFIER '.' IDENTIFIER
+type_name:
+	IDENTIFIER 
+	| IDENTIFIER '.' IDENTIFIER 
 	; 
-
 type_lit : 
 	array_type 
-	|	struct_type 
 	|	function_type
 	;	 
-
-struct_type:
-	STRUCT '{' '}'
-	|	STRUCT '{' field_declaration '}'
-	; 
-
-field_declaration:
-	identifier_list type 
 
 	/*
 //the first identifier is package name
@@ -161,44 +159,41 @@ qualified_ident:
 	*/
 
 array_type : 
-	'[' array_length ']' element_type 
+	'[' array_length ']' type 
 	; 
 
 array_length : 
 	expression 
 	; 
 
-element_type : 
-	type 
-	; 
 
 function_type : 
 	FUNC signature 
 	; 
 
-signature:	
-	parameters
-	|	parameters result
+signature:
+	parameters_in_braces
+	|	parameters_in_braces result
 	; 
 
-parameters 
-	:	'(' ')'
-	|	'('	parameter_list ')'
+parameters_in_braces:
+	'(' ')'
+	|	'(' parameter_list ')'
 	; 
 
 parameter_list : 
 	parameter_declare 
-	|	parameter_declare ',' parameter_declare
+	|	parameter_list ',' parameter_declare
 	;	 
 
 parameter_declare: 
 	type 
-	|	identifier_list type 
+	|	identifier_list_type 
 	; 
 
 result :
-	parameters
-	| type
+	parameters_in_braces
+	|	type
 	; 
 
 //variable declaration
@@ -209,11 +204,15 @@ var_declare :
 	;
 
 var_specification: 
-	identifier_list type
-	|	identifier_list type '=' expression_list 
+	identifier_list_type
+	|	identifier_list_type '=' expression_list 
 	|	identifier_list '=' expression_list 
 	;  
 
+
+identifier_list_type:
+	identifier_list type %prec "identifier_list" 
+	; 
 var_specification_list : 
 	var_specification ENDL
 	|	var_specification_list var_specification
@@ -330,8 +329,6 @@ expression :
 	|	expression '<' expression 
 	|	expression HIGHER_OR_EQU_OP expression
 	|	expression LOWER_OR_EQU_OP expression
-	|	expression BITWISE_OR_OP expression
-	|	expression BITWISE_XOR_OP expression
 	|	expression '+' expression
 	|	expression '-' expression
 	|	expression '*' expression
@@ -339,17 +336,24 @@ expression :
 	|	expression '%' expression
 	; 
 
-unary_expression :
+unary_expression:
 	primary_expression 
-	|	'+' unary_expression 
-	|	'-' unary_expression 
-	|	'!' unary_expression
+	|	'+' unary_expression %prec UNARY_OP
+	|	'-' unary_expression %prec UNARY_OP
+	|	'!' unary_expression %prec UNARY_OP
 	; 
 
 //Primary expressions are the operands for unary and binary expressions.
-primary_expression :
+primary_expression:
 	operand 
-	| primary_expression index	
+	|	primary_expression '.' IDENTIFIER
+	|	primary_expression index	
+	|	primary_expression arguments
+	; 
+
+arguments:
+	'(' ')'
+	|	'(' expression_list ')' 
 	; 
 
 index: 
@@ -358,7 +362,6 @@ index:
 
 operand: 
 	literal
-	|	operand_name 
 	|	method_expression
 	|	'(' expression ')'
 	;
@@ -382,25 +385,15 @@ function_literal:
 	FUNC function
 	; 
 
-
-operand_name: 
-	IDENTIFIER 
-	|	IDENTIFIER '.' IDENTIFIER	
-	; 
-
 method_expression: 
-	receiver_type '.' method_name 
+	receiver_type '.' IDENTIFIER 
 	; 
 
 receiver_type: 
-	type_name 
+	IDENTIFIER
+	|	IDENTIFIER '.' IDENTIFIER
+	| '(' receiver_type')'
 	; 
-
-method_name:
-	IDENTIFIER 
-	; 
-
-
 
 %%
 
