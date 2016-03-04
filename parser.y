@@ -62,11 +62,8 @@ program: function_declaration
 	; 
 
 function_declaration:
-	FUNC function_name function
-	|	FUNC function_name signature
-	; 
-function_name: 
-	IDENTIFIER
+	FUNC IDENTIFIER function
+	|	FUNC IDENTIFIER signature
 	; 
 
 function:
@@ -134,11 +131,11 @@ expression_list:
 	expression 
 	|	expression_list ',' expression 
 	; 
-
+	math.INT
 type: 
 	IDENTIFIER 
 	| IDENTIFIER '.' IDENTIFIER
-	|	type_lit 
+	|	array_type 
 	|	'(' type ')'
 	; 
 
@@ -146,10 +143,6 @@ type_name:
 	IDENTIFIER 
 	| IDENTIFIER '.' IDENTIFIER 
 	; 
-type_lit : 
-	array_type 
-	|	function_type
-	;	 
 
 	/*
 //the first identifier is package name
@@ -213,6 +206,8 @@ var_specification:
 identifier_list_type:
 	identifier_list type %prec "identifier_list" 
 	; 
+
+	
 var_specification_list : 
 	var_specification ENDL
 	|	var_specification_list var_specification
@@ -362,7 +357,6 @@ index:
 
 operand: 
 	literal
-	|	method_expression
 	|	'(' expression ')'
 	;
 
@@ -383,10 +377,6 @@ composite_literal:
 	*/
 function_literal:
 	FUNC function
-	; 
-
-method_expression: 
-	receiver_type '.' IDENTIFIER 
 	; 
 
 receiver_type: 
