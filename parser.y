@@ -35,8 +35,7 @@
 %right '='
 %left OR
 %left AND 
-%left EQU NE GT GTE LT LTE
-%left '>' '<'  
+%left EQU NE GT GTE LT LTE 
 %left '+' '-'
 %left '*' '/' '%'
 %left '!'
@@ -51,11 +50,11 @@
 
 %%
 
-/*
+
 	program: 
 	function_list 
 	;
-*/
+
 function_list :
 	function_declaration 
 	|	function_list function_declaration
@@ -128,24 +127,16 @@ unary_expression:
 
 //Primary expressions are the operands for unary and binary expressions.
 primary_expression:
-	operand 
-	|	primary_expression index	
-	|	primary_expression arguments
-	; 
-
-arguments:
-	'(' ')'
-	|	'(' expression_list ')' 
-	; 
-
-index: 
-	'[' expression']'
-	;
-
-operand:
 	literal
+	|	IDENTIFIER
+	|	primary_expression '[' expression ']'
+	|	function_call 
 	|	'(' expression ')'
-	;
+	; 
+	
+function_call:
+	IDENTIFIER '(' ')'
+	| IDENTIFIER '(' expression_list ')'
 
 literal:
 	DECIMAL_NUMBER
@@ -177,12 +168,12 @@ expression_list:
 
 //statement 
 statement :
-	declaration 
+	simple_statement
+	|	declaration 
 	|	return_statement
 	|	BREAK
 	|	CONTINUE
-	|	block 
-	|	simple_statement
+	|	block
 	|	if_statement
 	|	switch_statement	
 	|	for_statement
@@ -259,20 +250,10 @@ expression_switch_case:
 	
 //Simple statement 
 simple_statement:
-	|	expression 
-	|	inc_dec_statement
-	|	assignment
-	;
-
-assignment: 
-	expression_list assign_op expression_list 
-	; 
-
-	
-//the operand must be addresable 
-inc_dec_statement: 
-	expression "++"
+	expression 
+	|	expression "++"
 	|	expression "--"
+	|	expression_list assign_op expression_list 
 	;
 
 //for statement
@@ -288,17 +269,10 @@ for_clause :
 
 
 function_declaration:
-	FUNC IDENTIFIER function
+	FUNC IDENTIFIER signature block
 	|	FUNC IDENTIFIER signature
 	; 
 
-function:
-	signature function_body
-	; 
-
-function_body:
-	block
-	; 
 
 signature:
 	parameters_in_braces
