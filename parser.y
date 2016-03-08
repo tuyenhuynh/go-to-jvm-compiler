@@ -15,9 +15,9 @@
 	int INT;
 }
 
-//%start program
+%start program
 
-
+%token COMMA
 %token IDENTIFIER
 %token FUNC RETURN 
 %token ASSIGN_OP PLUS_ASSIGN_OP MINUS_ASSIGN_OP MUL_ASSIGN_OP DIV_ASSIGN_OP
@@ -42,14 +42,13 @@
 %left '[' ']'
 %left '(' 
 %left ')'
-%left UNARY_OP
+%left UNARY_OP UNARY_MINUS UNARY_PLUS
 %right ID_LIST
 
 %precedence "type"
 %precedence "identifier_list"
 
 %%
-
 
 	program: 
 	function_list 
@@ -60,48 +59,27 @@ function_list :
 	|	function_list function_declaration
 	;
 
-//Declaration
-declaration:
-	const_declare
-	|	var_declare
-	; 
-
-parameter_declare: 
-	type 
-	|	identifier_list_type 
-	; 
-
-//CONST_DECL
 const_declare :
-		CONST const_spec
+	CONST const_spec
 	|	CONST '(' const_spec ')' 
 	;
 
 const_spec:
-		identifier_list '=' expression_list
+	identifier_list '=' expression_list
 	| identifier_list_type '=' expression_list 
 	; 
 
+
 type: 
 	IDENTIFIER 
-	|	array_type 
-	; 
-
-array_type : 
-	'[' array_length ']' type 
-	; 
-
-array_length : 
-	expression 
+	|	'[' expression ']' IDENTIFIER  
 	; 
 
 identifier_list_type:
 	identifier_list type %prec "identifier_list" 
 	; 
 
-
-//variable declaration
-var_declare :	
+var_declare:	
 	VAR var_specification
 	|	VAR '(' ')'
 	|	VAR '(' var_specification_list  ')'
@@ -113,19 +91,18 @@ var_specification:
 	|	identifier_list '=' expression_list 
 	;  
 	
-var_specification_list : 
+var_specification_list: 
 	var_specification
 	|	var_specification_list ';' var_specification
 	; 
 
 unary_expression:
-	primary_expression 
-	|	'+' unary_expression %prec UNARY_OP
-	|	'-' unary_expression %prec UNARY_OP
-	|	'!' unary_expression %prec UNARY_OP
+	primary_expression
+	|	'!' primary_expression %prec UNARY_OP
+	|	'+' primary_expression %prec UNARY_PLUS
+	|	'-' primary_expression %prec UNARY_MINUS
 	; 
 
-//Primary expressions are the operands for unary and binary expressions.
 primary_expression:
 	literal
 	|	IDENTIFIER
@@ -133,10 +110,16 @@ primary_expression:
 	|	function_call 
 	|	'(' expression ')'
 	; 
-	
+
 function_call:
 	IDENTIFIER '(' ')'
-	| IDENTIFIER '(' expression_list ')'
+	|	IDENTIFIER '(' expression_list	optional_comma')'
+	;
+
+optional_comma:
+	|	COMMA
+	; 
+
 
 literal:
 	DECIMAL_NUMBER
@@ -144,7 +127,7 @@ literal:
 	|	STRING_LITERAL
 	;
 
-expression : 
+expression: 
 	unary_expression 
 	|	expression AND expression
 	|	expression OR expression
@@ -166,10 +149,10 @@ expression_list:
 	|	expression_list ',' expression 
 	; 
 
-//statement 
-statement :
+statement:
 	simple_statement
-	|	declaration 
+	|	var_declare
+	|	const_declare	
 	|	return_statement
 	|	BREAK
 	|	CONTINUE
@@ -180,11 +163,10 @@ statement :
 	; 
 
 identifier_list: 
-		IDENTIFIER
+	IDENTIFIER
 	|	identifier_list ',' IDENTIFIER
 	; 
 
-//return statement
 return_statement: 
 	RETURN expression_list 
 	; 
@@ -197,7 +179,6 @@ assign_op:
 	|	DIV_ASSIGN_OP
 	; 
 
-//if statement 
 if_statement: 
 	IF if_statement_expression block 
 	| IF if_statement_expression block ELSE else_block 
@@ -205,7 +186,7 @@ if_statement:
 	
 if_statement_expression :
 	expression 
-	|	 statement ';' expression 
+	|	 simple_statement ';' expression 
 	; 
 	
 else_block : 
@@ -213,19 +194,16 @@ else_block :
 	|	block 
 	; 
 	
-
-//block 
 block: 
 	'{'	'}'
 	|	'{' statement_list '}'
 	;
 
 statement_list : 
-		statement	
-	|	statement_list statement
+	statement	
+	|	statement_list ';' statement
 	; 
-
-//switch statement  
+ 
 switch_statement: 
 	SWITCH simple_statement ';' '{' switch_body '}'
 	|	SWITCH expression '{' switch_body '}' 
@@ -248,7 +226,6 @@ expression_switch_case:
 	|	DEFAULT 
 	; 
 	
-//Simple statement 
 simple_statement:
 	expression 
 	|	expression "++"
@@ -256,24 +233,21 @@ simple_statement:
 	|	expression_list assign_op expression_list 
 	;
 
-//for statement
 for_statement:	
 	FOR block
 	|	FOR expression block 
 	|	FOR for_clause block 
 	;
 
-for_clause : 
+for_clause: 
 	simple_statement ';' expression ';' simple_statement 
 	; 
 
-
 function_declaration:
-	FUNC IDENTIFIER signature block
-	|	FUNC IDENTIFIER signature
-	; 
-
-
+	FUNC	IDENTIFIER  signature
+	|	FUNC	IDENTIFIER  signature block
+	;
+	
 signature:
 	parameters_in_braces
 	|	parameters_in_braces result
@@ -287,8 +261,13 @@ parameters_in_braces:
 parameter_list : 
 	parameter_declare 
 	|	parameter_list ',' parameter_declare
-	;	 
-
+	;	
+ 
+parameter_declare: 
+	type 
+	|	IDENTIFIER type 
+	; 
+	
 result :
 	parameters_in_braces
 	|	type
