@@ -1,6 +1,5 @@
 %defines
 %error-verbose
-%locations
 
 %{
 	int yylex(void);
@@ -8,7 +7,7 @@
 %}
 
 %code requires {
-	#include <parser.h>
+	#include "parser.h"
 }
 
 %union {
@@ -71,7 +70,7 @@ import:
 	; 
 
 import_statement:
-	IDENTIFIER '.' IDENTIFIER 
+	STRING_LITERAL
 	; 
 
 import_statement_list:
