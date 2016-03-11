@@ -31,6 +31,8 @@
 %token NOT
 %token STRUCT
 %token DECIMAL_NUMBER FLOAT_NUMBER STRING_LITERAL 
+%token PACKAGE
+%token IMPORT
 
 %right '='
 %left OR
@@ -50,14 +52,42 @@
 
 %%
 
-	program: 
-	function_list 
+program: 
+	package	imports	declaration_list 
 	;
 
-function_list :
-	function_declaration 
-	|	function_list function_declaration
-	;
+package:
+	PACKAGE IDENTIFIER ';'
+	; 
+
+imports:
+	|	imports import
+	; 
+
+import:
+	IMPORT import_statement
+	|	IMPORT '(' ')'
+	|	IMPORT '(' import_statement_list ')'
+	; 
+
+import_statement:
+	IDENTIFIER '.' IDENTIFIER 
+	; 
+
+import_statement_list:
+	import_statement
+	|	import_statement_list ';' import_statement 
+	; 
+
+declaration_list:
+	|	declaration_list declaration ';'
+	; 
+
+declaration:
+	|	var_declare
+	|	const_declare
+	|	function_declaration
+	; 
 
 const_declare :
 	CONST const_spec
@@ -249,11 +279,11 @@ function_declaration:
 	;
 	
 signature:
-	parameters_in_braces
-	|	parameters_in_braces result
+	parameters_in_parentheses
+	|	parameters_in_parentheses result
 	; 
 
-parameters_in_braces:
+parameters_in_parentheses:
 	'(' ')'
 	|	'(' parameter_list ')'
 	; 
@@ -269,7 +299,7 @@ parameter_declare:
 	; 
 	
 result :
-	parameters_in_braces
+	parameters_in_parentheses
 	|	type
 	;
 
