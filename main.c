@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	
 	printf("Scanning file %s ...\n\n", argv[1]);
 	
-	yylex();
+	yyparse();
 
 	fclose(yyin);
 

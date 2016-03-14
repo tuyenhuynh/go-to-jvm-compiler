@@ -4,20 +4,176 @@
 %{
 	#include "parser.h"
 	#include "trees.h"
-	int yylex(void);
+	#include <malloc.h>
+	extern int yylex(void);
+	
+	struct Imports *imports;
+	
+	struct DeclarationList *declList;
+
+	struct Program *root;
+
+	struct Program *CreateProgram(struct Package *_pkg, struct Imports *_imports, struct DeclarationList *_declList);
+	struct Package *CreatePackage(char *_pkgName);
+	struct Imports *AppendToImportsList(struct Imports *_imports, struct Import *_import);
+	struct Import *CreateImportFromStatement(char *_importStmt);
+	struct Import *CreateCompositeImportFromStatementList(struct ImportStmtList *_importStmtList);
+	struct ImportStmtList *CreateImportStatementList(char *_importStmt);
+	struct ImportStmtList *AppendToImportStatementList(struct ImportStmtList *_importStmtList, char *_importStmt);
+	struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl);
+	struct Declaration *CreateConstDecl(enum DeclType type, struct ConstSpec *_constSpec);
+	struct ConstSpec *CreateConstSpecFromIdList(struct IdentifierList *_idList, struct ExpressionList *_exprList);
+	struct ConstSpec *CreateConstSpecFromIdListWithType(struct IdentifierListType *_idListType, struct ExpressionList *_expressionList);
+	struct Type *CreateTypeFromId(char *_id);
+	struct Type *CreateCompositeType(struct Expression *_expr, char *_id);
+	struct IdentifierListType *CreateIdListWithType(struct IdentifierList *_identifierList, struct Type *_type);
+	struct Declaration *CreateSimpleVarDecl(enum DeclType _declType, struct VarSpec *_varSpec);
+	struct Declaration *CreateCompositeVarDecl(enum DeclType _declType, struct VarSpecList *_varSpecList);
+	struct VarSpec *CreateSimpleVarSpecWType(struct IdentifierListType *_idListType);
+	struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *_idListType, struct ExpressionList *_exprList);
+	struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *_idList, struct ExpressionList *_exprList);
+	struct VarSpecList *CreateVarSpecList(struct VarSpec *_varSpec);
+	struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct VarSpec *_varSpec);
+
+
+
+
+
+
 %}
 
 %union {
+	char* string;
+	int decValue;
+	float floatValue;
 
+	struct Program *s_program;
+	
+	struct Package *s_package;
+	
+	struct Imports *s_imports;
+	
+	struct DeclarationList *s_declList;
 
+	struct Import *s_import;
+	
+	struct Declaration *s_declaration;
 
+	struct ImportStmtList *s_importStmtList;
+
+	struct VarDecl *s_varDecl;
+
+	struct ConstDecl *s_constDecl;
+
+	struct FunctionDecl *s_functionDecl;
+
+	struct ConstSpec *s_constSpec;
+
+	struct IdentifierList *s_IdList;
+
+	struct IdentifierListType *s_IdListType;
+
+	struct ExpressionList *s_exprList;
+
+	struct Type *s_type;
+
+	struct Expression *s_expr;
+
+	struct VarSpec *s_varSpec;
+
+	struct VarSpecList *s_varSpecList;
+
+	struct Statement *s_stmt;
+
+	struct SimpleStmt *s_simple_stmt;
+
+	struct ReturnStmt *s_return_stmt;
+
+	struct Block *s_block;
+
+	struct IfStmt *s_if_stmt;
+
+	struct SwitchStmt *s_switch_stmt;
+
+	struct ForStmt *s_for_stmt;
+
+	struct IfStmtExpression *s_ifstmtExpr;
+
+	struct ElseBlock *s_elseBlock;
+
+	struct StatementList *s_stmt_list;
+
+	struct SwitchBody *s_switch_body;
+
+	struct ExpressionCaseClauseList *s_eccl;
+
+	struct ExpressionCaseClause *s_ecc;
+
+	struct ExpressionSwitchCase *s_exprSwitchCase;
+
+	struct ForClause *s_forClause;
+
+	struct Signature *s_signature;
+
+	struct ParamInParen *s_paramInParen;
+
+	struct ParameterList *s_paramList;
+
+	struct ParameterDeclare *s_paramDecl;
+
+	struct Result *s_result;
+
+	struct PrimaryExpression *s_primary_expr;
+
+	struct FunctionCall *s_func_call;
 }
 
+%type<s_program> program
+%type<s_package> package
+%type<s_imports> imports
+%type<s_declList> declaration_list
+%type<s_import> import
+%type<s_declaration> declaration
+%type<string> import_statement
+%type<s_importStmtList> import_statement_list
+%type<s_varDecl> var_declare
+%type<s_constDecl> const_declare
+%type<s_functionDecl> function_declaration
+%type<s_constSpec> const_spec
+%type<s_IdList> identifier_list
+%type<s_IdListType> identifier_list_type
+%type<s_exprList> expression_list
+%type<s_type> type
+%type<s_expr> expression 
+%type<s_primary_expr> primary_expression 
+%type<s_func_call> function_call
+%type<s_varSpec> var_specification
+%type<s_varSpecList> var_specification_list
+%type<s_stmt> statement
+%type<s_simple_stmt> simple_statement
+%type<s_return_stmt> return_statement
+%type<s_block> block
+%type<s_if_stmt> if_statement
+%type<s_switch_stmt> switch_statement
+%type<s_for_stmt> for_statement
+%type<s_ifstmtExpr> if_statement_expression
+%type<s_elseBlock> else_block
+%type<s_stmt_list> statement_list
+%type<s_switch_body> switch_body
+%type<s_eccl> expression_case_clause_list
+%type<s_ecc> expression_case_clause
+%type<s_exprSwitchCase> expression_switch_case
+%type<s_forClause> for_clause
+%type<s_signature> signature
+%type<s_paramInParen> parameters_in_parentheses
+%type<s_paramList> parameter_list
+%type<s_paramDecl> parameter_declare
+%type<s_result> result
 
 %start program
 
 %token COMMA
-%token IDENTIFIER
+%token<string> IDENTIFIER
 %token FUNC RETURN 
 %token ASSIGN_OP PLUS_ASSIGN_OP MINUS_ASSIGN_OP MUL_ASSIGN_OP DIV_ASSIGN_OP
 %token BREAK CONTINUE 
@@ -29,10 +185,13 @@
 %token GT GTE LT LTE EQU NE
 %token NOT
 %token STRUCT
-%token DECIMAL_NUMBER FLOAT_NUMBER 
-%token STRING_LITERAL 
+%token<decValue> DECIMAL_NUMBER HEXADECIMAL_NUMBER OCTAL_NUMBER
+%token<floatValue> FLOAT_NUMBER 
+%token<string> STRING_LITERAL 
 %token PACKAGE
 %token IMPORT
+%token INT_TYPE FLOAT32_TYPE STRING_TYPE BOOL_TYPE NIL
+%token TRUE FALSE
 
 %right '='
 %left OR
@@ -53,7 +212,7 @@
 %%
 
 program: 
-	package imports declaration_list					{$$ = CreateProgram($1, $2, $3);}
+	package imports declaration_list					{$$ = root = CreateProgram($1, $2, $3);}
 	;
 
 package:
@@ -62,17 +221,20 @@ package:
 
 imports:
 														{}
-	|	imports import									{}
+	|	imports import									{
+															imports = (struct Imports *)malloc(sizeof(struct Imports));
+															$$ = AppendToImportsList(imports, $2);
+														}
 	; 
 
 import:
-	IMPORT import_statement								{$$ = CreateImportFromStatement(SIMPLE_IMPORT, $2);}
-	|	IMPORT '(' ')'									{$$ = CreateEmptyImport(EMPTY_IMPORT);}
-	|	IMPORT '(' import_statement_list ')'			{$$ = CreateCompositeImportFromStatementList(COMPOSITE_IMPORT, $3);}
+	IMPORT import_statement								{$$ = CreateImportFromStatement($2);}
+	|	IMPORT '(' ')'									{}
+	|	IMPORT '(' import_statement_list ')'			{$$ = CreateCompositeImportFromStatementList($3);}
 	; 
 
 import_statement:
-	STRING_LITERAL										{$$ = CreateImportStatement($1);}							
+	STRING_LITERAL										{$$ = $1;}							
 	; 
 
 import_statement_list:
@@ -82,18 +244,22 @@ import_statement_list:
 
 declaration_list:
 														{}
-	|	declaration_list declaration ';'				{}
+	|	declaration_list declaration ';'				{
+															declList = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));
+															$$ = AppendToDeclarationList(declList, $2);
+														}
 	; 
 
 declaration:
-	|	var_declare										{$$ = CreateDeclarationOfVar(VAR_DECL, $1);}
-	|	const_declare									{$$ = CreateDeclarationOfConst(CONST_DECL, $1);}
-	|	function_declaration							{$$ = CreateDeclarationOfFunc(FUNCTION_DECL, $1);}
+														{}
+	|	var_declare										{$$ = $1;}
+	|	const_declare									{$$ = $1;}
+	|	function_declaration							{$$ = $1;}
 	; 
 
 const_declare :
-	CONST const_spec									{$$ = CreateConstDecl(WO_PAREN, $2);}
-	|	CONST '(' const_spec ')'						{$$ = CreateConstDecl(W_PAREN, $2);}
+	CONST const_spec									{$$ = CreateConstDecl(CONST_DECL, $2);}
+	|	CONST '(' const_spec ')'						{$$ = CreateConstDecl(CONST_DECL, $3);}
 	;
 
 const_spec:
@@ -103,8 +269,8 @@ const_spec:
 
 
 type: 
-	IDENTIFIER											{$$ = CreateTypeFromId(SIMPLE_TYPE, $1);}
-	|	'[' expression ']' IDENTIFIER					{$$ = CreateCompositeType(COMPOSITE_TYPE, $2, $4);}
+	IDENTIFIER											{$$ = CreateTypeFromId($1);}
+	|	'[' expression ']' IDENTIFIER					{$$ = CreateCompositeType($2, $4);}
 	; 
 
 identifier_list_type:
@@ -112,15 +278,15 @@ identifier_list_type:
 	; 
 
 var_declare:	
-	VAR var_specification								{$$ = CreateSimpleVarDecl(SIMPLE_VAR_DECL, $2);}
-	|	VAR '(' ')'										{$$ = CreateEmptyVarDecl(EMPTY_VAR_DECL);}
-	|	VAR '(' var_specification_list  ')'				{$$ = CreateCompositeVarDecl(COMPOSITE_VAR_DECL, $3);}
+	VAR var_specification								{$$ = CreateSimpleVarDecl(VAR_DECL, $2);}
+	|	VAR '(' ')'										{}
+	|	VAR '(' var_specification_list  ')'				{$$ = CreateCompositeVarDecl(VAR_DECL, $3);}
 	;
 
 var_specification: 
-	identifier_list_type								{$$ = CreateSimpleVarSpecWType(SIMPLE_VAR_SPEC_W_TYPE, $1);}
-	|	identifier_list_type '=' expression_list		{$$ = CreateCompositeVarSpecWtype(COMPOSITE_VAR_SPEC_W_TYPE, $1, $3);}
-	|	identifier_list '=' expression_list				{$$ = CreateCompositeVarSpecWOType(COMPOSITE_VAR_SPEC_WO_TYPE, $1, $3);}
+	identifier_list_type								{$$ = CreateSimpleVarSpecWType($1);}
+	|	identifier_list_type '=' expression_list		{$$ = CreateCompositeVarSpecWtype($1, $3);}
+	|	identifier_list '=' expression_list				{$$ = CreateCompositeVarSpecWOType($1, $3);}
 	;  
 	
 var_specification_list: 
@@ -128,39 +294,31 @@ var_specification_list:
 	|	var_specification_list ';' var_specification	{$$ = AppendToVarSpecList($1, $3);}
 	; 
 
-unary_expression:
-	primary_expression									{$$ = CreateUnaryExpression(UNARY_EXPR, $1);}
-	|	'!' primary_expression %prec UNARY_OP			{$$ = CreateUnaryExpression(NOT_UNARY_EXPR, $2);}
-	|	'+' primary_expression %prec UNARY_PLUS			{$$ = CreateUnaryExpression(PLUS_UNARY_EXPR, $2);}
-	|	'-' primary_expression %prec UNARY_MINUS		{$$ = CreateUnaryExpression(MINUS_UNARY_EXPR, $2);}
-	; 
-
 primary_expression:
-	literal												{$$ = CreatePrimaryExpressionFromLiteral(PE_LITERAL, $1);}
-	|	IDENTIFIER										{$$ = CreatePrimaryExpressionFromIdentifier(PE_IDENTIFIER, $1);}
+		DECIMAL_NUMBER									{$$ = CreateDecimalExpression(DECIMAL_EXPR, $1);}
+	|	FLOAT_NUMBER									{$$ = CreateFloatExpression(FLOAT_EXPR, $1);}
+	|	STRING_LITERAL									{$$ = CreateStringExpression(STRING_EXPR, $1);}
+	|	IDENTIFIER										{$$ = CreateIdExpression(ID_EXPRESSION, $1);}
 	|	primary_expression '[' expression ']'			{$$ = CreateCompositePrimaryExpression(PE_COMPOSITE, $1, $3);}
-	|	function_call									{$$ = CreatePrimaryExpressionFromFucntionCall(PE_FUNCTION_CALL, $1);}
-	|	'(' expression ')'								{$$ = CreatePrimaryExpressionFromExpression(PE_EXPRESSION, $2);}
+	|	function_call									{$$ = CreatePrimaryExpressionFromFuncCall(FUNCTION_CALL, $1);}
+	|	'(' expression ')'								{$$ = CreatePrimaryExpressionFromExpression(EXPRESSION, $2);}
 	; 
 
 function_call:
-	IDENTIFIER '(' ')'									   {$$ = CreateFunctionCallEmptyParameters(FUNCTION_CALL_EMPTY, $1);}
-	|	IDENTIFIER '(' expression_list	optional_comma')'  {$$ = CreateFunctionCall(FUNCTION_CALL, $1, $3, $4);}
+	IDENTIFIER '(' ')'									   {}
+	|	IDENTIFIER '(' expression_list	optional_comma')'  {$$ = CreateFunctionCallExpr($1, $3);}
 	;
 
 optional_comma:
-	|	COMMA											{$$ = $1;}
+														{}
+	|	COMMA											{}
 	; 
 
-
-literal:
-		DECIMAL_NUMBER									{$$ = CreateLiteral(DECIMAL_LITERAL, $1);}
-	|	FLOAT_NUMBER									{$$ = CreateLiteral(FLOAT_LITERAL, $1);}
-	|	STRING_LITERAL									{$$ = CreateLiteral(STRING_LITERAL, $1);}
-	;	
-
 expression: 
-	unary_expression									{$$ = CreateExpressionFromUnary(UNARY_EXPRESSION, $1);}
+		primary_expression								{$$ = CreateExpressionFromPrimary(PRIMARY, $1);}
+	|	'!' primary_expression %prec UNARY_OP			{$$ = CreateUnaryExpression(NOT_UNARY_EXPR, $2);}
+	|	'+' primary_expression %prec UNARY_PLUS			{$$ = CreateUnaryExpression(PLUS_UNARY_EXPR, $2);}
+	|	'-' primary_expression %prec UNARY_MINUS		{$$ = CreateUnaryExpression(MINUS_UNARY_EXPR, $2);}
 	|	expression AND expression						{$$ = CreateBinaryExpression(AND_EXPRESSION, $1, $3);}
 	|	expression OR expression						{$$ = CreateBinaryExpression(OR_EXPRESSION, $1, $3);}
 	|	expression EQU expression						{$$ = CreateBinaryExpression(EQU_EXPRESSION, $1, $3);}
@@ -183,11 +341,11 @@ expression_list:
 
 statement:
 	simple_statement									{$$ = $1;}
-	|	var_declare										{$$ = $1;}
-	|	const_declare									{$$ = $1;}
+	|	var_declare										{$$ = CreateVarDeclStmt(VAR_DECL_STMT, $1);}
+	|	const_declare									{$$ = CreateConstDeclStmt(CONST_DECL_STMT, $1);}
 	|	return_statement								{$$ = $1;}
-	|	BREAK											{$$ = $1;}
-	|	CONTINUE										{$$ = $1;}
+	|	BREAK											{$$ = CreateStatement(BREAK_STMT);}
+	|	CONTINUE										{$$ = CreateStatement(CONTINUE_STMT);}
 	|	block											{$$ = $1;}
 	|	if_statement									{$$ = $1;}
 	|	switch_statement								{$$ = $1;}
@@ -203,14 +361,6 @@ return_statement:
 	RETURN expression_list								{$$ = CreateReturnStatement(RETURN_STMT, $2);}
 	; 
 
-assign_op: 
-	ASSIGN_OP											{$$ = CreateAssignOp(ASSIGN, $1);}
-	|	PLUS_ASSIGN_OP									{$$ = CreateAssignOp(PLUS_ASSIGN, $1);}
-	|	MINUS_ASSIGN_OP									{$$ = CreateAssignOp(MINUS_ASSIGN, $1);}
-	|	MUL_ASSIGN_OP									{$$ = CreateAssignOp(MUL_ASSIGN, $1);}
-	|	DIV_ASSIGN_OP									{$$ = CreateAssignOp(DIV_ASSIGN, $1);}
-	; 
-
 if_statement: 
 	IF if_statement_expression block					{$$ = CreateIfStatement(IF_STMT, $2, $3);}
 	| IF if_statement_expression block ELSE else_block  {$$ = CreateIfElseStatement(IF_ELSE_STMT, $2, $3, $5);}
@@ -218,7 +368,7 @@ if_statement:
 	
 if_statement_expression :
 	expression											{$$ = CreateIfStmtExpression($1);}
-	|	 simple_statement ';' expression				{$$ = AppendToIfStmtExpression($1, $3);}
+	|	 simple_statement ';' expression				{$$ = CreateCompositeIfStmtExpression($1, $3);}
 	; 
 	
 else_block : 
@@ -256,15 +406,19 @@ expression_case_clause:
 	; 
 
 expression_switch_case: 
-	CASE expression_list									{$$ = $2;}
-	|	DEFAULT												{$$ = $1;}												
+	CASE expression_list									{$$ = CreateExprSwitchCase($2);}
+	|	DEFAULT												{}												
 	; 
 	
 simple_statement:
 	expression												{$$ = CreateSimpleStmt(EXPR_SIMPLE_STMT, $1);}
 	|	expression "++"										{$$ = CreateSimpleStmt(INC_SIMPLE_STMT, $1);}
 	|	expression "--"										{$$ = CreateSimpleStmt(DEC_SIMPLE_STMT, $1);}
-	|	expression_list assign_op expression_list			{$$ = CreateCompositeSimpleStmt(COMPOSITE_SIMPLE_STMT, $1, $2, $3);}
+	|   expression_list ASSIGN_OP expression_list			{$$ = CreatAssignSimpleStmt(ASSIGN_STMT, $1, $3);}
+	|	expression_list PLUS_ASSIGN_OP expression_list		{$$ = CreatAssignSimpleStmt(PLUS_ASSIGN_STMT, $1, $3);}
+	|	expression_list MINUS_ASSIGN_OP expression_list		{$$ = CreatAssignSimpleStmt(MINUS_ASSIGN_STMT, $1, $3);}
+	|	expression_list MUL_ASSIGN_OP expression_list		{$$ = CreatAssignSimpleStmt(MUL_ASSIGN_STMT, $1, $3);}
+	|	expression_list DIV_ASSIGN_OP expression_list		{$$ = CreatAssignSimpleStmt(DIV_ASSIGN_STMT, $1, $3);} 
 	;
 
 for_statement:	
@@ -289,7 +443,7 @@ signature:
 
 parameters_in_parentheses:
 	'(' ')'													{}
-	|	'(' parameter_list ')'								{$$ = $1;}
+	|	'(' parameter_list ')'								{$$ = $2;}
 	; 
 
 parameter_list : 
@@ -309,4 +463,205 @@ result :
 
 %%
 
+struct Program *CreateProgram(struct Package *_pkg, struct Imports *_imports, struct DeclarationList *_declList) {
+	struct Program *Result = (struct Program *)malloc(sizeof(struct Program));
+
+	Result->pkg = _pkg;
+	Result->imports = _imports;
+	Result->declList = _declList;
+
+	return Result;
+}
+
+struct Package *CreatePackage(char *_pkgName) {
+	struct Package *Result = (struct Package *)malloc(sizeof(struct Package));
+
+	Result->packageName = _pkgName;
+
+	return Result;
+}
+
+struct Imports *AppendToImportsList(struct Imports *_imports, struct Import *_import) {
+	struct Imports *Result = (struct Imports *)malloc(sizeof(struct Imports));
+	Result->nextImport = NULL;
+	_imports->nextImport = Result;
+	Result->import = _import;
+	return Result;
+}
+
+struct Import *CreateImportFromStatement(char *_importStmt) {
+	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
+
+	Result->importStmt = _importStmt;
+
+	return Result;
+}
+
+struct Import *CreateCompositeImportFromStatementList(struct ImportStmtList *_importStmtList) {
+	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
+
+	Result->importStmtList = _importStmtList;
+
+	return Result;
+}
+
+struct ImportStmtList *CreateImportStatementList(char *_importStmt) {
+	struct ImportStmtList *Result = (struct ImportStmtList *)malloc(sizeof(struct ImportStmtList));
+	Result->nextImportStmt = NULL;
+	Result->importStmt = _importStmt;
+
+	return Result;
+}
+
+struct ImportStmtList *AppendToImportStatementList(struct ImportStmtList *_importStmtList, char *_importStmt) {
+	struct ImportStmtList *Result = (struct ImportStmtList *)malloc(sizeof(struct ImportStmtList));
+	Result->nextImportStmt = NULL;
+	_importStmtList->nextImportStmt = Result;
+	Result->importStmt = _importStmt;
+
+	return Result;
+}
+
+struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl) {
+	struct DeclarationList *Result = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));
+
+	Result->nextDecl = NULL;
+	_declList->nextDecl = Result;
+	Result->decl = _decl;
+
+	return Result;
+
+}
+
+struct Declaration *CreateConstDecl(enum DeclType type, struct ConstSpec *_constSpec) {
+	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
+	struct ConstDecl *newConstDecl = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
+
+
+	Result->declType = type;
+	
+	newConstDecl->constSpec = _constSpec;;
+	
+	Result->constDecl = newConstDecl;
+
+	return Result;
+
+}
+
+struct ConstSpec *CreateConstSpecFromIdList(struct IdentifierList *_idList, struct ExpressionList *_expressionList) {
+	struct ConstSpec *Result = (struct ConstSpec *)malloc(sizeof(struct ConstSpec));
+
+	Result->idList = _idList;
+	Result->expressionList = _expressionList;
+
+	return Result;
+}
+
+struct ConstSpec *CreateConstSpecFromIdListWithType(struct IdentifierListType *_idListType, struct ExpressionList *_expressionList) {
+	struct ConstSpec *Result = (struct ConstSpec *)malloc(sizeof(struct ConstSpec));
+
+	Result->idListType = _idListType;
+	Result->expressionList = _expressionList;
+
+	return Result;
+}
+
+struct Type *CreateTypeFromId(char *_id) {
+	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
+	Result->identifier = _id;
+
+	return Result;
+}
+
+struct Type *CreateCompositeType(struct Expression *_expr, char *_id) {
+	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
+
+	Result->identifier = _id;
+	Result->expr = _expr;
+
+	return Result;
+}
+
+struct IdentifierListType *CreateIdListWithType(struct IdentifierList *_identifierList, struct Type *_type) {
+	struct IdentifierListType *Result = (struct IdentifierListType *)malloc(sizeof(struct IdentifierListType));
+
+	Result->type = _type;
+	Result->identifierList = _identifierList;
+
+	return Result;
+
+}
+
+struct Declaration *CreateSimpleVarDecl(enum DeclType _declType, struct VarSpec *_varSpec) {
+	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
+	struct VarDecl *newVarDecl = (struct VarDecl *)malloc(sizeof(struct VarDecl));
+
+	Result->declType = _declType;
+	
+	newVarDecl->varSpec = _varSpec;
+
+	Result->varDecl = newVarDecl;
+
+	return Result;
+
+}
+
+struct Declaration *CreateCompositeVarDecl(enum DeclType _declType, struct VarSpecList *_varSpecList) {
+	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
+	struct VarDecl *newVarDecl = (struct VarDecl *)malloc(sizeof(struct VarDecl));
+
+	Result->declType = _declType;
+
+	newVarDecl->varSpecList = _varSpecList;
+
+	Result->varDecl = newVarDecl;
+
+	return Result;
+}
+
+struct VarSpec *CreateSimpleVarSpecWType(struct IdentifierListType *_idListType) {
+	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
+
+	Result->idListType = _idListType;
+
+	return Result;
+}
+
+struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *_idListType, struct ExpressionList *_exprList) {
+	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
+	
+	Result->idListType = _idListType;
+	Result->exprList = _exprList;
+
+	return Result;
+}
+
+struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *_idList, struct ExpressionList *_exprList) {
+	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
+
+	Result->idList = _idList;
+
+	Result->exprList = _exprList;
+
+	return Result;
+}
+
+struct VarSpecList *CreateVarSpecList(struct VarSpec *_varSpec) {
+	struct VarSpecList *Result = (struct VarSpecList *)malloc(sizeof(struct VarSpecList));
+
+	Result->nextVarSpec = NULL;
+	Result->varSpec = _varSpec;
+
+	return Result;
+}
+
+struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct VarSpec *_varSpec) {
+	struct VarSpecList *Result = (struct VarSpecList *)malloc(sizeof(struct VarSpecList));
+
+	Result->nextVarSpec = NULL;
+	_varSpecList->nextVarSpec = Result;
+	Result->varSpec = _varSpec;
+
+	return Result; 
+}
 
