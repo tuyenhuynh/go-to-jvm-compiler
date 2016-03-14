@@ -16,128 +16,128 @@
 	int decValue;
 	float floatValue;
 
-	struct Program *s_program;
+	struct Program *ProgramUnion;
 	
-	struct Package *s_package;
+	struct Package *PackageUnion;
 	
-	struct Imports *s_imports;
+	struct Imports *ImportsUnion;
 	
-	struct DeclarationList *s_declList;
+	struct DeclarationList *DeclListUnion;
 
-	struct Import *s_import;
+	struct Import *ImportUnion;
 	
-	struct Declaration *s_declaration;
+	struct Declaration *DeclarationUnion;
 
-	struct ImportStmtList *s_importStmtList;
+	struct ImportStmtList *ImportStmtListUnion;
 
-	struct VarDecl *s_varDecl;
+	struct VarDecl *VarDeclUnion;
 
-	struct ConstDecl *s_constDecl;
+	struct ConstDecl *ConstDeclUnion;
 
-	struct FunctionDecl *s_functionDecl;
+	struct FunctionDecl *FunctionDeclUnion;
 
-	struct ConstSpec *s_constSpec;
+	struct ConstSpec *ConstSpecUnion;
 
-	struct IdentifierList *s_IdList;
+	struct IdentifierList *IdListUnion;
 
-	struct IdentifierListType *s_IdListType;
+	struct IdentifierListType *IdListTypeUnion;
 
-	struct ExpressionList *s_exprList;
+	struct ExpressionList *ExprListUnion;
 
-	struct Type *s_type;
+	struct Type *TypeUnion;
 
-	struct Expression *s_expr;
+	struct Expression *ExprUnion;
 
-	struct VarSpec *s_varSpec;
+	struct VarSpec *VarSpecUnion;
 
-	struct VarSpecList *s_varSpecList;
+	struct VarSpecList *VarSpecListUnion;
 
-	struct Statement *s_stmt;
+	struct Statement *StmtUnion;
 
-	struct SimpleStmt *s_simple_stmt;
+	struct SimpleStmt *SimpleStmtUnion;
 
-	struct ReturnStmt *s_return_stmt;
+	struct ReturnStmt *ReturnStmtUnion;
 
-	struct Block *s_block;
+	struct Block *BlockUnion;
 
-	struct IfStmt *s_if_stmt;
+	struct IfStmt *IfStmtUnion;
 
-	struct SwitchStmt *s_switch_stmt;
+	struct SwitchStmt *SwitchStmtUnion;
 
-	struct ForStmt *s_for_stmt;
+	struct ForStmt *ForStmtUnion;
 
-	struct IfStmtExpression *s_ifstmtExpr;
+	struct IfStmtExpression *IfStmtExprUnion;
 
-	struct ElseBlock *s_elseBlock;
+	struct ElseBlock *ElseBlockUnion;
 
-	struct StatementList *s_stmt_list;
+	struct StatementList *StmtListUnion;
 
-	struct SwitchBody *s_switch_body;
+	struct SwitchBody *SwitchBodyUnion;
 
-	struct ExpressionCaseClauseList *s_eccl;
+	struct ExpressionCaseClauseList *EcclUnion;
 
-	struct ExpressionCaseClause *s_ecc;
+	struct ExpressionCaseClause *EccUnion;
 
-	struct ExpressionSwitchCase *s_exprSwitchCase;
+	struct ExpressionSwitchCase *ExpressionSwtichCaseUnion;
 
-	struct ForClause *s_forClause;
+	struct ForClause *ForClauseUnion;
 
-	struct Signature *s_signature;
+	struct Signature *SignatureUnion;
 
-	struct ParamInParen *s_paramInParen;
+	struct ParamInParen *ParamInParenUnion;
 
-	struct ParameterList *s_paramList;
+	struct ParameterList *ParamListUnion;
 
-	struct ParameterDeclare *s_paramDecl;
+	struct ParameterDeclare *ParamDeclUnion;
 
-	struct Result *s_result;
+	struct Result *ResultUnion;
 
-	struct PrimaryExpression *s_primary_expr;
+	struct PrimaryExpression *PrimaryExprUnion;
 
-	struct FunctionCall *s_func_call;
+	struct FunctionCall *FunctionCallUnion;
 }
 
-%type<s_program> program
-%type<s_package> package
-%type<s_imports> imports
-%type<s_declList> declaration_list
-%type<s_import> import
-%type<s_declaration> declaration
+%type<ProgramUnion> program
+%type<PackageUnion> package
+%type<ImportsUnion> imports
+%type<DeclListUnion> declaration_list
+%type<ImportUnion> import
+%type<DeclarationUnion> declaration
 %type<string> import_statement
-%type<s_importStmtList> import_statement_list
-%type<s_varDecl> var_declare
-%type<s_constDecl> const_declare
-%type<s_functionDecl> function_declaration
-%type<s_constSpec> const_spec
-%type<s_IdList> identifier_list
-%type<s_IdListType> identifier_list_type
-%type<s_exprList> expression_list
-%type<s_type> type
-%type<s_expr> expression 
-%type<s_primary_expr> primary_expression 
-%type<s_func_call> function_call
-%type<s_varSpec> var_specification
-%type<s_varSpecList> var_specification_list
-%type<s_stmt> statement
-%type<s_simple_stmt> simple_statement
-%type<s_return_stmt> return_statement
-%type<s_block> block
-%type<s_if_stmt> if_statement
-%type<s_switch_stmt> switch_statement
-%type<s_for_stmt> for_statement
-%type<s_ifstmtExpr> if_statement_expression
-%type<s_elseBlock> else_block
-%type<s_stmt_list> statement_list
-%type<s_switch_body> switch_body
-%type<s_eccl> expression_case_clause_list
-%type<s_ecc> expression_case_clause
-%type<s_exprSwitchCase> expression_switch_case
-%type<s_forClause> for_clause
-%type<s_signature> signature
-%type<s_paramInParen> parameters_in_parentheses
-%type<s_paramList> parameter_list
-%type<s_paramDecl> parameter_declare
-%type<s_result> result
+%type<ImportStmtListUnion> import_statement_list
+%type<VarDeclUnion> var_declare
+%type<ConstDeclUnion> const_declare
+%type<FunctionDeclUnion> function_declaration
+%type<ConstSpecUnion> const_spec
+%type<IdListUnion> identifier_list
+%type<IdListTypeUnion> identifier_list_type
+%type<ExprListUnion> expression_list
+%type<TypeUnion> type
+%type<ExprUnion> expression 
+%type<PrimaryExprUnion> primary_expression 
+%type<FunctionCallUnion> function_call
+%type<VarSpecUnion> var_specification
+%type<VarSpecListUnion> var_specification_list
+%type<StmtUnion> statement
+%type<SimpleStmtUnion> simple_statement
+%type<ReturnStmtUnion> return_statement
+%type<BlockUnion> block
+%type<IfStmtUnion> if_statement
+%type<SwitchStmtUnion> switch_statement
+%type<ForStmtUnion> for_statement
+%type<IfStmtExprUnion> if_statement_expression
+%type<ElseBlockUnion> else_block
+%type<StmtListUnion> statement_list
+%type<SwitchBodyUnion> switch_body
+%type<EcclUnion> expression_case_clause_list
+%type<EccUnion> expression_case_clause
+%type<ExpressionSwtichCaseUnion> expression_switch_case
+%type<ForClauseUnion> for_clause
+%type<SignatureUnion> signature
+%type<ParamInParenUnion> parameters_in_parentheses
+%type<ParamListUnion> parameter_list
+%type<ParamDeclUnion> parameter_declare
+%type<ResultUnion> result
 
 %start program
 
