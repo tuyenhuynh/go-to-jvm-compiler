@@ -204,10 +204,7 @@
 %left '(' 
 %left ')'
 %left UNARY_OP UNARY_MINUS UNARY_PLUS
-%right ID_LIST
 
-%precedence "type"
-%precedence "identifier_list"
 
 %%
 
