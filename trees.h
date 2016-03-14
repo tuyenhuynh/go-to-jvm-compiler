@@ -1,5 +1,5 @@
-#ifndef _TREE_H_
-#define _TREE_H_
+#ifndef _TREES_H_
+#define _TREES_H_
 
 struct Program {
 	struct Package *pkg;
@@ -133,6 +133,7 @@ struct Expression {
 
 struct PrimaryExpression
 {
+	enum ExpressionType exprType;
 	int decNumber;
 	float floatNumber;
 	char* stringLiteral;
@@ -148,6 +149,7 @@ struct FunctionCall {
 };
 
 enum StatementType {
+	SIMPLE_STMT,
 	EXPR_SIMPLE_STMT,
 	INC_SIMPLE_STMT,
 	DEC_SIMPLE_STMT,
@@ -163,6 +165,7 @@ enum StatementType {
 	RETURN_STMT,
 	IF_STMT,
 	IF_ELSE_STMT,
+	FOR_STMT,
 	BLOCK,
 	SWITCH_STMT
 };
@@ -185,6 +188,7 @@ struct StatementList {
 };
 
 struct SimpleStmt {
+	enum StatemenType stmtType;
 	struct Expression *expr;
 	struct ExpressionList *exprListLeft;
 	struct ExpressionList *exprListRight;
@@ -274,4 +278,4 @@ struct Result {
 	struct Type *type;
 };
 
-#endif// _TREE_H_
+#endif// _TREES_H_

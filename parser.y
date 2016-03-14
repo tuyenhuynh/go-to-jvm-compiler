@@ -3,8 +3,10 @@
 
 %{
 	#include "parser.h"
-	#include "ast_functions.h"
+	#include "astfunctions.h"
 	extern int yylex(void);
+
+	void yyerror (char const *s);
 	
 	struct Imports *imports;
 	struct DeclarationList *declList;
@@ -218,14 +220,14 @@ declaration_list:
 
 declaration:
 														{}
-	|	var_declare										{$$ = $1;}
-	|	const_declare									{$$ = $1;}
-	|	function_declaration							{$$ = $1;}
+	|	var_declare										{$$ = CreateDeclarationFromVarDecl(VAR_DECL, $1);}
+	|	const_declare									{$$ = CreateDeclarationFromConstDecl(CONST_DECL, $1);}
+	|	function_declaration							{$$ = CreateDeclarationFromFuncDecl(FUNC_DECL, $1);}
 	; 
 
 const_declare :
-	CONST const_spec									{$$ = CreateConstDecl(CONST_DECL, $2);}
-	|	CONST '(' const_spec ')'						{$$ = CreateConstDecl(CONST_DECL, $3);}
+	CONST const_spec									{$$ = CreateConstDecl($2);}
+	|	CONST '(' const_spec ')'						{$$ = CreateConstDecl($3);}
 	;
 
 const_spec:
@@ -244,9 +246,9 @@ identifier_list_type:
 	; 
 
 var_declare:	
-	VAR var_specification								{$$ = CreateSimpleVarDecl(VAR_DECL, $2);}
+	VAR var_specification								{$$ = CreateSimpleVarDecl($2);}
 	|	VAR '(' ')'										{}
-	|	VAR '(' var_specification_list  ')'				{$$ = CreateCompositeVarDecl(VAR_DECL, $3);}
+	|	VAR '(' var_specification_list  ')'				{$$ = CreateCompositeVarDecl($3);}
 	;
 
 var_specification: 
@@ -281,7 +283,7 @@ optional_comma:
 	; 
 
 expression: 
-		primary_expression								{$$ = CreateExpressionFromPrimary(PRIMARY, $1);}
+		primary_expression								{$$ = CreateUnaryExpression(PRIMARY, $1);}
 	|	'!' primary_expression %prec UNARY_OP			{$$ = CreateUnaryExpression(NOT_UNARY_EXPR, $2);}
 	|	'+' primary_expression %prec UNARY_PLUS			{$$ = CreateUnaryExpression(PLUS_UNARY_EXPR, $2);}
 	|	'-' primary_expression %prec UNARY_MINUS		{$$ = CreateUnaryExpression(MINUS_UNARY_EXPR, $2);}
@@ -306,16 +308,16 @@ expression_list:
 	; 
 
 statement:
-	simple_statement									{$$ = $1;}
+	simple_statement									{$$ = CreateStmtFromSimpleStmt(SIMPLE_STMT, $1);}
 	|	var_declare										{$$ = CreateVarDeclStmt(VAR_DECL_STMT, $1);}
 	|	const_declare									{$$ = CreateConstDeclStmt(CONST_DECL_STMT, $1);}
-	|	return_statement								{$$ = $1;}
+	|	return_statement								{$$ = CreateStmtFromReturnStmt(RETURN_STMT, $1);}
 	|	BREAK											{$$ = CreateStatement(BREAK_STMT);}
 	|	CONTINUE										{$$ = CreateStatement(CONTINUE_STMT);}
-	|	block											{$$ = $1;}
-	|	if_statement									{$$ = $1;}
-	|	switch_statement								{$$ = $1;}
-	|	for_statement									{$$ = $1;}
+	|	block											{$$ = CreateStmtFromBlock(BLOCK, $1);}
+	|	if_statement									{$$ = CreateStmtFromIfStmt(IF_STMT, $1);}
+	|	switch_statement								{$$ = CreateStmtFromSwitchStmt(SWITCH_STMT, $1);}
+	|	for_statement									{$$ = CreateStmtFromForStmt(FOR_STMT, $1);}
 	; 
 
 identifier_list: 
@@ -324,12 +326,12 @@ identifier_list:
 	; 
 
 return_statement: 
-	RETURN expression_list								{$$ = CreateReturnStatement(RETURN_STMT, $2);}
+	RETURN expression_list								{$$ = CreateReturnStatement($2);}
 	; 
 
 if_statement: 
-	IF if_statement_expression block					{$$ = CreateIfStatement(IF_STMT, $2, $3);}
-	| IF if_statement_expression block ELSE else_block  {$$ = CreateIfElseStatement(IF_ELSE_STMT, $2, $3, $5);}
+	IF if_statement_expression block					{$$ = CreateIfStatement($2, $3);}
+	| IF if_statement_expression block ELSE else_block  {$$ = CreateIfElseStatement($2, $3, $5);}
 	; 
 	
 if_statement_expression :
@@ -338,13 +340,13 @@ if_statement_expression :
 	; 
 	
 else_block : 
-	if_statement										{$$ = $1;}
-	|	block											{$$ = $1;}
+	if_statement										{$$ = CreateElseBlockFromIfStmt($1);}
+	|	block											{$$ = CreateElseBlockFromBlock($1);}
 	; 
 	
 block: 
 	'{'	'}'												{}
-	|	'{' statement_list '}'							{$$ = CreateBlock(BLOCK, $2);}
+	|	'{' statement_list '}'							{$$ = CreateBlock($2);}
 	;
 
 statement_list : 
@@ -353,13 +355,13 @@ statement_list :
 	; 
  
 switch_statement: 
-	SWITCH simple_statement ';' '{' switch_body '}'		{$$ = CreateSwitchStatementWSimpleStmt(SWITCH_STMT, $2, $5);}
-	|	SWITCH expression '{' switch_body '}'			{$$ = CreateSwitchStatementWExpression(SWITCH_STMT, $2, $4);}
+	SWITCH simple_statement ';' '{' switch_body '}'		{$$ = CreateSwitchStatementWSimpleStmt($2, $5);}
+	|	SWITCH expression '{' switch_body '}'			{$$ = CreateSwitchStatementWExpression($2, $4);}
 	; 
 
 switch_body:
 														{}
-	|	expression_case_clause_list						{$$ = $1;}
+	|	expression_case_clause_list						{$$ = CreateSwitchBody($1);}
 	;
  
 expression_case_clause_list: 
@@ -398,8 +400,8 @@ for_clause:
 	; 
 
 function_declaration:
-	FUNC IDENTIFIER signature								{$$ = CreateFunctionDeclaration(FUNC_DECL,$2, $3);}
-	| FUNC IDENTIFIER signature block						{$$ = CreateFunctionDeclaration(FUNC_DECL, $2, $3, $4);}
+	FUNC IDENTIFIER signature								{$$ = CreateFunctionDeclaration($2, $3);}
+	| FUNC IDENTIFIER signature block						{$$ = CreateFunctionDeclarationWithBlock($2, $3, $4);}
 	;
 	
 signature:
@@ -409,11 +411,11 @@ signature:
 
 parameters_in_parentheses:
 	'(' ')'													{}
-	|	'(' parameter_list ')'								{$$ = $2;}
+	|	'(' parameter_list ')'								{$$ = CreateParametersInParens($2);}
 	; 
 
 parameter_list : 
-	parameter_declare										{$$ = CreateParameterList($1);}
+	parameter_declare										{$$ = CreateParameterDeclareList($1);}
 	|	parameter_list ',' parameter_declare				{$$ = AppendToParameterDeclareList($1, $3);}
 	;	
  
@@ -430,3 +432,6 @@ result :
 %%
 
 
+void yyerror(char const *s)
+{
+}
