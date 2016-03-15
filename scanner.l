@@ -80,7 +80,7 @@ DECIMAL		[0-9]+
 "*="						{return MUL_ASSIGN_OP;}
 "/="						{return DIV_ASSIGN_OP;}
 "="							{return ASSIGN_OP;}
-","							{return COMMA;}
+","							{return ',';}
 "("							{return '(';}
 ")"							{return ')';}
 ";"							{return ';';}
@@ -88,7 +88,21 @@ DECIMAL		[0-9]+
 "}"							{return '}';}
 "["							{return '[';}
 "]"							{return ']';}
-
+"]"							{return ']';}
+"&&"						{return AND;}
+"||"						{return OR;}
+">"							{return GT;}
+"<"							{return LT;}
+">="						{return LTE;}
+"<="						{return LTE;}
+"=="						{return EQU;}
+"!="						{return NE;}
+"!"							{return NOT;}
+"+"							{return '+';}
+"-"							{return '-';}
+"*"							{return '*';}
+"/"							{return '/';}
+"."							{return '.';}
 
 
 [a-zA-Z_][a-zA-Z0-9_]*			{
