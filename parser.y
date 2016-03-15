@@ -244,16 +244,15 @@ import_statement_list:
 	; 
 
 declaration_list:
-														{}
-	|	declaration_list declaration ';'				{
+	declaration													{}
+	|	declaration_list declaration				{
 															declList = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));
 															$$ = AppendToDeclarationList(declList, $2);
 														}
 	; 
 
 declaration:
-														{}
-	|	var_declare										{$$ = CreateDeclarationFromVarDecl(VAR_DECL, $1);}
+	var_declare										{$$ = CreateDeclarationFromVarDecl(VAR_DECL, $1);}
 	|	const_declare									{$$ = CreateDeclarationFromConstDecl(CONST_DECL, $1);}
 	|	function_declaration							{$$ = CreateDeclarationFromFuncDecl(FUNC_DECL, $1);}
 	; 
