@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "scanner.h"
+#include "parser.h"
 
 int main(int argc, char *argv[])
 {
@@ -11,13 +12,27 @@ int main(int argc, char *argv[])
 
 	yyin = fopen(argv[1], "r");
 	
-	printf("Scanning file %s ...\n\n", argv[1]);
-	
-	yyparse();
+	if (yyin != NULL)
+	{
+		if (!yyparse()) 
+		{
+			printf("Parsing was successful\n");
+		}
+		else 
+		{
+			printf("Parsing failed because of invalid input\n");
+		}
+	}
+
+	else 
+	{
+		printf("Error opening file!\n");
+		return 1;
+	}
 
 	fclose(yyin);
 
-	printf("\nScanning is over");
+	
 	
 	return 0;
 }
