@@ -1,6 +1,7 @@
 %defines
 %error-verbose
 
+
 %{
 	#include "parser.h"
 	#include "astfunctions.h"

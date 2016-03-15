@@ -18,7 +18,6 @@ DECIMAL		[0-9]+
 
 %%
 
-
 \/\/.*			{}
 
 \/\*					   {BEGIN(MULTILINE_COMMENT);}
@@ -65,6 +64,14 @@ DECIMAL		[0-9]+
 "/="						{return DIV_ASSIGN_OP;}
 "="							{return ASSIGN_OP;}
 ","							{return COMMA;}
+"("							{return '(';}
+")"							{return ')';}
+";"							{return ';';}
+"{"							{return '{';}
+"}"							{return '}';}
+"["							{return '[';}
+"]"							{return ']';}
+
 
 
 [a-zA-Z_][a-zA-Z0-9_]*			{
