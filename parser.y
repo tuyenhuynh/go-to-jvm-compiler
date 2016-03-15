@@ -181,7 +181,7 @@
 
 program: 
 	package imports declaration_list					{$$ = root = CreateProgram($1, $2, $3);}
-	;
+	;	
 
 package:
 	PACKAGE IDENTIFIER 								{$$ = CreatePackage($2);}
