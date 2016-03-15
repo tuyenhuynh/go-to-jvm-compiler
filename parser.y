@@ -303,11 +303,12 @@ primary_expression:
 	|	primary_expression '[' expression ']'			{$$ = CreateCompositePrimaryExpression(PE_COMPOSITE, $1, $3);}
 	|	function_call									{$$ = CreatePrimaryExpressionFromFuncCall(FUNCTION_CALL, $1);}
 	|	'(' expression ')'								{$$ = CreatePrimaryExpressionFromExpression(EXPRESSION, $2);}
+	|	primary_expression '.' IDENTIFIER
 	; 
 
 function_call:
-	IDENTIFIER '(' ')'									   {}
-	|	IDENTIFIER '(' expression_list	optional_comma')'  {$$ = CreateFunctionCallExpr($1, $3);}
+	primary_expression '(' ')'									   {}
+	|	primary_expression '(' expression_list	optional_comma')'  {$$ = CreateFunctionCallExpr($1, $3);}
 	;
 
 optional_comma:
