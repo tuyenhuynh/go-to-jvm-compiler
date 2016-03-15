@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 		}
 		else 
 		{
-			printf("Parsing failed because of invalid input\n");
+			printf("Parsing failed\n");
 		}
 	}
 

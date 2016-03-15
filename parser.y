@@ -184,7 +184,7 @@ program:
 	;
 
 package:
-	PACKAGE IDENTIFIER ';'								{$$ = CreatePackage($2);}
+	PACKAGE IDENTIFIER 								{$$ = CreatePackage($2);}
 	; 
 
 imports:
@@ -434,4 +434,5 @@ result :
 
 void yyerror(char const *s)
 {
+	printf("Error: %s\n", s);
 }
