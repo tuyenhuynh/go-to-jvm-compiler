@@ -434,5 +434,5 @@ result :
 
 void yyerror(char const *s)
 {
-	printf("Error: %s\n", s);
+	printf("Parse error: %s\n", s);
 }
