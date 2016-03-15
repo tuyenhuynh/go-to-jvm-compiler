@@ -1,12 +1,29 @@
 %option noyywrap
 %option never-interactive
 %option header-file="scanner.h"
+%option yylineno
 
 %{
 	#include <stdio.h>
 	#include <math.h>
 	#include "parser.h"
 	int line = 1;
+
+
+	int yycolumn = 1;
+    char *filename;
+
+    #define YY_USER_ACTION \
+        yylloc.filename = filename; \
+        yylloc.first_line = yylloc.last_line = yylineno; \
+        yylloc.first_column = yycolumn; \
+        yylloc.last_column = yycolumn + yyleng - 1; \
+        yycolumn += yyleng;
+
+    void yyerror(const char *msg)
+    {
+        printf("%s:%d.%d: %s\n", yylloc.filename, yylloc.first_line, yylloc.first_column, msg);
+    }
 %}
 
 FLOAT		[0-9]*\.[0-9]+[eE]*[-+]*[0-9]*	
@@ -90,7 +107,7 @@ DECIMAL		[0-9]+
 
 "\n"							{line++;}
 [ \t\a\b\f\r\v\\]+				{}
-.								{printf("->unknown<-: \"%s\", line: %i\n", yytext, line);}
+.								{printf(".unknown<-: \"%s\", line: %i\n", yytext, line);}
 
 %%
 
