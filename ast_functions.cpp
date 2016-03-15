@@ -1,84 +1,84 @@
 #include "trees.h"
 #include "ast_functions.h"
 
-struct Program *CreateProgram(struct Package *_pkg, struct Imports *_imports, struct DeclarationList *_declList) {
+struct Program *CreateProgram(struct Package *pkg, struct Imports *imports, struct DeclarationList *declList) {
 	struct Program *Result = (struct Program *)malloc(sizeof(struct Program));
 
-	Result->pkg = _pkg;
-	Result->imports = _imports;
-	Result->declList = _declList;
+	Result->pkg = pkg;
+	Result->imports = imports;
+	Result->declList = declList;
 
 	return Result;
 }
 
-struct Package *CreatePackage(char *_pkgName) {
+struct Package *CreatePackage(char *pkgName) {
 	struct Package *Result = (struct Package *)malloc(sizeof(struct Package));
 
-	Result->packageName = _pkgName;
+	Result->packageName = pkgName;
 
 	return Result;
 }
 
-struct Imports *AppendToImportsList(struct Imports *_imports, struct Import *_import) {
+struct Imports *AppendToImportsList(struct Imports *imports, struct Import *import) {
 	struct Imports *Result = (struct Imports *)malloc(sizeof(struct Imports));
 	Result->nextImport = NULL;
-	_imports->nextImport = Result;
-	Result->import = _import;
+	imports->nextImport = Result;
+	Result->import = import;
 	return Result;
 }
 
-struct Import *CreateImportFromStatement(char *_importStmt) {
+struct Import *CreateImportFromStatement(char *importStmt) {
 	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
 
-	Result->importStmt = _importStmt;
+	Result->importStmt = importStmt;
 
 	return Result;
 }
 
-struct Import *CreateCompositeImportFromStatementList(struct ImportStmtList *_importStmtList) {
+struct Import *CreateCompositeImportFromStatementList(struct ImportStmtList *importStmtList) {
 	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
 
-	Result->importStmtList = _importStmtList;
+	Result->importStmtList = importStmtList;
 
 	return Result;
 }
 
-struct ImportStmtList *CreateImportStatementList(char *_importStmt) {
+struct ImportStmtList *CreateImportStatementList(char *importStmt) {
 	struct ImportStmtList *Result = (struct ImportStmtList *)malloc(sizeof(struct ImportStmtList));
 	Result->nextImportStmt = NULL;
-	Result->importStmt = _importStmt;
+	Result->importStmt = importStmt;
 
 	return Result;
 }
 
-struct ImportStmtList *AppendToImportStatementList(struct ImportStmtList *_importStmtList, char *_importStmt) {
+struct ImportStmtList *AppendToImportStatementList(struct ImportStmtList *importStmtList, char *importStmt) {
 	struct ImportStmtList *Result = (struct ImportStmtList *)malloc(sizeof(struct ImportStmtList));
 	Result->nextImportStmt = NULL;
-	_importStmtList->nextImportStmt = Result;
-	Result->importStmt = _importStmt;
+	importStmtList->nextImportStmt = Result;
+	Result->importStmt = importStmt;
 
 	return Result;
 }
 
-struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl) {
+struct DeclarationList *AppendToDeclarationList(struct DeclarationList *declList, struct Declaration *decl) {
 	struct DeclarationList *Result = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));
 
 	Result->nextDecl = NULL;
-	_declList->nextDecl = Result;
-	Result->decl = _decl;
+	declList->nextDecl = Result;
+	Result->decl = decl;
 
 	return Result;
 
 }
 
-struct Declaration *CreateConstDecl(enum DeclType type, struct ConstSpec *_constSpec) {
+struct Declaration *CreateConstDecl(enum DeclType type, struct ConstSpec *constSpec) {
 	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
 	struct ConstDecl *newConstDecl = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
 
 
 	Result->declType = type;
 
-	newConstDecl->constSpec = _constSpec;;
+	newConstDecl->constSpec = constSpec;;
 
 	Result->constDecl = newConstDecl;
 
@@ -86,57 +86,57 @@ struct Declaration *CreateConstDecl(enum DeclType type, struct ConstSpec *_const
 
 }
 
-struct ConstSpec *CreateConstSpecFromIdList(struct IdentifierList *_idList, struct ExpressionList *_expressionList) {
+struct ConstSpec *CreateConstSpecFromIdList(struct IdentifierList *idList, struct ExpressionList *expressionList) {
 	struct ConstSpec *Result = (struct ConstSpec *)malloc(sizeof(struct ConstSpec));
 
-	Result->idList = _idList;
-	Result->expressionList = _expressionList;
+	Result->idList = idList;
+	Result->expressionList = expressionList;
 
 	return Result;
 }
 
-struct ConstSpec *CreateConstSpecFromIdListWithType(struct IdentifierListType *_idListType, struct ExpressionList *_expressionList) {
+struct ConstSpec *CreateConstSpecFromIdListWithType(struct IdentifierListType *idListType, struct ExpressionList *expressionList) {
 	struct ConstSpec *Result = (struct ConstSpec *)malloc(sizeof(struct ConstSpec));
 
-	Result->idListType = _idListType;
-	Result->expressionList = _expressionList;
+	Result->idListType = idListType;
+	Result->expressionList = expressionList;
 
 	return Result;
 }
 
-struct Type *CreateTypeFromId(char *_id) {
+struct Type *CreateTypeFromId(char *id) {
 	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
-	Result->identifier = _id;
+	Result->identifier = id;
 
 	return Result;
 }
 
-struct Type *CreateCompositeType(struct Expression *_expr, char *_id) {
+struct Type *CreateCompositeType(struct Expression *expr, char *id) {
 	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
 
-	Result->identifier = _id;
-	Result->expr = _expr;
+	Result->identifier = id;
+	Result->expr = expr;
 
 	return Result;
 }
 
-struct IdentifierListType *CreateIdListWithType(struct IdentifierList *_identifierList, struct Type *_type) {
+struct IdentifierListType *CreateIdListWithType(struct IdentifierList *identifierList, struct Type *type) {
 	struct IdentifierListType *Result = (struct IdentifierListType *)malloc(sizeof(struct IdentifierListType));
 
-	Result->type = _type;
-	Result->identifierList = _identifierList;
+	Result->type = type;
+	Result->identifierList = identifierList;
 
 	return Result;
 
 }
 
-struct Declaration *CreateSimpleVarDecl(enum DeclType _declType, struct VarSpec *_varSpec) {
+struct Declaration *CreateSimpleVarDecl(enum DeclType declType, struct VarSpec *varSpec) {
 	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
 	struct VarDecl *newVarDecl = (struct VarDecl *)malloc(sizeof(struct VarDecl));
 
-	Result->declType = _declType;
+	Result->declType = declType;
 
-	newVarDecl->varSpec = _varSpec;
+	newVarDecl->varSpec = varSpec;
 
 	Result->varDecl = newVarDecl;
 
@@ -144,61 +144,61 @@ struct Declaration *CreateSimpleVarDecl(enum DeclType _declType, struct VarSpec 
 
 }
 
-struct Declaration *CreateCompositeVarDecl(enum DeclType _declType, struct VarSpecList *_varSpecList) {
+struct Declaration *CreateCompositeVarDecl(enum DeclType declType, struct VarSpecList *varSpecList) {
 	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
 	struct VarDecl *newVarDecl = (struct VarDecl *)malloc(sizeof(struct VarDecl));
 
-	Result->declType = _declType;
+	Result->declType = declType;
 
-	newVarDecl->varSpecList = _varSpecList;
+	newVarDecl->varSpecList = varSpecList;
 
 	Result->varDecl = newVarDecl;
 
 	return Result;
 }
 
-struct VarSpec *CreateSimpleVarSpecWType(struct IdentifierListType *_idListType) {
+struct VarSpec *CreateSimpleVarSpecWType(struct IdentifierListType *idListType) {
 	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
 
-	Result->idListType = _idListType;
+	Result->idListType = idListType;
 
 	return Result;
 }
 
-struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *_idListType, struct ExpressionList *_exprList) {
+struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *idListType, struct ExpressionList *exprList) {
 	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
 
-	Result->idListType = _idListType;
-	Result->exprList = _exprList;
+	Result->idListType = idListType;
+	Result->exprList = exprList;
 
 	return Result;
 }
 
-struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *_idList, struct ExpressionList *_exprList) {
+struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *idList, struct ExpressionList *exprList) {
 	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
 
-	Result->idList = _idList;
+	Result->idList = idList;
 
-	Result->exprList = _exprList;
+	Result->exprList = exprList;
 
 	return Result;
 }
 
-struct VarSpecList *CreateVarSpecList(struct VarSpec *_varSpec) {
+struct VarSpecList *CreateVarSpecList(struct VarSpec *varSpec) {
 	struct VarSpecList *Result = (struct VarSpecList *)malloc(sizeof(struct VarSpecList));
 
 	Result->nextVarSpec = NULL;
-	Result->varSpec = _varSpec;
+	Result->varSpec = varSpec;
 
 	return Result;
 }
 
-struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct VarSpec *_varSpec) {
+struct VarSpecList *AppendToVarSpecList(struct VarSpecList *varSpecList, struct VarSpec *varSpec) {
 	struct VarSpecList *Result = (struct VarSpecList *)malloc(sizeof(struct VarSpecList));
 
 	Result->nextVarSpec = NULL;
-	_varSpecList->nextVarSpec = Result;
-	Result->varSpec = _varSpec;
+	varSpecList->nextVarSpec = Result;
+	Result->varSpec = varSpec;
 
 	return Result;
 }
