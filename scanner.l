@@ -97,7 +97,7 @@ DECIMAL		[0-9]+
 "<="						{return LTE;}
 "=="						{return EQU;}
 "!="						{return NE;}
-"!"							{return NOT;}
+"!"							{return '!';}
 "+"							{return '+';}
 "-"							{return '-';}
 "*"							{return '*';}
