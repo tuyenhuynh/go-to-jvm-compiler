@@ -96,7 +96,7 @@ struct Declaration *CreateDeclarationFromConstDecl(enum DeclType _declType, stru
 	return Result;
 }
 
-struct Declaration *CreateDeclarationFromFuncDecl(enum DeclType _declType, struct FuncDecl *_funcDecl) {
+struct Declaration *CreateDeclarationFromFuncDecl(enum DeclType _declType, struct FunctionDecl *_funcDecl) {
 	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
 	Result->declType = _declType;
 	Result->funcDecl = _funcDecl;
@@ -118,23 +118,23 @@ struct ConstDecl *CreateConstDecl(struct VarSpec *_varSpec) {
 struct ConstDecl *CreateConstDeclFromList(struct VarSpecList *_varSpecList) {
 	struct ConstDecl *Result = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
 
-	Result->varSpec = _varSpecList;
+	Result->varSpecList = _varSpecList;
 
 	return Result;
 
 }
 
-struct Type *CreateTypeFromId(char *_id) {
+struct Type *CreateTypeFromTypeName(enum TypeNames _typeName) {
 	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
-	Result->identifier = _id;
+	Result->typeName = _typeName;
 
 	return Result;
 }
 
-struct Type *CreateCompositeType(struct Expression *_expr, char *_id) {
+struct Type *CreateCompositeType(struct Expression *_expr, enum TypeNames _typeName) {
 	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
 
-	Result->identifier = _id;
+	Result->typeName = _typeName;
 	Result->expr = _expr;
 
 	return Result;
@@ -434,6 +434,24 @@ struct Statement *CreateStmtFromForStmt(enum StatementType _stmtType, struct For
 	return Result;
 }
 
+struct Statement *CreateStmtFromPrinStmt(enum StatementType _stmtType, struct PrintStatement *_printStatement) {
+	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
+
+	Result->stmtType = _stmtType;
+	Result->printStatement = _printStatement;
+
+	return Result;
+}
+
+struct Statement *CreateStmtFromScanStmt(enum StatementType _stmtType, struct ScanStatement *_scanStatement) {
+	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
+
+	Result->stmtType = _stmtType;
+	Result->scanStatement = _scanStatement;
+
+	return Result;
+}
+
 struct IdentifierList *CreateIdList(char *_id) {
 	struct IdentifierList *Result = (struct IdentifierList *)malloc(sizeof(struct IdentifierList));
 
@@ -555,6 +573,8 @@ struct SwitchInitialAndExpression *CreateSwitchInitialAndExpression(enum SwitchI
 	Result->switchType = _type; 
 	Result->expression = _expression; 
 	Result->initialStmt = _initialStmt; 
+
+	return Result;
 }
 
 struct SwitchBody *CreateSwitchBody(struct ExpressionCaseClauseList *_eccl) {
@@ -651,12 +671,12 @@ struct ForStmt *CreateForStmtWClause(struct ForClause *_forClause, struct Block 
 	return Result;
 }
 
-struct ForClause *CreateForClause(struct SimpleStatement *_simpleStmtLeft, struct Expression *_expr, struct SimpleStatement *_simpleStmtRight) {
+struct ForClause *CreateForClause(struct ForInitStmt *_forInitStmt, struct ForCondition *_forCondition, struct ForPostStmt *_forPostStmt) {
 	struct ForClause *Result = (struct ForClause *)malloc(sizeof(struct ForClause));
 
-	Result->simpleStmtLeft = _simpleStmtLeft;
-	Result->expr = _expr;
-	Result->simpleStmtRight = _simpleStmtRight;
+	Result->forInitStmt = _forInitStmt;
+	Result->forCondition = _forCondition;
+	Result->forPostStmt = _forPostStmt;
 
 	return Result;
 }
@@ -793,4 +813,23 @@ struct ScanStatement * CreateScanStmt(struct ScanIdentifierList* _scanIdentifier
 
 	return Result; 
 
+}
+
+struct ScanIdentifierList *CreateScanItemList(char *_identifier) {
+	struct ScanIdentifierList * Result = (struct ScanIdentifierList*) malloc(sizeof(struct ScanIdentifierList));
+	
+	Result->nextIdentifier = NULL;
+	Result->identifier = _identifier;
+
+	return Result;
+}
+
+struct ScanIdentifierList *AppendItemToScanItemList(struct ScanIdentifierList * _scanIdList, char *_identifier) {
+	struct ScanIdentifierList * Result = (struct ScanIdentifierList*) malloc(sizeof(struct ScanIdentifierList));
+
+	Result->nextIdentifier = NULL;
+	_scanIdList->nextIdentifier = Result;
+	Result->identifier = _identifier;
+
+	return Result;
 }

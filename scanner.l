@@ -96,7 +96,6 @@ DECIMAL		[0-9]+
 "}"							{return '}';}
 "["							{return '[';}
 "]"							{return ']';}
-"]"							{return ']';}
 "&&"						{return AND;}
 "||"						{return OR;}
 ">"							{return GT;}
