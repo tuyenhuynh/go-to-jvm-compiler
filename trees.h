@@ -122,6 +122,13 @@ enum ExpressionType {
 	PRIMARY
 };
 
+enum SwitchInitialExpressionType {
+	ALWAYS_TRUE, 
+	WITH_INITIAL_STMT, 
+	WITH_EXPRESSION,  
+	WITH_INITIAL_AND_EXPRESSION
+};
+
 struct Expression {
 	enum ExpressionType exprType;
 	struct PrimaryExpression *primaryExpr;
@@ -217,9 +224,14 @@ struct ElseBlock {
 };
 
 struct SwitchStmt {
-	struct SimpleStmt *simpleStmt;
+	struct SwitchInitialAndExpression* initialAndExpression; 
 	struct SwitchBody *switchBody;
-	struct Expression *expr;
+};
+
+struct SwitchInitialAndExpression {
+	enum SwitchInitialExpressionType switchType; 
+	struct SimpleStmt *initialStmt; 
+	struct Expression *expression; 
 };
 
 struct SwitchBody {

@@ -87,9 +87,10 @@ struct StatementList * CreateStmtList(struct Statement * _stmt);
 
 struct StatementList * AppendToStmtList(struct StatementList * _stmtList, struct Statement * _stmt);
 
-struct SwitchStmt * CreateSwitchStatementWSimpleStmt(struct  SimpleStmt * _simpleStmt, struct SwitchBody * _switchBody);
+struct SwitchStmt * CreateSwitchStatement(struct  SwitchInitialAndExpression * _initialAndExpression, struct SwitchBody * _switchBody);
 
-struct SwitchStmt * CreateSwitchStatementWExpression(struct Expression * _expr, struct SwitchBody * _switchBody);
+struct SwitchInitialAndExpression *CreateSwitchInitialAndExpression(enum SwitchInitialExpressionType _type,
+	struct SimpleStmt *_initialStmt, struct Expression * _expression );
 
 struct SwitchBody * CreateSwitchBody(struct ExpressionCaseClauseList *_eccl);
 

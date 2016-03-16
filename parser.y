@@ -133,6 +133,8 @@
 	struct PrimaryExpression *PrimaryExprUnion;
 
 	struct FunctionCall *FunctionCallUnion;
+
+	struct SwitchInitialAndExpression *SwitchInitialAndExpressionUnion;
 }
 
 %type<ProgramUnion> program
@@ -177,6 +179,7 @@
 %type<ParamListUnion> parameter_list
 %type<ParamDeclUnion> parameter_declare
 %type<ResultUnion> result
+%type<SwitchInitialAndExpressionUnion> switch_initial_and_expression
 
 %start program
 
@@ -400,19 +403,19 @@ statement_list:
 	; 
  
 switch_statement: 
-	SWITCH switch_initial_and_expression  '{' switch_body '}'		//{$$ = CreateSwitchStatementWSimpleStmt($2, $5);}
-	//|	SWITCH expression '{' switch_body '}'			//{$$ = CreateSwitchStatementWExpression($2, $4);}
+	SWITCH switch_initial_and_expression '{' switch_body '}'	{$$ = CreateSwitchStatement($2, $4);}
 	; 
 
-switch_initial_and_expression:
-	|	simple_statement ';'
-	|	expression
-	|	simple_statement ';' expression
+switch_initial_and_expression:							
+														{$$ = CreateSwitchInitialAndExpression(ALWAYS_TRUE, NULL, NULL) ;}
+	|	simple_statement ';'							{$$ = CreateSwitchInitialAndExpression(WITH_INITIAL_STMT, $1, NULL) ;}
+	|	expression										{$$ = CreateSwitchInitialAndExpression(WITH_EXPRESSION, NULL, $1) ;}
+	|	simple_statement ';' expression					{$$ = CreateSwitchInitialAndExpression(WITH_INITIAL_AND_EXPRESSION, $1, $3) ;}
 	; 
 
 
 switch_body:
-														{}
+														{$$ = NULL;}
 	|	expression_case_clause_list						{$$ = CreateSwitchBody($1);}
 	;
  

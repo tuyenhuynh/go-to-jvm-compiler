@@ -504,23 +504,21 @@ struct StatementList *AppendToStmtList(struct StatementList *_stmtList, struct S
 	return Result;
 }
 
-struct SwitchStmt *CreateSwitchStatementWSimpleStmt(struct SimpleStmt *_simpleStmt, struct SwitchBody *_switchBody) {
-	struct SwitchStmt *Result = (struct SwitchStmt *)malloc(sizeof(struct SwitchStmt));
+struct SwitchStmt * CreateSwitchStatement(struct  SwitchInitialAndExpression * _initialAndExpression, struct SwitchBody * _switchBody) {
+	struct SwitchStmt * Result = (struct SwitchStmt*) malloc(sizeof (struct SwitchStmt));
 
-	Result->simpleStmt = _simpleStmt;
-	Result->switchBody = _switchBody;
-
-
-	return Result;
+	Result->initialAndExpression = _initialAndExpression; 
+	Result->switchBody = _switchBody; 
+	return Result ; 
 }
 
-struct SwitchStmt *CreateSwitchStatementWExpression( struct Expression *_expr, struct SwitchBody *_switchBody) {
-	struct SwitchStmt *Result = (struct SwitchStmt *)malloc(sizeof(struct SwitchStmt));
-
-	Result->expr = _expr;
-	Result->switchBody = _switchBody;
-
-	return Result;
+struct SwitchInitialAndExpression *CreateSwitchInitialAndExpression(enum SwitchInitialExpressionType _type,
+	struct SimpleStmt *_initialStmt, struct Expression * _expression) {
+	struct SwitchInitialAndExpression *Result = 
+		(struct SwitchInitialAndExpression*) malloc(sizeof(struct SwitchInitialAndExpression));
+	Result->switchType = _type; 
+	Result->expression = _expression; 
+	Result->initialStmt = _initialStmt; 
 }
 
 struct SwitchBody *CreateSwitchBody(struct ExpressionCaseClauseList *_eccl) {
