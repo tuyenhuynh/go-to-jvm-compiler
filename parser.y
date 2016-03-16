@@ -199,7 +199,7 @@
 %token IMPORT
 %token INT_TYPE FLOAT32_TYPE STRING_TYPE BOOL_TYPE NIL
 %token TRUE FALSE
-
+%token PLUS_PLUS MINUS_MINUS
 %right ASSIGN_OP
 %left OR
 %left AND 
@@ -438,8 +438,8 @@ expression_switch_case:
 	
 simple_statement:
 	expression												{$$ = CreateSimpleStmt(EXPR_SIMPLE_STMT, $1);}
-	|	expression "++"										{$$ = CreateSimpleStmt(INC_SIMPLE_STMT, $1);}
-	|	expression "--"										{$$ = CreateSimpleStmt(DEC_SIMPLE_STMT, $1);}
+	|	expression PLUS_PLUS								{$$ = CreateSimpleStmt(INC_SIMPLE_STMT, $1);}
+	|	expression MINUS_MINUS								{$$ = CreateSimpleStmt(DEC_SIMPLE_STMT, $1);}
 	|   expression_list ASSIGN_OP expression_list			{$$ = CreatAssignSimpleStmt(ASSIGN_STMT, $1, $3);}
 	|	expression_list PLUS_ASSIGN_OP expression_list		{$$ = CreatAssignSimpleStmt(PLUS_ASSIGN_STMT, $1, $3);}
 	|	expression_list MINUS_ASSIGN_OP expression_list		{$$ = CreatAssignSimpleStmt(MINUS_ASSIGN_STMT, $1, $3);}

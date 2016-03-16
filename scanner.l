@@ -105,6 +105,9 @@ DECIMAL		[0-9]+
 "."							{return '.';}
 "%"							{return '%';}
 ":"							{return ':';}
+"++"						{return PLUS_PLUS;}
+"--"						{return MINUS_MINUS;}
+
 
 
 [a-zA-Z_][a-zA-Z0-9_]*			{
