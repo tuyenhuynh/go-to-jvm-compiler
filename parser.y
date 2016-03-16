@@ -82,6 +82,8 @@
 
 	struct Type *TypeUnion;
 
+	struct TypeName* TypeNameUnion; 
+
 	struct Expression *ExprUnion;
 
 	struct VarSpec *VarSpecUnion;
@@ -149,6 +151,7 @@
 %type<IdListTypeUnion> identifier_list_type
 %type<ExprListUnion> expression_list
 %type<TypeUnion> type
+%type<TypeNameUnion> type_name
 %type<ExprUnion> expression 
 %type<PrimaryExprUnion> primary_expression 
 %type<FunctionCallUnion> function_call
@@ -197,7 +200,7 @@
 %token INT_TYPE FLOAT32_TYPE STRING_TYPE BOOL_TYPE NIL
 %token TRUE FALSE
 
-%right '='
+%right ASSIGN_OP
 %left OR
 %left AND 
 %left EQU NE GT GTE LT LTE 
@@ -239,38 +242,51 @@ import_statement:
 	; 
 
 import_statement_list:
-	import_statement									{$$ = CreateImportStatementList($1);}			
-	|	import_statement_list ';' import_statement		{$$ = AppendToImportStatementList($1, $3);}
+	import_statement ';'									{$$ = CreateImportStatementList($1);}			
+	|	import_statement_list  import_statement	';'	//{$$ = AppendToImportStatementList($1, $3);}
 	; 
 
 declaration_list:
 	declaration													{}
-	|	declaration_list declaration				{
+	|	declaration_list declaration					{
 															declList = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));
 															$$ = AppendToDeclarationList(declList, $2);
 														}
 	; 
 
 declaration:
-	var_declare										{$$ = CreateDeclarationFromVarDecl(VAR_DECL, $1);}
+	var_declare											{$$ = CreateDeclarationFromVarDecl(VAR_DECL, $1);}
 	|	const_declare									{$$ = CreateDeclarationFromConstDecl(CONST_DECL, $1);}
 	|	function_declaration							{$$ = CreateDeclarationFromFuncDecl(FUNC_DECL, $1);}
 	; 
 
-const_declare :
-	CONST const_spec									{$$ = CreateConstDecl($2);}
-	|	CONST '(' const_spec ')'						{$$ = CreateConstDecl($3);}
+const_declare:
+	CONST var_specification									{$$ = CreateConstDecl($2);}
+	|	CONST	'('	')'										
+	|	CONST	'(' var_specification_list ')'						{$$ = CreateConstDecl($3);}
 	;
 
+	/*
 const_spec:
-	identifier_list '=' expression_list					{$$ = CreateConstSpecFromIdList($1, $3);}
-	| identifier_list_type '=' expression_list			{$$ = CreateConstSpecFromIdListWithType($1, $3);}
+	identifier_list ASSIGN_OP expression_list					{$$ = CreateConstSpecFromIdList($1, $3);}
+	| identifier_list_type ASSIGN_OP expression_list			{$$ = CreateConstSpecFromIdListWithType($1, $3);}
 	; 
 
+const_spec_list:
+	const_spec ';'
+	|	const_spec_list	const_spec ';'
+	*/
 
 type: 
-	IDENTIFIER											{$$ = CreateTypeFromId($1);}
-	|	'[' expression ']' IDENTIFIER					{$$ = CreateCompositeType($2, $4);}
+	type_name											{$$ = CreateTypeFromId($1);}
+	|	'[' expression ']' type_name					{$$ = CreateCompositeType($2, $4);}
+	; 
+	
+type_name:
+	FLOAT32_TYPE
+	|	INT_TYPE
+	|	STRING_TYPE 
+	|	BOOL_TYPE 
 	; 
 
 identifier_list_type:
@@ -285,17 +301,19 @@ var_declare:
 
 var_specification: 
 	identifier_list_type								{$$ = CreateSimpleVarSpecWType($1);}
-	|	identifier_list_type '=' expression_list		{$$ = CreateCompositeVarSpecWtype($1, $3);}
-	|	identifier_list '=' expression_list				{$$ = CreateCompositeVarSpecWOType($1, $3);}
+	|	identifier_list_type ASSIGN_OP expression_list	{$$ = CreateCompositeVarSpecWtype($1, $3);}
+	|	identifier_list ASSIGN_OP expression_list		{$$ = CreateCompositeVarSpecWOType($1, $3);}
 	;  
 	
 var_specification_list: 
-	var_specification									{$$ = CreateVarSpecList($1);}
-	|	var_specification_list ';' var_specification	{$$ = AppendToVarSpecList($1, $3);}
+	var_specification ';' 								{$$ = CreateVarSpecList($1);}
+	|	var_specification_list  var_specification ';'	{$$ = AppendToVarSpecList($1, $2);}
 	; 
 
 primary_expression:
-		DECIMAL_NUMBER									{$$ = CreateDecimalExpression(DECIMAL_EXPR, $1);}
+	|	TRUE
+	|	FALSE
+	|	DECIMAL_NUMBER									{$$ = CreateDecimalExpression(DECIMAL_EXPR, $1);}
 	|	FLOAT_NUMBER									{$$ = CreateFloatExpression(FLOAT_EXPR, $1);}
 	|	STRING_LITERAL									{$$ = CreateStringExpression(STRING_EXPR, $1);}
 	|	IDENTIFIER										{$$ = CreateIdExpression(ID_EXPRESSION, $1);}
@@ -316,7 +334,7 @@ optional_comma:
 	; 
 
 expression: 
-		primary_expression								{$$ = CreateUnaryExpression(PRIMARY, $1);}
+	primary_expression									{$$ = CreateUnaryExpression(PRIMARY, $1);}
 	|	'!' primary_expression %prec UNARY_OP			{$$ = CreateUnaryExpression(NOT_UNARY_EXPR, $2);}
 	|	'+' primary_expression %prec UNARY_PLUS			{$$ = CreateUnaryExpression(PLUS_UNARY_EXPR, $2);}
 	|	'-' primary_expression %prec UNARY_MINUS		{$$ = CreateUnaryExpression(MINUS_UNARY_EXPR, $2);}
@@ -367,7 +385,7 @@ if_statement:
 	| IF if_statement_expression block ELSE else_block  {$$ = CreateIfElseStatement($2, $3, $5);}
 	; 
 	
-if_statement_expression :
+if_statement_expression:
 	expression											{$$ = CreateIfStmtExpression($1);}
 	|	 simple_statement ';' expression				{$$ = CreateCompositeIfStmtExpression($1, $3);}
 	; 
@@ -382,15 +400,22 @@ block:
 	|	'{' statement_list '}'							{$$ = CreateBlock($2);}
 	;
 
-statement_list : 
-	statement											{$$ = CreateStmtList($1);}
-	|	statement_list ';' statement					{$$ = AppendToStmtList($1, $3);}
+statement_list: 
+	statement ';'											{$$ = CreateStmtList($1);}
+	|	statement_list statement ';'					//{$$ = AppendToStmtList($1, $3);}
 	; 
  
 switch_statement: 
-	SWITCH simple_statement ';' '{' switch_body '}'		{$$ = CreateSwitchStatementWSimpleStmt($2, $5);}
-	|	SWITCH expression '{' switch_body '}'			{$$ = CreateSwitchStatementWExpression($2, $4);}
+	SWITCH switch_initial_and_expression  '{' switch_body '}'		//{$$ = CreateSwitchStatementWSimpleStmt($2, $5);}
+	//|	SWITCH expression '{' switch_body '}'			//{$$ = CreateSwitchStatementWExpression($2, $4);}
 	; 
+
+switch_initial_and_expression:
+	|	simple_statement ';'
+	|	expression
+	|	simple_statement ';' expression
+	; 
+
 
 switch_body:
 														{}
@@ -425,12 +450,26 @@ simple_statement:
 for_statement:	
 	FOR block												{$$ = CreateForStmt($2);}
 	|	FOR expression block								{$$ = CreateForStmtWExpr($2, $3);}
-	|	FOR for_clause block								{$$ = CreateForStmtWClause($2, $3);}
+	//|	FOR simple_statement block								{$$ = CreateForStmtWClause($2, $3);}
 	;
 
 for_clause: 
-	simple_statement ';' expression ';' simple_statement	{$$ = CreateForClause($1, $3, $5);}
+	init_statement ';' condition ';' post_statement	//{$$ = CreateForClause($1, $3, $5);}
 	; 
+
+
+init_statement:
+	|	simple_statement
+	; 
+
+condition:
+	|	expression
+	; 
+
+post_statement:
+	|	simple_statement
+	; 
+
 
 function_declaration:
 	FUNC IDENTIFIER signature								{$$ = CreateFunctionDeclaration($2, $3);}
