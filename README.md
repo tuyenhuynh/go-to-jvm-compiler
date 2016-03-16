@@ -11,5 +11,5 @@
 8. Remove all ';' at the end of statement and make integrity tests
 9. Export AST using .dot
 10. Rewrite ast
-11. Adding In/out function
+11. Adding In/out function ✔
 
