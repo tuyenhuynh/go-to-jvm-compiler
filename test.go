@@ -14,6 +14,7 @@ var v3= "Florence"
 var v4, v5, v6 = 7, true, "Florence" 
 var (
 )
+
 var (
 	v7 =2;
 	v8 int = 3;
@@ -27,24 +28,75 @@ const v3= "Florence"
 const v4, v5, v6 = 7, true, "Florence" 
 const (
 )
-const (
-	c7 =2;
-	c8 int = 3;
-	c88, c99 int = 88, 99;
-	c9= "Florence";
-	c10, c11, c12 = 7, true, "Florence"; 
-)
-
-
-
 
 func f() {
 	fmt.Println("Florence") ;
 }
 
+func f2 (a int, b string, c float32) int {
+	return 1 ; 
+}
+
+func f3 (a int, b string, c float32) () {
+	 
+}
+
+func f4 (a int, b string, c float32) (int) {
+	return 1; 
+}
+
+func f1 (a int, b string, c float32) (a, b, c int, str string, arr [32] int) {
+	return 1 ; 
+}
+
+func function_with_nobody() 
+
 func main() { 
 	
+	var e1, e2, e3, e4, e5, e6 int ; 
+	e1;
+	true; 
+	false ; 
+	"TEST";
+	1.2 ; 
+	3; 
+	e1++; 
+	e1--; 
+	e1 += e2; 
+	e1 -= e2; 
+	e1 *= e2; 
+	e1 /= e2; 
+	e1, e2 = e3, e4; 
+	e1, e2 = 1, 2 ; 
+	e1 = true; 
+	e2 = false; 
+	e1 = 1.3 ; 
+	e1 = "Florence"; 
+	e1 = e3 ; 
+	e1 = 5; 
+	e1 = (e2); 
+	var arr [10] int ; 
+	arr[e2] = 5; 
+	f1(e3, e4, e5) ; 
 	
+	e1 = true;
+	e1 = -5 ;
+	e2 = +5; 
+	
+	e1 && e2 || e3;
+	e1 == e4;
+	e2 != e5; 
+	e1 >=  32 ;
+
+	(e1+5 * e3)/e4  > -e3 +1 ; 
+
+	e1 + e2 + e3 + e5 + e5 +
+		e6 % e7; 
+
+	((f1() +1 ) * 10 - f2(1,2,3)/4 + 2) % (-5 + 7*e4 - e4 * e5 * (e6 -e7)) || e6 && true;
+
+	(1+ (e2 - (-e3 + (e4 % (e5-1)))) - ((((arr[7]))))) == 100 + "test";
+
 	//array
 	var x[5] int;
 	var i int = 0; 
@@ -58,6 +110,23 @@ func main() {
 		fmt.Println(a, " is odd");
 	};
 	
+	var max = 10 ;  
+	if a  = 11; a > max {
+		fmt.Println("Greater");
+	}else if (a == max){
+		fmt.Println("Equal");
+	}else {
+		fmt.Println("Less than"); 
+	}
+	;
+	
+	if (true == false) {
+		fmt.Println("The apocalypse"); 
+	};
+	
+	//empty block
+	if (true != false) {
+	};
 	
 	//branch
 	var str string = "student";
@@ -110,7 +179,7 @@ func main() {
 	
 	var j int =0;
 	
-	/*
+	
 	for i<1  {
 		x[i] = 1;
 		i=2;
@@ -129,7 +198,7 @@ func main() {
 		fmt.Println("Loop");
 		break; 
 	};
-	*/
+	
 	
 	//input output by console
 	/*
@@ -154,12 +223,15 @@ func main() {
 	fmt.Println(floatVal); 
 	*/
 	
-	
-	//test expression
-	
-	
-	
 }
+
+const (
+	c7 =2;
+	c8 int = 3;
+	c88, c99 int = 88, 99;
+	c9= "Florence";
+	c10, c11, c12 = 7, true, "Florence"; 
+)
 
 var a1 int = 2
 
