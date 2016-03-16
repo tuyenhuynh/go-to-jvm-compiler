@@ -136,4 +136,10 @@ struct Result * CreateResultFromParameters(struct ParamInParen * _paramInParen);
 
 struct Result * CreateResultFormType(struct Type * _type);
 
+struct ForInitStmt * CreateForInitStmt(struct SimpleStmt * _initStmt); 
+
+struct ForCondition * CreateForCondition(struct Expression * _expression);
+
+struct ForPostStmt * CreateForPostStmt(struct  SimpleStmt * _postStmt);
+
 #endif //_AST_FUNCTIONS_H_

@@ -135,6 +135,13 @@
 	struct FunctionCall *FunctionCallUnion;
 
 	struct SwitchInitialAndExpression *SwitchInitialAndExpressionUnion;
+
+	struct ForInitStmt *ForInitStmtUnion ; 
+
+	struct ForCondition *ForConditionUnion;
+	
+	struct ForPostStmt *ForPostStmtUnion ; 
+	 
 }
 
 %type<ProgramUnion> program
@@ -180,6 +187,10 @@
 %type<ParamDeclUnion> parameter_declare
 %type<ResultUnion> result
 %type<SwitchInitialAndExpressionUnion> switch_initial_and_expression
+%type<ForInitStmtUnion> for_init_statement ; 
+%type<ForConditionUnion> for_condition; 
+%type<ForPostStmtUnion> for_post_statement ; 
+
 
 %start program
 
@@ -451,20 +462,23 @@ for_statement:
 	;
 
 for_clause: 
-	init_statement ';' condition ';' post_statement	//{$$ = CreateForClause($1, $3, $5);}
+	for_init_statement ';' for_condition ';' for_post_statement	{$$ = CreateForClause($1, $3, $5);}
 	; 
 
 
-init_statement:
-	|	simple_statement
+for_init_statement:	
+															{}
+	|	simple_statement									{$$ = CreateForInitStmt ($1) ; }
+	;  
+
+for_condition:											
+															{}
+	|	expression											{$$ = CreateForCondition ($1) ; }
 	; 
 
-condition:
-	|	expression
-	; 
-
-post_statement:
-	|	simple_statement
+for_post_statement:
+															{}	
+	|	simple_statement									{$$ = CreateForPostStmt($1) ;}
 	; 
 
 

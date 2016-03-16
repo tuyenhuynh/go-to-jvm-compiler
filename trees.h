@@ -288,4 +288,16 @@ struct Result {
 	struct Type *type;
 };
 
+struct ForInitStmt {
+	struct SimpleStmt *initStmt; 
+};
+
+struct ForCondition {
+	struct Expression *expression;
+};
+
+struct ForPostStmt {
+	struct SimpleStmt *postStmt; 
+};
+
 #endif// _TREES_H_

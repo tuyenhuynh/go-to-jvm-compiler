@@ -625,6 +625,29 @@ struct ForClause *CreateForClause(struct SimpleStatement *_simpleStmtLeft, struc
 	return Result;
 }
 
+struct ForInitStmt * CreateForInitStmt(struct SimpleStmt * _initStmt) {
+	struct ForInitStmt * Result = (struct ForInitStmt*)malloc(sizeof (struct ForInitStmt));
+	Result->initStmt = _initStmt; 
+	
+	return Result; 
+}
+
+struct ForCondition * CreateForCondition(struct Expression * _expression) {
+	struct ForCondition * Result = (struct ForCondition*) malloc(sizeof (struct ForCondition));
+	Result->expression = _expression; 
+
+	return Result; 
+}
+
+struct ForPostStmt * CreateForPostStmt(struct  SimpleStmt * _postStmt) {
+	struct ForPostStmt * Result = (struct ForPostStmt*) malloc(sizeof(struct ForPostStmt));
+	Result->postStmt = _postStmt; 
+
+	return Result; 
+	
+}
+
+
 struct FunctionDecl *CreateFunctionDeclaration(char *_identifier, struct Signature *_signature) {
 	struct FunctionDecl *Result = (struct FunctionDecl *)malloc(sizeof(struct FunctionDecl));
 
