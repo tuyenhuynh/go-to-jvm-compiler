@@ -249,11 +249,8 @@ import_statement_list:
 	; 
 
 declaration_list:
-	declaration													{}
-	|	declaration_list declaration					{
-															declList = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));
-															$$ = AppendToDeclarationList(declList, $2);
-														}
+	declaration												{$$ = CreateDeclarationList($1);}
+	|	declaration_list declaration						{$$ = AppendToDeclarationList($1, $2);}
 	; 
 
 declaration:
@@ -316,7 +313,7 @@ primary_expression:
 	; 
 
 function_call:
-	primary_expression '(' ')'									   {}
+	primary_expression '(' ')'									   {$$ = CreateEmptyFunctionCall($1)}
 	|	primary_expression '(' expression_list  optional_comma')'  {$$ = CreateFunctionCallExpr($1, $3);}
 	;
 

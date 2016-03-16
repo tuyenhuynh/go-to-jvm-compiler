@@ -11,6 +11,7 @@ struct Import *CreateImportFromStatement(char *_importStmt);
 struct Import *CreateCompositeImportFromStatementList(struct ImportStmtList *_importStmtList);
 struct ImportStmtList *CreateImportStatementList(char *_importStmt);
 struct ImportStmtList *AppendToImportStatementList(struct ImportStmtList *_importStmtList, char *_importStmt);
+struct DeclarationList * CreateDeclarationList(struct Declaration * _decl);
 struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl);
 struct Declaration * CreateDeclarationFromVarDecl(enum DeclType _declType, struct VarDecl * _varDecl);
 struct Declaration * CreateDeclarationFromConstDecl(enum DeclType _declType, struct ConstDecl * _constDecl);
@@ -39,7 +40,9 @@ struct PrimaryExpression * CreatePrimaryExpressionFromFuncCall(enum ExpressionTy
 
 struct PrimaryExpression * CreatePrimaryExpressionFromExpression(enum ExpressionType _exprType, struct Expression * _expr);
 
-struct FunctionCall * CreateFunctionCallExpr(char * _identifier, struct ExpressionList * _exprList);
+struct FunctionCall * CreateEmptyFunctionCall(struct PrimaryExpression * _primaryExpr);
+
+struct FunctionCall * CreateFunctionCallExpr(struct PrimaryExpression * _primaryExpr, struct ExpressionList * _exprList);
 
 struct Expression * CreateUnaryExpression(enum ExpressionType _exprType, struct PrimaryExpression * _primaryExpr);
 

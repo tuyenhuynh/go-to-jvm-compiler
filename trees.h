@@ -142,7 +142,7 @@ struct PrimaryExpression
 };
 
 struct FunctionCall {
-	char* identifier;
+	struct PrimaryExpression *primaryExpr;
 	struct ExpressionList *exprList;
 };
 

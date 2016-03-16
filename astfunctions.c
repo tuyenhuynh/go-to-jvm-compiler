@@ -60,6 +60,15 @@ struct ImportStmtList *AppendToImportStatementList(struct ImportStmtList *_impor
 	return Result;
 }
 
+struct DeclarationList *CreateDeclarationList(struct Declaration *_decl) {
+	struct DeclarationList *Result = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));
+
+	Result->nextDecl = NULL;
+	Result->decl = _decl;
+
+	return Result;
+}
+
 struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl) {
 	struct DeclarationList *Result = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));
 
@@ -266,11 +275,18 @@ struct PrimaryExpression *CreatePrimaryExpressionFromExpression(enum ExpressionT
 	return Result;
 }
 
-struct FunctionCall *CreateFunctionCallExpr(char* _identifier, struct ExpressionList *_exprList) {
+struct FunctionCall *CreateEmptyFunctionCall(struct PrimaryExpression *_primaryExpr) {
+	struct FunctionCall *Result = (struct FunctionCall *)malloc(sizeof(struct FunctionCall));
+
+	Result->primaryExpr = _primaryExpr;
+	return Result;
+}
+
+struct FunctionCall *CreateFunctionCallExpr(struct PrimaryExpression *_primaryExpr, struct ExpressionList *_exprList) {
 	struct FunctionCall *Result = (struct FunctionCall *)malloc(sizeof(struct FunctionCall));
 
 	Result->exprList = _exprList;
-	Result->identifier = _identifier;
+	Result->primaryExpr = _primaryExpr;
 
 	return Result;
 }
