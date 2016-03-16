@@ -106,10 +106,19 @@ struct Declaration *CreateDeclarationFromFuncDecl(enum DeclType _declType, struc
 
 
 
-struct ConstDecl *CreateConstDecl(struct ConstSpec *_constSpec) {
+struct ConstDecl *CreateConstDecl(struct VarSpec *_varSpec) {
 	struct ConstDecl *Result = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
 
-	Result->constSpec = _constSpec;;
+	Result->varSpec = _varSpec;
+
+	return Result;
+
+}
+
+struct ConstDecl *CreateConstDeclFromList(struct VarSpecList *_varSpecList) {
+	struct ConstDecl *Result = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
+
+	Result->varSpec = _varSpecList;
 
 	return Result;
 
