@@ -311,7 +311,7 @@ var_specification_list:
 	; 
 
 primary_expression:
-	|	TRUE
+	TRUE
 	|	FALSE
 	|	DECIMAL_NUMBER									{$$ = CreateDecimalExpression(DECIMAL_EXPR, $1);}
 	|	FLOAT_NUMBER									{$$ = CreateFloatExpression(FLOAT_EXPR, $1);}
@@ -325,7 +325,7 @@ primary_expression:
 
 function_call:
 	primary_expression '(' ')'									   {}
-	|	primary_expression '(' expression_list	optional_comma')'  {$$ = CreateFunctionCallExpr($1, $3);}
+	|	primary_expression '(' expression_list  optional_comma')'  {$$ = CreateFunctionCallExpr($1, $3);}
 	;
 
 optional_comma:
@@ -396,7 +396,7 @@ else_block :
 	; 
 	
 block: 
-	'{'	'}'												{}
+	'{' '}'												{}
 	|	'{' statement_list '}'							{$$ = CreateBlock($2);}
 	;
 
@@ -450,7 +450,7 @@ simple_statement:
 for_statement:	
 	FOR block												{$$ = CreateForStmt($2);}
 	|	FOR expression block								{$$ = CreateForStmtWExpr($2, $3);}
-	//|	FOR simple_statement block								{$$ = CreateForStmtWClause($2, $3);}
+	|	FOR for_clause block								{$$ = CreateForStmtWClause($2, $3);}
 	;
 
 for_clause: 
