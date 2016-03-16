@@ -96,6 +96,10 @@ struct Type {
 	struct Expression *expr;
 };
 
+struct TypeName {
+	int typeName;
+};
+
 enum ExpressionType {
 	DECIMAL_EXPR,
 	FLOAT_EXPR,
