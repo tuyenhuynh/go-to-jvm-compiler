@@ -119,7 +119,9 @@ enum ExpressionType {
 	DIV_EXPRESSION,
 	MOD_EXPRESSION,
 	EXPRESSION,
-	PRIMARY
+	PRIMARY,
+	BOOL_TRUE_EXPRESSION,
+	BOOL_FALSE_EXPRESSION
 };
 
 enum SwitchInitialExpressionType {
@@ -143,6 +145,7 @@ struct PrimaryExpression
 	float floatNumber;
 	char* stringLiteral;
 	char* identifier;
+	int boolValue;
 	struct PrimaryExpression *primaryExpr;
 	struct Expression *expr;
 	struct FunctionCall *funcCall;

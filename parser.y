@@ -51,6 +51,7 @@
 	char* string;
 	int decValue;
 	float floatValue;
+	int boolValue;
 
 	struct Program *ProgramUnion;
 	
@@ -201,7 +202,7 @@
 %token PACKAGE
 %token IMPORT
 %token INT_TYPE FLOAT32_TYPE STRING_TYPE BOOL_TYPE NIL
-%token TRUE FALSE
+%token<boolValue> TRUE FALSE
 %token PLUS_PLUS MINUS_MINUS
 %token PRINTLN SCANLN 
 
@@ -303,8 +304,8 @@ var_specification_list:
 	; 
 
 primary_expression:
-	TRUE
-	|	FALSE
+		TRUE											{$$ = CreateBoolExpr(BOOL_TRUE_EXPRESSION, $1);}
+	|	FALSE											{$$ = CreateBoolExpr(BOOL_FALSE_EXPRESSION, $1);}
 	|	DECIMAL_NUMBER									{$$ = CreateDecimalExpression(DECIMAL_EXPR, $1);}
 	|	FLOAT_NUMBER									{$$ = CreateFloatExpression(FLOAT_EXPR, $1);}
 	|	STRING_LITERAL									{$$ = CreateStringExpression(STRING_EXPR, $1);}
@@ -316,7 +317,7 @@ primary_expression:
 	; 
 
 function_call:
-	primary_expression '(' ')'									   {$$ = CreateEmptyFunctionCall($1)}
+	primary_expression '(' ')'									   {$$ = CreateEmptyFunctionCall($1);}
 	|	primary_expression '(' expression_list  optional_comma')'  {$$ = CreateFunctionCallExpr($1, $3);}
 	;
 

@@ -203,6 +203,17 @@ struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct
 	return Result;
 }
 
+struct PrimaryExpression *CreateBoolExpr(enum ExpressionType _exprType, int _boolValue) {
+	struct PrimaryExpression *Result = (struct PrimaryExpression *)malloc(sizeof(struct PrimaryExpression));
+
+	Result->exprType = _exprType;
+
+	Result->boolValue = _boolValue;
+
+	return Result;
+}
+
+
 struct PrimaryExpression *CreateDecimalExpression(enum ExpressionType _exprType, int _decNumber) {
 	struct PrimaryExpression *Result = (struct PrimaryExpression *)malloc(sizeof(struct PrimaryExpression));
 

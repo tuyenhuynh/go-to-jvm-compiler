@@ -66,8 +66,14 @@ DECIMAL		[0-9]+
 "string"		{return STRING_TYPE;}
 "bool"			{return BOOL_TYPE;}
 
-"true"			{return TRUE;}
-"false"			{return FALSE;}
+"true"			{
+					yylval.boolValue = 1;
+					return TRUE;
+				}
+"false"			{
+					yylval.boolValue = 0;
+					return FALSE;
+				}
 "nil"			{return NIL;}
 
 "fmt.Scanln"	{return	SCANLN; }
