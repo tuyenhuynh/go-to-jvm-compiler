@@ -283,7 +283,8 @@ type:
 	; 
 	
 type_name:
-	FLOAT32_TYPE
+	IDENTIFIER
+	|	FLOAT32_TYPE
 	|	INT_TYPE
 	|	STRING_TYPE 
 	|	BOOL_TYPE 
@@ -486,7 +487,7 @@ parameters_in_parentheses:
 	|	'(' parameter_list ')'								{$$ = CreateParametersInParens($2);}
 	; 
 
-parameter_list : 
+parameter_list: 
 	parameter_declare										{$$ = CreateParameterDeclareList($1);}
 	|	parameter_list ',' parameter_declare				{$$ = AppendToParameterDeclareList($1, $3);}
 	;	
@@ -496,7 +497,7 @@ parameter_declare:
 	|	IDENTIFIER type										{$$ = CreateParameterDeclareWithId($1, $2);}
 	; 
 	
-result :
+result:
 	parameters_in_parentheses								{$$ = CreateResultFromParameters($1);}
 	|	type												{$$ = CreateResultFormType($1);}
 	;
