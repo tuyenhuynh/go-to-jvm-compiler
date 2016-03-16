@@ -64,12 +64,6 @@ struct ConstDecl {
 	struct ConstSpec *constSpec;
 };
 
-struct ConstSpec {
-	struct IdentifierList *idList;
-	struct IdentifierListType *idListType;
-	struct ExpressionList *expressionList;
-};
-
 struct FunctionDecl {
 	char *identifier;
 	struct Signature *signature;

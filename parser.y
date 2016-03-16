@@ -268,17 +268,6 @@ const_declare:
 	|	CONST	'(' var_specification_list ')'						{$$ = CreateConstDecl($3);}
 	;
 
-	/*
-const_spec:
-	identifier_list ASSIGN_OP expression_list					{$$ = CreateConstSpecFromIdList($1, $3);}
-	| identifier_list_type ASSIGN_OP expression_list			{$$ = CreateConstSpecFromIdListWithType($1, $3);}
-	; 
-
-const_spec_list:
-	const_spec ';'
-	|	const_spec_list	const_spec ';'
-	*/
-
 type: 
 	type_name											{$$ = CreateTypeFromId($1);}
 	|	'[' expression ']' type_name					{$$ = CreateCompositeType($2, $4);}

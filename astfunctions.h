@@ -16,8 +16,6 @@ struct Declaration * CreateDeclarationFromVarDecl(enum DeclType _declType, struc
 struct Declaration * CreateDeclarationFromConstDecl(enum DeclType _declType, struct ConstDecl * _constDecl);
 struct Declaration * CreateDeclarationFromFuncDecl(enum DeclType _declType, struct FuncDecl * _funcDecl);
 struct ConstDecl *CreateConstDecl(struct ConstSpec *_constSpec);
-struct ConstSpec *CreateConstSpecFromIdList(struct IdentifierList *_idList, struct ExpressionList *_exprList);
-struct ConstSpec *CreateConstSpecFromIdListWithType(struct IdentifierListType *_idListType, struct ExpressionList *_expressionList);
 struct Type *CreateTypeFromId(char *_id);
 struct Type *CreateCompositeType(struct Expression *_expr, char *_id);
 struct IdentifierListType *CreateIdListWithType(struct IdentifierList *_identifierList, struct Type *_type);

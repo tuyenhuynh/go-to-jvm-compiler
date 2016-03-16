@@ -106,24 +106,6 @@ struct ConstDecl *CreateConstDecl(struct ConstSpec *_constSpec) {
 
 }
 
-struct ConstSpec *CreateConstSpecFromIdList(struct IdentifierList *_idList, struct ExpressionList *_expressionList) {
-	struct ConstSpec *Result = (struct ConstSpec *)malloc(sizeof(struct ConstSpec));
-
-	Result->idList = _idList;
-	Result->expressionList = _expressionList;
-
-	return Result;
-}
-
-struct ConstSpec *CreateConstSpecFromIdListWithType(struct IdentifierListType *_idListType, struct ExpressionList *_expressionList) {
-	struct ConstSpec *Result = (struct ConstSpec *)malloc(sizeof(struct ConstSpec));
-
-	Result->idListType = _idListType;
-	Result->expressionList = _expressionList;
-
-	return Result;
-}
-
 struct Type *CreateTypeFromId(char *_id) {
 	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
 	Result->identifier = _id;
