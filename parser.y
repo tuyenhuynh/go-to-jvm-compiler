@@ -260,7 +260,7 @@ import_statement:
 
 import_statement_list:
 	import_statement ';'									{$$ = CreateImportStatementList($1);}			
-	|	import_statement_list  import_statement	';'	//{$$ = AppendToImportStatementList($1, $3);}
+	|	import_statement_list  import_statement	';'			{$$ = AppendToImportStatementList($1, $3);}
 	; 
 
 declaration_list:
@@ -408,7 +408,7 @@ block:
 
 statement_list: 
 	statement ';'											{$$ = CreateStmtList($1);}
-	|	statement_list statement ';'					//{$$ = AppendToStmtList($1, $3);}
+	|	statement_list statement ';'					{$$ = AppendToStmtList($1, $3);}
 	; 
  
 switch_statement: 
