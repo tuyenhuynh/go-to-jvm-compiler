@@ -70,6 +70,8 @@ DECIMAL		[0-9]+
 "false"			{return FALSE;}
 "nil"			{return NIL;}
 
+"fmt.Scanln"	{return	SCANLN; }
+"fmt.Println"	{return PRINTLN; }
 \"(\\.|[^\\"])*\"	{ 		yylval.string = (char*)malloc(strlen(yytext) + 1);
 							strcpy(yylval.string, yytext);
 							return STRING_LITERAL;
@@ -107,6 +109,7 @@ DECIMAL		[0-9]+
 ":"							{return ':';}
 "++"						{return PLUS_PLUS;}
 "--"						{return MINUS_MINUS;}
+"&"							{return '&';}
 
 
 

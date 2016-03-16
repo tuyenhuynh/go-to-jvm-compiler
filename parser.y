@@ -200,6 +200,8 @@
 %token INT_TYPE FLOAT32_TYPE STRING_TYPE BOOL_TYPE NIL
 %token TRUE FALSE
 %token PLUS_PLUS MINUS_MINUS
+%token PRINTLN SCANLN 
+
 %right ASSIGN_OP
 %left OR
 %left AND 
@@ -331,7 +333,7 @@ function_call:
 
 optional_comma:
 														{}
-	|	','											{}
+	|	','												{}
 	; 
 
 expression: 
@@ -370,6 +372,8 @@ statement:
 	|	if_statement									{$$ = CreateStmtFromIfStmt(IF_STMT, $1);}
 	|	switch_statement								{$$ = CreateStmtFromSwitchStmt(SWITCH_STMT, $1);}
 	|	for_statement									{$$ = CreateStmtFromForStmt(FOR_STMT, $1);}
+	|	print_statement
+	|	scan_statement
 	; 
 
 identifier_list: 
@@ -501,5 +505,20 @@ result:
 	parameters_in_parentheses								{$$ = CreateResultFromParameters($1);}
 	|	type												{$$ = CreateResultFormType($1);}
 	;
+
+print_statement:
+	PRINTLN '(' expression_list ')'
+	; 
+
+scan_statement:
+	SCANLN '(' scan_identifier_list ')' 
+	; 
+
+scan_identifier_list:
+	scan_item 
+	|	scan_identifier_list ',' scan_item ; 
+
+scan_item:
+	'&'	IDENTIFIER; 
 
 %%
