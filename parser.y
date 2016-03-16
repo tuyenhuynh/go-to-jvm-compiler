@@ -142,6 +142,12 @@
 	struct ForCondition *ForConditionUnion;
 	
 	struct ForPostStmt *ForPostStmtUnion ; 
+
+	struct PrintStatement * PrintStatementUnion ; 
+
+	struct ScanStatement * ScanStatementUnion ; 
+
+	struct ScanIdentifierList * ScanIdentifierListUnion ; 
 	 
 }
 
@@ -156,7 +162,6 @@
 %type<VarDeclUnion> var_declare
 %type<ConstDeclUnion> const_declare
 %type<FunctionDeclUnion> function_declaration
-%type<ConstSpecUnion> const_spec
 %type<IdListUnion> identifier_list
 %type<IdListTypeUnion> identifier_list_type
 %type<ExprListUnion> expression_list
@@ -191,7 +196,9 @@
 %type<ForInitStmtUnion> for_init_statement ; 
 %type<ForConditionUnion> for_condition; 
 %type<ForPostStmtUnion> for_post_statement ; 
-
+%type<PrintStatementUnion> print_statement ; 
+%type<ScanStatementUnion> scan_statement ; 
+%type<ScanIdentifierListUnion> scan_identifier_list; 
 
 %start program
 
@@ -511,18 +518,17 @@ result:
 	;
 
 print_statement:
-	PRINTLN '(' expression_list ')'
+	PRINTLN '(' expression_list ')'							{$$ = CreatePrintStmt ($3) ;}
 	; 
 
 scan_statement:
-	SCANLN '(' scan_identifier_list ')' 
+	SCANLN '(' scan_identifier_list ')'						{$$ = CreateScanStmt ($3) ; }
 	; 
 
-scan_identifier_list:
-	scan_item 
-	|	scan_identifier_list ',' scan_item ; 
-
-scan_item:
-	'&'	IDENTIFIER; 
+scan_identifier_list:										
+	'&'	IDENTIFIER											//{$$ = CreateScanItemfList( $1) ;}
+	|	scan_identifier_list ',' '&'	IDENTIFIER			//{$$ = AppendItemToScanItemList($1, $4) ;}
+	;									
 
 %%
+

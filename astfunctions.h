@@ -145,4 +145,8 @@ struct ForCondition * CreateForCondition(struct Expression * _expression);
 
 struct ForPostStmt * CreateForPostStmt(struct  SimpleStmt * _postStmt);
 
+struct PrintStatement * CreatePrintStmt(struct ExpressionList * _expressionList); 
+
+struct ScanStatement * CreateScanStmt(struct ScanIdentifierList* _scanIdentifierList);
+
 #endif //_AST_FUNCTIONS_H_

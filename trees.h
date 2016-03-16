@@ -303,4 +303,17 @@ struct ForPostStmt {
 	struct SimpleStmt *postStmt; 
 };
 
+struct PrintStatement {
+	struct ExpressionList * expressionList;
+};
+
+struct ScanStatement {
+	struct ScanIdentifierList *scanIdentifierList;
+};
+
+struct ScanIdentifierList {
+	char* identifier;
+	struct ScanItenditifierList * nextIdentifier;
+};
+
 #endif// _TREES_H_

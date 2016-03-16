@@ -770,3 +770,18 @@ struct Result *CreateResultFormType(struct Type *_type) {
 
 	return Res;
 }
+
+
+struct PrintStatement * CreatePrintStmt(struct ExpressionList * _expressionList) {
+	struct PrintStatement * Result = (struct PrintStatement*) malloc(sizeof(struct PrintStatement));
+	Result->expressionList = _expressionList; 
+	
+	return Result; 
+}
+struct ScanStatement * CreateScanStmt(struct ScanIdentifierList* _scanIdentifierList) {
+	struct ScanStatement * Result = (struct ScanStatement*) malloc(sizeof (struct ScanStatement));
+	Result->scanIdentifierList = _scanIdentifierList; 
+
+	return Result; 
+
+}
