@@ -46,7 +46,8 @@ func f4 (a int, b string, c float32) (int) {
 }
 
 func f1 (a int, b string, c float32) (a, b, c int, str string, arr [32] int) {
-	return 1 ; 
+	var retArr [32] int ; 
+	return 1, 2, 0, "String", retArr ; 
 }
 
 func function_with_nobody() 
@@ -173,8 +174,19 @@ func main() {
 	//cycle 
 	i = 0; 
 	for i < 3 {
-		i +=1; 
+		
+		i +=1;
+		if (i == 1) {
+			continue ; 
+		} 
+		;
 		fmt.Println(i); 
+
+		if i ==2 {
+			break ;
+		}
+		;
+
 	};
 	
 	var j int =0;
@@ -185,15 +197,16 @@ func main() {
 		i=2;
 	};
 	
-	//for i == 1; i < 2 ;  {
-	//	x[i] = 1;
-	//}
-	
 	for  ; j  < 5 ; j++ {
 		fmt.Println(j) ;
 		continue;
 	};
 	
+	for ; ;  {
+		continue; 
+	}
+	;
+
 	for {
 		fmt.Println("Loop");
 		break; 
@@ -201,7 +214,7 @@ func main() {
 	
 	
 	//input output by console
-	/*
+	
 	fmt.Println("Input a number");
 	var number int; 
 	fmt.Scanln(&number); 
@@ -219,9 +232,9 @@ func main() {
 	
 	fmt.Println("Input a float value");
 	var floatVal float32; 
-	fmt.Scanln(&floatVal); 
-	fmt.Println(floatVal); 
-	*/
+	fmt.Scanln(&floatVal, &boolVal); 
+	fmt.Println("ABC", floatVal, boolVal); 
+	
 	
 }
 
