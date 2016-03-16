@@ -61,7 +61,8 @@ struct VarSpecList {
 };
 
 struct ConstDecl {
-	struct ConstSpec *constSpec;
+	struct VarSpec *varSpec;
+	struct VarSpecList *varSpecList;
 };
 
 struct FunctionDecl {

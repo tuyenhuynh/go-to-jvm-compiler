@@ -73,8 +73,6 @@
 
 	struct FunctionDecl *FunctionDeclUnion;
 
-	struct ConstSpec *ConstSpecUnion;
-
 	struct IdentifierList *IdListUnion;
 
 	struct IdentifierListType *IdListTypeUnion;
@@ -267,7 +265,7 @@ import_statement:
 
 import_statement_list:
 	import_statement ';'									{$$ = CreateImportStatementList($1);}			
-	|	import_statement_list  import_statement	';'	//{$$ = AppendToImportStatementList($1, $3);}
+	|	import_statement_list  import_statement	';'			{$$ = AppendToImportStatementList($1, $2);}
 	; 
 
 declaration_list:
@@ -282,9 +280,9 @@ declaration:
 	; 
 
 const_declare:
-	CONST var_specification									{$$ = CreateConstDecl($2);}
-	|	CONST	'('	')'										
-	|	CONST	'(' var_specification_list ')'						{$$ = CreateConstDecl($3);}
+	CONST var_specification											{$$ = CreateConstDecl($2);}
+	|	CONST	'('	')'												{}							
+	|	CONST	'(' var_specification_list ')'						{$$ = CreateConstDeclFromList($3);}
 	;
 
 type: 
@@ -415,7 +413,7 @@ block:
 
 statement_list: 
 	statement ';'											{$$ = CreateStmtList($1);}
-	|	statement_list statement ';'					//{$$ = AppendToStmtList($1, $3);}
+	|	statement_list statement ';'						{$$ = AppendToStmtList($1, $2);}
 	; 
  
 switch_statement: 
