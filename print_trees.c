@@ -28,7 +28,18 @@ void print_expression(struct Expression* expression) {
 				openTag("FloatExpression");
 				printf("%f", expression->primaryExpr->floatNumber); 
 				closeTage("FloatExpression"); 
-
+			case STRING_EXPR:
+				openTag("StringExpression");
+				printf("%s", expression->primaryExpr->stringLiteral);
+				closeTag("StringExpression");
+			case ID_EXPRESSION:
+				openTag("IdExpression"); 
+				printf("%s", expression->primaryExpr->identifier);
+				closeTag("IdExpression");
+			case PE_COMPOSITE:
+				openTag("ParenExpression");
+				print_expression(expression->primaryExpr->expr);
+				closeTag("ParenExpression");
 		}
 	}
 	else {
