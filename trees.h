@@ -96,7 +96,7 @@ enum TypeNames {
 };
 
 struct Type {
-	enum TypeName typeName;
+	enum TypeNames typeName;
 	struct Expression *expr;
 };
 
