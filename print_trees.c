@@ -15,6 +15,8 @@ void print_import(int parentId, struct Import* import) {
 	
 }
 
+void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList) {}
+
 //import is not very clear
 
 void printPrimitiveExpression(int parentId, char*name, char*value) {
@@ -163,15 +165,46 @@ void printFunctionCall(int parentId, struct FunctionCall* functionCall) {
 }
 
 void printExpressionList(int parentId, struct ExpressionList* expressionList) {
-	
+	while (expressionList != NULL) {
+		printExpression(parentId, expressionList->expr);
+		expressionList = expressionList->nextExpr; 
+	}
 }
 
-void print_declaration_list(int parentId, struct DeclarationList* program){}
-void print_declaration(int parentId, struct Declaration* declaration){}
-void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList){}
-void print_var_decl(int parentId, struct VarDecl * varDecl){}
-void print_const_decl(int parentId, struct ConstDecl * constDecl){}
-void print_function_decl(int parentId, struct FunctionDecl functionDecl){}
+void printDeclarationList(int parentId, struct DeclarationList* declarationList){
+	while (declarationList != NULL) {
+		printDeclaration(parentId, declarationList->decl); 
+		declarationList = declarationList->nextDecl;
+	}
+}
+
+
+void printDeclaration(int parentId, struct Declaration* declaration) {
+	if (declaration != NULL) {
+		if (declaration->declType == CONST_DECL) {
+			printConstDecl(parentId, declaration->constDecl);
+		}
+		else if (declaration->declType == VAR_DECL) {
+			printVarDecl(parentId, declaration->varDecl);
+		}
+		else if (declaration->declType == FUNC_DECL) {
+			printFunctionDecl(parentId, declaration->funcDecl);
+		}
+		else {
+			printf("Unknown declaration type");
+		}
+	}
+	else {
+		printf("Declaration is null"); 
+	}
+}
+
+
+
+
+void printVarDecl(int parentId, struct VarDecl * varDecl){}
+void printConstDecl(int parentId, struct ConstDecl * constDecl){}
+void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl){}
 void print_identifier_list(int parentId, struct IdentifierList * identifierList){}
 void print_type_name(int parentId, struct Type* typeName){}
 void print_var_spec(int parentId, struct VarSpec* varSpec){}

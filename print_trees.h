@@ -15,13 +15,13 @@ void printExpressionList(int parentId, struct ExpressionList* expressionList);
 
 void print_program(struct Program* program);
 void print_package(int parentId, struct Package* package);
-void print_declaration_list(int parentId, struct DeclarationList* program);
-void print_declaration(int parentId, struct Declaration* declaration);
+void printDeclarationList(int parentId, struct DeclarationList* declarationList);
+void printDeclaration(int parentId, struct Declaration* declaration);
 void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList);
 void print_import(int parentId, struct Import* import);
-void print_var_decl(int parentId, struct VarDecl * varDecl);
-void print_const_decl(int parentId, struct ConstDecl * constDecl);
-void print_function_decl(int parentId, struct FunctionDecl functionDecl);
+void printVarDecl(int parentId, struct VarDecl * varDecl);
+void printConstDecl(int parentId, struct ConstDecl * constDecl);
+void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl);
 void print_identifier_list(int parentId, struct IdentifierList * identifierList);
 void print_type_name(int parentId, struct Type* typeName);
 void printExpression(int parentId, struct Expression* expression);
