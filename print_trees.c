@@ -85,7 +85,7 @@ void printExpression(int parentId, struct Expression* expression) {
 		}
 	}
 	else {
-		printf("Expression is null");
+		printf("Expression is null\n");
 	}
 }
 
@@ -99,7 +99,7 @@ void printBinaryExpression(int parentId, struct Expression* expression) {
 		printExpression(id, expression->leftExpr);
 		printExpression(id, expression->rightExpr);
 	}else {
-		printf("Binary expression is null");
+		printf("Binary expression is null\n");
 	}
 }
 
@@ -113,11 +113,9 @@ void printUnaryExpression(int parentId, struct Expression* expression) {
 		printPrimaryExpression(id, expression->primaryExpr);
 	}
 	else {
-		printf("Unary expression is null");
+		printf("Unary expression is null\n");
 	}
 }
-
-<<<<<<< HEAD
 
 void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr) {
 	if (primaryExpr != NULL) {
@@ -168,7 +166,7 @@ void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr)
 		}
 	}
 	else {
-		printf("Primary expression is null"); 
+		printf("Primary expression is null\n"); 
 	}
 }
 
@@ -188,7 +186,7 @@ void printFunctionCall(int parentId, struct FunctionCall* functionCall) {
 		printExpressionList(maxId, functionCall->exprList); 
 	}
 	else {
-		printf("Function call is null"); 
+		printf("Function call is null\n"); 
 	}
 }
 
@@ -266,8 +264,6 @@ void print_print_stmt(int parentId, struct PrintStatement* printStmt){}
 void print_scan_stmt(int parentId, struct ScanStatement* scanStmt){}
 
 
-=======
->>>>>>> 88e7f94b531f997dcde312c5daed557b0d4ad1c6
 void expressionTypeToString(enum ExpressionType exprType, char* result) {
 	if (result == NULL) {
 		result = (char*)malloc(20* sizeof(char)); 
@@ -344,11 +340,10 @@ void expressionTypeToString(enum ExpressionType exprType, char* result) {
 		break;
 	case EXPRESSION:
 		//TODO:CHECK THIS
-		//strcpy(result, "I");
+		strcpy(result, "EXPR");
 		break;
 	case PRIMARY:
-		//TODO: remove this ?
-		//strcpy(result, "INT");
+		strcpy(result, "PE"); 
 		break;
 	case BOOL_TRUE_EXPRESSION:
 		strcpy(result, "true");
@@ -356,10 +351,12 @@ void expressionTypeToString(enum ExpressionType exprType, char* result) {
 	case BOOL_FALSE_EXPRESSION:
 		strcpy(result, "false");
 		break;
+	default: {
+		printf("Unknown expression type\n");
+	}
 	}
 }
 
-void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr) {}
 void print_declaration_list(int parentId, struct DeclarationList* program){}
 void print_declaration(int parentId, struct Declaration* declaration){}
 void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList){}
