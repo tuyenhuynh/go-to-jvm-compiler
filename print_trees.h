@@ -21,7 +21,7 @@ void print_var_decl(int parentId, struct VarDecl * varDecl);
 void print_const_decl(int parentId, struct ConstDecl * constDecl);
 void print_function_decl(int parentId, struct FunctionDecl functionDecl);
 void print_identifier_list(int parentId, struct IdentifierList * identifierList);
-void print_type_name(int parentId, struct TypeName* typeName);
+void print_type_name(int parentId, struct Type* typeName);
 void printExpression(int parentId, struct Expression* expression);
 void print_var_spec(int parentId, struct VarSpec* varSpec);
 void print_var_spec_list(int parentId, struct VarSpecList* varSpecList);
