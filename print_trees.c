@@ -204,7 +204,6 @@ void printDeclarationList(int parentId, struct DeclarationList* declarationList)
 	}
 }
 
-
 void printDeclaration(int parentId, struct Declaration* declaration) {
 	if (declaration != NULL) {
 		if (declaration->declType == CONST_DECL) {
@@ -217,24 +216,95 @@ void printDeclaration(int parentId, struct Declaration* declaration) {
 			printFunctionDecl(parentId, declaration->funcDecl);
 		}
 		else {
-			printf("Unknown declaration type");
+			printf("Unknown declaration type\n");
 		}
 	}
 	else {
-		printf("Declaration is null"); 
+		printf("Declaration is null\n"); 
+	}
+}
+
+void printVarDecl(int parentId, struct VarDecl * varDecl){
+	if (varDecl != NULL) {
+		maxId++; 
+		int id = maxId;
+		printEdgeWithDestName(parentId, id, "VAR");
+		if (varDecl->varSpec != NULL) {
+			printVarSpec(id, varDecl->varSpec); 
+		}
+		else if (varDecl->varSpecList != NULL) {
+			printVarSpecList(id, varDecl->varSpecList);
+		}
+		else {
+			printf("VarDecl is undefined\n"); 
+		}
+	}
+	else {
+		printf("VarDecl is NULL\n"); 
 	}
 }
 
 
 
+void printConstDecl(int parentId, struct ConstDecl * constDecl){
+	if (constDecl != NULL) {
+		maxId++; 
+		int id = maxId;
+		printEdgeWithDestName(parentId, id, "CONST");
+		if (constDecl->varSpec != NULL) {
+			printVarSpec(id, constDecl->varSpec); 
+		}
+		else if (constDecl->varSpecList != NULL) {
+			printVarSpecList(id, constDecl->varSpecList);
+		}
+		else {
+			printf("Const spec is undefined\n"); 
+		}
 
-void printVarDecl(int parentId, struct VarDecl * varDecl){}
-void printConstDecl(int parentId, struct ConstDecl * constDecl){}
+	}
+	else {
+		printf("ConstDecl is NULL\n"); 
+	}
+}
 void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl){}
-void print_identifier_list(int parentId, struct IdentifierList * identifierList){}
-void print_type_name(int parentId, struct Type* typeName){}
-void print_var_spec(int parentId, struct VarSpec* varSpec){}
-void print_var_spec_list(int parentId, struct VarSpecList* varSpecList){}
+
+
+void printVarSpec(int parentId, struct VarSpec* varSpec){
+	if (varSpec != NULL) {
+		maxId++;
+		int id = maxId;
+		printEdgeWithDestName(parentId, id, "VAR_SPEC");
+		if (varSpec->idListType != NULL) {
+			printIdentifierList(id, varSpec->idListType->identifierList);
+			printTypeName(id, varSpec->idListType->type);
+		}
+		else if (varSpec->idList != NULL) {
+			printIdentifierList(id, varSpec->idList);
+		}
+
+		if (varSpec->exprList != NULL) {
+			maxId++;
+			printEdgeWithDestName(id, maxId, "EXPR_LIST");
+			printExpressionList(maxId, varSpec->exprList);
+		}
+	}
+	else {
+		printf("VarSpec is null\n"); 
+	}
+}
+
+void printVarSpecList(int parentId, struct VarSpecList* varSpecList){
+	if (printVarSpecList != NULL) {
+		int id = maxId++; 
+		printEdgeWithDestName(parentId, id, "VAR_SPEC_LIST"); 
+		while (varSpecList != NULL) {
+			printVarSpec(id, varSpecList->varSpec);
+			varSpecList = varSpecList->nextVarSpec;
+		}
+	}
+}
+
+
 void print_statement(int parentId, struct Statement* statement){}
 void print_simple_stmt(int parentId, struct SimpleStmt* simpleStmt){}
 void print_return_stmt(int parentId, struct ReturnStmt* returnStmt){}
@@ -357,20 +427,44 @@ void expressionTypeToString(enum ExpressionType exprType, char* result) {
 	}
 }
 
-void print_declaration_list(int parentId, struct DeclarationList* program){}
-void print_declaration(int parentId, struct Declaration* declaration){}
 void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList){}
-void print_var_decl(int parentId, struct VarDecl * varDecl){}
-void print_const_decl(int parentId, struct ConstDecl * constDecl){}
-void print_function_decl(int parentId, struct FunctionDecl functionDecl){}
-void print_identifier_list(int parentId, struct IdentifierList * identifierList){}
-void print_type_name(int parentId, struct Type* typeName){}
-void print_var_spec(int parentId, struct VarSpec* varSpec){}
-void print_var_spec_list(int parentId, struct VarSpecList* varSpecList){}
+
+void printIdentifierList(int parentId, struct IdentifierList * identifierList){
+	if (identifierList != NULL) {
+		maxId++; 
+		int id = maxId;
+		printEdgeWithDestName(parentId, id, "ID_LIST"); 
+		while (identifierList != NULL) {
+			printPrimitiveExpression(id, "ID", identifierList->identifier);
+			identifierList = identifierList->nextIdentifier; 
+		}
+	}
+	else {
+		printf("Identifier list is null\n"); 
+	}
+}
+
+
+void printTypeName(int parentId, struct Type* typeName){
+	if (typeName != NULL) {
+		int id = maxId++; 
+		printEdgeWithDestName(parentId, id, "TYPE"); 
+		maxId++; 
+		//Stuck with this 
+		//printEdgeWithDestName(id, maxId, ); 
+		//TODO:
+	}
+	else {
+		printf("Type name is null \n"); 
+	}
+}
+
 void print_statement(int parentId, struct Statement* statement){}
 void printSimpleStmt(int parentId, struct SimpleStmt* simpleStmt){}
 void print_return_stmt(int parentId, struct ReturnStmt* returnStmt){}
 void print_block(int parentId, struct Block* block){}
+
+
 
 
 void printSwitchStmt(int parentId, struct SwitchStmt* switchStmt) {
