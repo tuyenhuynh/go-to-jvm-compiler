@@ -31,6 +31,36 @@ void printExpression(int parentId, struct Expression* expression) {
 		maxId++;
 		int id = maxId; 
 		switch (expression->exprType) {
+			case DECIMAL_EXPR: {
+				char buffer[10];
+				itoa(expression->primaryExpr->decNumber, buffer, 10);
+				printPrimitiveExpression(parentId, "INT", buffer);
+				break;
+			}	 
+			case FLOAT_EXPR: {
+				char buffer[10];
+				gcvt(expression->primaryExpr->floatNumber, 10, buffer);
+				printPrimitiveExpression(parentId, "FLOAT", buffer);
+				break;
+			}
+			case STRING_EXPR: {
+				printPrimitiveExpression(parentId, "STRING", expression->primaryExpr->stringLiteral);
+				break;
+			}
+			case ID_EXPRESSION: {
+				printPrimitiveExpression(parentId, "ID", expression->primaryExpr->identifier);
+				break;
+			}
+			case PE_COMPOSITE: {
+				//TODO: implement this
+				break;
+			}
+			case FUNCTION_CALL: {
+				//TODO: implement this
+			}
+			case FUNCTION_CALL_EMPTY: {
+				//TODO: implement this
+			}
 			case NOT_UNARY_EXPR:
 			case PLUS_UNARY_EXPR:
 			case MINUS_UNARY_EXPR: {
@@ -50,11 +80,8 @@ void printExpression(int parentId, struct Expression* expression) {
 			case DIV_EXPRESSION:
 			case MOD_EXPRESSION: {
 				printBinaryExpression(parentId, expression);
-				break;
 			}
-			default: {
-				printf("What the hell's going on with function print expression???");
-			}
+			//default ???
 		}
 	}
 	else {
@@ -90,6 +117,7 @@ void printUnaryExpression(int parentId, struct Expression* expression) {
 	}
 }
 
+<<<<<<< HEAD
 
 void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr) {
 	if (primaryExpr != NULL) {
@@ -238,9 +266,11 @@ void print_print_stmt(int parentId, struct PrintStatement* printStmt){}
 void print_scan_stmt(int parentId, struct ScanStatement* scanStmt){}
 
 
+=======
+>>>>>>> 88e7f94b531f997dcde312c5daed557b0d4ad1c6
 void expressionTypeToString(enum ExpressionType exprType, char* result) {
 	if (result == NULL) {
-		result = (char*)malloc(20 * sizeof(char));
+		result = (char*)malloc(20* sizeof(char)); 
 	}
 	switch (exprType) {
 	case DECIMAL_EXPR:
@@ -328,3 +358,79 @@ void expressionTypeToString(enum ExpressionType exprType, char* result) {
 		break;
 	}
 }
+
+void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr) {}
+void print_declaration_list(int parentId, struct DeclarationList* program){}
+void print_declaration(int parentId, struct Declaration* declaration){}
+void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList){}
+void print_var_decl(int parentId, struct VarDecl * varDecl){}
+void print_const_decl(int parentId, struct ConstDecl * constDecl){}
+void print_function_decl(int parentId, struct FunctionDecl functionDecl){}
+void print_identifier_list(int parentId, struct IdentifierList * identifierList){}
+void print_type_name(int parentId, struct Type* typeName){}
+void print_var_spec(int parentId, struct VarSpec* varSpec){}
+void print_var_spec_list(int parentId, struct VarSpecList* varSpecList){}
+void print_statement(int parentId, struct Statement* statement){}
+void printSimpleStmt(int parentId, struct SimpleStmt* simpleStmt){}
+void print_return_stmt(int parentId, struct ReturnStmt* returnStmt){}
+void print_block(int parentId, struct Block* block){}
+
+
+void printSwitchStmt(int parentId, struct SwitchStmt* switchStmt) {
+	if (switchStmt != NULL) {
+		maxId++;
+		int id = maxId;
+		printSwitchInitialExpression(parentId, switchStmt->initialAndExpression);
+		id++;
+		printSwitchBody(id, switchStmt->switchBody);
+	}
+	else {
+		printf("Switch statement is null\n");
+	}
+}
+
+
+void print_if_stmt(int parentId, struct IfStmt* ifStmt){}
+void print_for_stmt(int parentId, struct ForStmt* forStmt){}
+void print_if_stmt_expression(int parentId, struct IfStmtExpression* ifStmtExpr){}
+void print_else_block(int parentId, struct ElseBlock* elseBlock){}
+void print_stmt_list(int parentId, struct StatementList* stmtList){}
+
+
+void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
+	if (switchBody != NULL) {
+		maxId++;
+		printExpressionCaseClauseList(parentId, switchBody->eccl);
+	}
+	else {
+		printf("Switch body is null\n");
+	}
+
+}
+void printExpressionCaseClauseList(int parentId, struct ExpressionCaseClauseList* eccl) {
+	
+}
+void print_expression_case_clause(int parentId, struct ExpressionCaseClause* ecc){}
+void print_expression_switch_case(int parentId, struct ExpressionSwitchCase* expressionSwitchCase){}
+void print_for_clause(int parentId, struct ForClause* ForClause){}
+void print_signature(int parentId, struct Signature* signature){}
+void print_param_in_paren(int parentId, struct ParamInParen* paramInParen){}
+void print_param_list(int parentId, struct ParameterList* paramList){}
+void print_param_declare(int parentId, struct ParameterDeclare* paramDeclare){}
+void print_result(int parentId, struct Result* result){}
+void print_function_call(int parentId, struct FunctionCall* functionCall){}
+
+void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression){
+	if (switchInitialAndExpression != NULL) {
+		maxId++;
+		printExpression(parentId, switchInitialAndExpression->expression);
+		printSimpleStmt(parentId, switchInitialAndExpression->initialStmt);
+	}
+
+
+}
+void print_for_init_stmt(int parentId, struct ForInitStmt* forInitStmt){}
+void print_for_condition(int parentId, struct ForCondition* forCondition){}
+void print_for_post_stmt(int parentId, struct ForPostStmt* forPostStmt){}
+void print_print_stmt(int parentId, struct PrintStatement* printStmt){}
+void print_scan_stmt(int parentId, struct ScanStatement* scanStmt){}
