@@ -9,6 +9,8 @@ void printBinaryExpression(int parentId, struct Expression* expression);
 void printUnaryExpression(int parentId, struct Expression* expression);
 void expressionTypeToString(enum ExpressionType exprType, char* result);
 void printPrimitiveExpression(int parentId, char*name, char*value);
+void printFunctionCall(int parentId, struct FunctionCall* functionCall); 
+void printExpressionList(int parentId, struct ExpressionList* expressionList);
 
 
 void print_program(struct Program* program);
