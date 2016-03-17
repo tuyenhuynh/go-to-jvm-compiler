@@ -15,11 +15,11 @@ struct DeclarationList * CreateDeclarationList(struct Declaration * _decl);
 struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl);
 struct Declaration * CreateDeclarationFromVarDecl(enum DeclType _declType, struct VarDecl * _varDecl);
 struct Declaration * CreateDeclarationFromConstDecl(enum DeclType _declType, struct ConstDecl * _constDecl);
-struct Declaration * CreateDeclarationFromFuncDecl(enum DeclType _declType, struct FuncDecl * _funcDecl);
-struct ConstDecl *CreateConstDecl(struct ConstSpec *_constSpec);
+struct Declaration * CreateDeclarationFromFuncDecl(enum DeclType _declType, struct FunctionDecl * _funcDecl);
+struct ConstDecl *CreateConstDecl(struct VarSpec *_varSpec);
 struct ConstDecl * CreateConstDeclFromList(struct VarSpecList * _varSpecList);
-struct Type *CreateTypeFromId(char *_id);
-struct Type *CreateCompositeType(struct Expression *_expr, char *_id);
+struct Type *CreateTypeFromTypeName(enum TypeNames _typeName);
+struct Type *CreateCompositeType(struct Expression *_expr, enum TypeNames _typeName);
 struct IdentifierListType *CreateIdListWithType(struct IdentifierList *_identifierList, struct Type *_type);
 struct VarDecl *CreateSimpleVarDecl(struct VarSpec *_varSpec);
 struct VarDecl *CreateCompositeVarDecl(struct VarSpecList *_varSpecList);
@@ -28,6 +28,7 @@ struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *_idListTy
 struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *_idList, struct ExpressionList *_exprList);
 struct VarSpecList *CreateVarSpecList(struct VarSpec *_varSpec);
 struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct VarSpec *_varSpec);
+struct PrimaryExpression * CreateBoolExpr(enum ExpressionType _exprType, int _boolValue);
 struct PrimaryExpression *CreateDecimalExpression(enum ExpressionType _exprType, int _decNumber);
 struct PrimaryExpression *CreateFloatExpression(enum ExpressionType _exprType, float _floatNumber);
 
@@ -55,9 +56,13 @@ struct ExpressionList * AppendToExpressionList(struct ExpressionList * _exprList
 
 struct Statement * CreateStmtFromSimpleStmt(enum StatementType _stmtType, struct SimpleStmt * _simpleStmt);
 
+struct Statement * CreateVarDeclStmt(enum StatementType _stmtType, struct  VarDecl * _varDecl);
+
 struct Statement * CreateConstDeclStmt(enum StatementType _stmtType, struct ConstDecl * _constDecl);
 
 struct Statement * CreateStmtFromReturnStmt(enum StatementType _stmtType, struct ReturnStmt * _returnStmt);
+
+struct Statement * CreateStatement(enum StatementType _stmtType);
 
 struct Statement * CreateStmtFromBlock(enum StatementType _stmtType, struct Block * _block);
 
@@ -66,6 +71,10 @@ struct Statement * CreateStmtFromIfStmt(enum StatementType _stmtType, struct IfS
 struct Statement * CreateStmtFromSwitchStmt(enum StatementType _stmtType, struct SwitchStmt * _switchStmt);
 
 struct Statement * CreateStmtFromForStmt(enum StatementType _stmtType, struct ForStmt * _forStmt);
+
+struct Statement * CreateStmtFromPrinStmt(enum StatementType _stmtType, struct PrintStatement * _printStatement);
+
+struct Statement * CreateStmtFromScanStmt(enum StatementType _stmtType, struct ScanStatement * _scanStatement);
 
 struct IdentifierList * CreateIdList(char * _id);
 
@@ -116,7 +125,7 @@ struct ForStmt * CreateForStmtWExpr(struct Expression * _expr, struct  Block * _
 
 struct ForStmt * CreateForStmtWClause(struct ForClause * _forClause, struct  Block * _block);
 
-struct ForClause * CreateForClause(struct SimpleStatement * _simpleStmtLeft, struct Expression * _expr, struct SimpleStatement * _simpleStmtRight);
+struct ForClause *CreateForClause(struct ForInitStmt *_forInitStmt, struct ForCondition *_forCondition, struct ForPostStmt *_forPostStmt);
 
 struct FunctionDecl * CreateFunctionDeclaration(char * _identifier, struct Signature * _signature);
 
@@ -149,5 +158,9 @@ struct ForPostStmt * CreateForPostStmt(struct  SimpleStmt * _postStmt);
 struct PrintStatement * CreatePrintStmt(struct ExpressionList * _expressionList); 
 
 struct ScanStatement * CreateScanStmt(struct ScanIdentifierList* _scanIdentifierList);
+
+struct ScanIdentifierList *CreateScanItemList(char *_identifier);
+
+struct ScanIdentifierList *AppendItemToScanItemList(struct ScanIdentifierList * _scanIdList, char *_identifier);
 
 #endif //_AST_FUNCTIONS_H_

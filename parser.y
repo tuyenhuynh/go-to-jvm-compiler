@@ -41,7 +41,8 @@
 	#include "parser.h"
 	#include "astfunctions.h"
 	extern int yylex(void);
-	
+	extern void yyerror(const char *msg);
+
 	struct Imports *imports;
 	struct DeclarationList *declList;
 	struct Program *root;
@@ -81,7 +82,7 @@
 
 	struct Type *TypeUnion;
 
-	struct TypeName* TypeNameUnion; 
+	enum TypeNames TypeNameUnion; 
 
 	struct Expression *ExprUnion;
 
@@ -286,16 +287,16 @@ const_declare:
 	;
 
 type: 
-	type_name											{$$ = CreateTypeFromId($1);}
+	type_name											{$$ = CreateTypeFromTypeName($1);}
 	|	'[' expression ']' type_name					{$$ = CreateCompositeType($2, $4);}
 	; 
 	
 type_name:
-	IDENTIFIER
-	|	FLOAT32_TYPE
-	|	INT_TYPE
-	|	STRING_TYPE 
-	|	BOOL_TYPE 
+		IDENTIFIER										{$$ = IDENTIFIER_TYPE_NAME;}
+	|	FLOAT32_TYPE									{$$ = FLOAT32_TYPE_NAME;}
+	|	INT_TYPE										{$$ = INT_TYPE_NAME;}
+	|	STRING_TYPE										{$$ = STRING_TYPE_NAME;}
+	|	BOOL_TYPE										{$$ = BOOL_TYPE_NAME;}
 	; 
 
 identifier_list_type:
@@ -378,8 +379,8 @@ statement:
 	|	if_statement									{$$ = CreateStmtFromIfStmt(IF_STMT, $1);}
 	|	switch_statement								{$$ = CreateStmtFromSwitchStmt(SWITCH_STMT, $1);}
 	|	for_statement									{$$ = CreateStmtFromForStmt(FOR_STMT, $1);}
-	|	print_statement
-	|	scan_statement
+	|	print_statement									{$$ = CreateStmtFromPrinStmt(PRINT_STMT, $1);}
+	|	scan_statement									{$$ = CreateStmtFromScanStmt(SCAN_STMT, $1);}
 	; 
 
 identifier_list: 
@@ -429,7 +430,7 @@ switch_initial_and_expression:
 
 
 switch_body:
-														{$$ = NULL;}
+														{}
 	|	expression_case_clause_list						{$$ = CreateSwitchBody($1);}
 	;
  
@@ -524,8 +525,8 @@ scan_statement:
 	; 
 
 scan_identifier_list:										
-	'&'	IDENTIFIER											//{$$ = CreateScanItemfList( $1) ;}
-	|	scan_identifier_list ',' '&'	IDENTIFIER			//{$$ = AppendItemToScanItemList($1, $4) ;}
+	'&'	IDENTIFIER											{$$ = CreateScanItemList($2) ;}
+	|	scan_identifier_list ',' '&'	IDENTIFIER			{$$ = AppendItemToScanItemList($1, $4) ;}
 	;									
 
 %%

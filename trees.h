@@ -41,7 +41,7 @@ struct Declaration {
 	enum DeclType declType;
 	struct VarDecl *varDecl;
 	struct ConstDecl *constDecl;
-	struct FuncDecl *funcDecl;
+	struct FunctionDecl *funcDecl;
 };
 
 struct VarDecl {
@@ -86,13 +86,18 @@ struct ExpressionList {
 	struct ExpressionList *nextExpr;
 };
 
-struct Type {
-	char *identifier;
-	struct Expression *expr;
+
+enum TypeNames {
+	IDENTIFIER_TYPE_NAME,
+	FLOAT32_TYPE_NAME,
+	INT_TYPE_NAME,
+	STRING_TYPE_NAME,
+	BOOL_TYPE_NAME
 };
 
-struct TypeName {
-	int typeName;
+struct Type {
+	enum TypeName typeName;
+	struct Expression *expr;
 };
 
 enum ExpressionType {
@@ -176,7 +181,9 @@ enum StatementType {
 	IF_ELSE_STMT,
 	FOR_STMT,
 	BLOCK,
-	SWITCH_STMT
+	SWITCH_STMT,
+	PRINT_STMT,
+	SCAN_STMT
 };
 
 struct Statement {
@@ -189,6 +196,8 @@ struct Statement {
 	struct IfStmt *ifStmt;
 	struct SwitchStmt *switchStmt;
 	struct ForStmt *forStmt;
+	struct ScanStatement *scanStatement;
+	struct PrintStatement *printStatement;
 };
 
 struct StatementList {
@@ -263,9 +272,9 @@ struct ForStmt {
 };
 
 struct ForClause {
-	struct SimpleStatement *simpleStmtLeft;
-	struct Expression *expr;
-	struct SimpleStatement *simpleStmtRight;
+	struct ForInitStmt *forInitStmt;
+	struct ForCondition *forCondition;
+	struct ForPostStmt *forPostStmt;
 };
 
 struct Signature {
@@ -314,7 +323,7 @@ struct ScanStatement {
 
 struct ScanIdentifierList {
 	char* identifier;
-	struct ScanItenditifierList * nextIdentifier;
+	struct ScanIdentifierList * nextIdentifier;
 };
 
 #endif// _TREES_H_
