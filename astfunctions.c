@@ -33,6 +33,7 @@ struct Import *CreateImportFromStatement(char *_importStmt) {
 	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
 
 	Result->importStmt = _importStmt;
+	Result->importStmtList = NULL;
 
 	return Result;
 }
@@ -41,6 +42,7 @@ struct Import *CreateCompositeImportFromStatementList(struct ImportStmtList *_im
 	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
 
 	Result->importStmtList = _importStmtList;
+	Result->importStmt = NULL;
 
 	return Result;
 }
@@ -87,6 +89,9 @@ struct Declaration *CreateDeclarationFromVarDecl(enum DeclType _declType, struct
 	Result->declType = _declType;
 	Result->varDecl = _varDecl;
 
+	Result->constDecl = NULL;
+	Result->funcDecl = NULL;
+
 	return Result;
 }
 
@@ -94,6 +99,9 @@ struct Declaration *CreateDeclarationFromConstDecl(enum DeclType _declType, stru
 	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
 	Result->declType = _declType;
 	Result->constDecl = _constDecl;
+	
+	Result->funcDecl = NULL;
+	Result->varDecl = NULL;
 
 	return Result;
 }
@@ -103,15 +111,18 @@ struct Declaration *CreateDeclarationFromFuncDecl(enum DeclType _declType, struc
 	Result->declType = _declType;
 	Result->funcDecl = _funcDecl;
 
+	Result->constDecl = NULL;
+	Result->varDecl = NULL;
+
 	return Result;
 }
-
-
 
 struct ConstDecl *CreateConstDecl(struct VarSpec *_varSpec) {
 	struct ConstDecl *Result = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
 
 	Result->varSpec = _varSpec;
+
+	Result->varSpecList = NULL;
 
 	return Result;
 
@@ -122,6 +133,8 @@ struct ConstDecl *CreateConstDeclFromList(struct VarSpecList *_varSpecList) {
 
 	Result->varSpecList = _varSpecList;
 
+	Result->varSpec = NULL;
+
 	return Result;
 
 }
@@ -129,6 +142,8 @@ struct ConstDecl *CreateConstDeclFromList(struct VarSpecList *_varSpecList) {
 struct Type *CreateTypeFromTypeName(enum TypeNames _typeName) {
 	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
 	Result->typeName = _typeName;
+
+	Result->expr = NULL;
 
 	return Result;
 }
@@ -148,6 +163,7 @@ struct IdentifierListType *CreateIdListWithType(struct IdentifierList *_identifi
 	Result->type = _type;
 	Result->identifierList = _identifierList;
 
+
 	return Result;
 
 }
@@ -156,6 +172,9 @@ struct VarDecl *CreateSimpleVarDecl(struct VarSpec *_varSpec) {
 	struct VarDecl *Result = (struct VarDecl *)malloc(sizeof(struct VarDecl));
 
 	Result->varSpec = _varSpec;
+
+	Result->varSpecList = NULL;
+
 	return Result;
 
 }
@@ -165,6 +184,8 @@ struct VarDecl *CreateCompositeVarDecl(struct VarSpecList *_varSpecList) {
 
 
 	Result->varSpecList = _varSpecList;
+
+	Result->varSpec = NULL;
 	return Result;
 }
 
@@ -172,6 +193,8 @@ struct VarSpec *CreateSimpleVarSpecWType(struct IdentifierListType *_idListType)
 	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
 
 	Result->idListType = _idListType;
+	Result->exprList = NULL;
+	Result->idList = NULL;
 
 	Result->exprList = NULL; 
 
@@ -185,6 +208,7 @@ struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *_idListTy
 
 	Result->idListType = _idListType;
 	Result->exprList = _exprList;
+	Result->idList = NULL;
 
 
 	return Result;
@@ -194,6 +218,8 @@ struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *_idList, str
 	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
 
 	Result->idList = _idList;
+
+	Result->idListType = NULL;
 
 	Result->exprList = _exprList;
 
@@ -646,6 +672,8 @@ struct SimpleStmt *CreatAssignSimpleStmt(enum StatementType _stmtType, struct Ex
 	Result->exprListLeft = _exprListLeft;
 	Result->exprListRight = _exprListRight;
 
+	
+
 	return Result;
 }
 
@@ -653,6 +681,10 @@ struct ForStmt *CreateForStmt(struct Block *_block) {
 	struct ForStmt *Result = (struct ForStmt *)malloc(sizeof(struct ForStmt));
 
 	Result->block = _block;
+
+	Result->expr = NULL; 
+
+	Result->forClause = NULL; 
 
 	return Result;
 }
@@ -664,6 +696,7 @@ struct ForStmt *CreateForStmtWExpr(struct Expression *_expr, struct Block *_bloc
 
 	Result->block = _block;
 
+	Result->forClause = NULL; 
 	return Result;
 
 }
@@ -675,6 +708,7 @@ struct ForStmt *CreateForStmtWClause(struct ForClause *_forClause, struct Block 
 
 	Result->block = _block;
 
+	Result->expr = NULL; 
 	return Result;
 }
 
@@ -716,6 +750,7 @@ struct FunctionDecl *CreateFunctionDeclaration(char *_identifier, struct Signatu
 
 	Result->identifier = _identifier;
 	Result->signature = _signature;
+	Result->block = NULL; 
 
 	return Result;
 }
@@ -735,12 +770,7 @@ struct Signature *CreateSignature(struct ParamInParen *_paramInParen) {
 		struct Signature *Result = (struct Signature *)malloc(sizeof(struct Signature));
 
 		Result->paramInParen = _paramInParen;
-
-		return Result;
-		
-	}
-	else {
-		return NULL; 
+		Result->result = NULL;
 	}
 }
 
@@ -749,7 +779,7 @@ struct Signature *CreateSignatureWithResult(struct ParamInParen *_paramInParen, 
 
 	Result->paramInParen = _paramInParen;
 	Result->result = _result;
-
+	
 	return Result;
 }
 
@@ -758,7 +788,7 @@ struct ParamInParen *CreateParametersInParens(struct ParameterList *_paramList) 
 		struct ParamInParen *Result = (struct ParamInParen *)malloc(sizeof(struct ParamInParen));
 
 		Result->paramList = _paramList;
-
+		
 		return Result;
 		
 	}
@@ -789,7 +819,7 @@ struct ParameterDeclare *CreateParameterDeclareWithoutId(struct Type *_type) {
 	struct ParameterDeclare *Result = (struct ParameterDeclare *)malloc(sizeof(struct ParameterDeclare));
 
 	Result->type = _type;
-
+	Result->identifier = NULL; 
 	return Result;
 }
 
@@ -798,7 +828,7 @@ struct ParameterDeclare *CreateParameterDeclareWithId(char* _identifier, struct 
 
 	Result->identifier = _identifier;
 	Result->type = _type;
-
+	
 	return Result;
 }
 
@@ -806,15 +836,16 @@ struct Result *CreateResultFromParameters(struct ParamInParen *_paramInParen) {
 	struct Result *Res = (struct Result *)malloc(sizeof(struct Result));
 
 	Res->paramInParen = _paramInParen;
+	Res->type = NULL; 
 
 	return Res;
 }
 
-struct Result *CreateResultFormType(struct Type *_type) {
+struct Result *CreateResultFromType(struct Type *_type) {
 	struct Result *Res = (struct Result *)malloc(sizeof(struct Result));
 
 	Res->type = _type;
-
+	Res->paramInParen = NULL; 
 	return Res;
 }
 
@@ -828,7 +859,7 @@ struct PrintStatement * CreatePrintStmt(struct ExpressionList * _expressionList)
 struct ScanStatement * CreateScanStmt(struct ScanIdentifierList* _scanIdentifierList) {
 	struct ScanStatement * Result = (struct ScanStatement*) malloc(sizeof (struct ScanStatement));
 	Result->scanIdentifierList = _scanIdentifierList; 
-
+	
 	return Result; 
 
 }
@@ -848,6 +879,6 @@ struct ScanIdentifierList *AppendItemToScanItemList(struct ScanIdentifierList * 
 	Result->nextIdentifier = NULL;
 	_scanIdList->nextIdentifier = Result;
 	Result->identifier = _identifier;
-
+	
 	return Result;
 }
