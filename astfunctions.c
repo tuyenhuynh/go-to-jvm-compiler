@@ -729,6 +729,7 @@ struct Signature *CreateSignature(struct ParamInParen *_paramInParen) {
 	struct Signature *Result = (struct Signature *)malloc(sizeof(struct Signature));
 
 	Result->paramInParen = _paramInParen;
+	Result->result = NULL;
 
 	return Result;
 
@@ -794,7 +795,7 @@ struct Result *CreateResultFromParameters(struct ParamInParen *_paramInParen) {
 	return Res;
 }
 
-struct Result *CreateResultFormType(struct Type *_type) {
+struct Result *CreateResultFromType(struct Type *_type) {
 	struct Result *Res = (struct Result *)malloc(sizeof(struct Result));
 
 	Res->type = _type;

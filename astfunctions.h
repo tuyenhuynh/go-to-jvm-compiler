@@ -147,7 +147,7 @@ struct ParameterDeclare * CreateParameterDeclareWithId(char * _identifier, struc
 
 struct Result * CreateResultFromParameters(struct ParamInParen * _paramInParen);
 
-struct Result * CreateResultFormType(struct Type * _type);
+struct Result * CreateResultFromType(struct Type * _type);
 
 struct ForInitStmt * CreateForInitStmt(struct SimpleStmt * _initStmt); 
 

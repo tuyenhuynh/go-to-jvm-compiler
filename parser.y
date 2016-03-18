@@ -513,7 +513,7 @@ parameter_declare:
 	
 result:
 	parameters_in_parentheses								{$$ = CreateResultFromParameters($1);}
-	|	type												{$$ = CreateResultFormType($1);}
+	|	type												{$$ = CreateResultFromType($1);}
 	;
 
 print_statement:
