@@ -173,6 +173,10 @@ struct VarSpec *CreateSimpleVarSpecWType(struct IdentifierListType *_idListType)
 
 	Result->idListType = _idListType;
 
+	Result->exprList = NULL; 
+
+	//Result->idListType = NULL; 
+
 	return Result;
 }
 
@@ -181,6 +185,7 @@ struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *_idListTy
 
 	Result->idListType = _idListType;
 	Result->exprList = _exprList;
+
 
 	return Result;
 }
@@ -726,12 +731,17 @@ struct FunctionDecl *CreateFunctionDeclarationWithBlock(char *_identifier, struc
 }
 
 struct Signature *CreateSignature(struct ParamInParen *_paramInParen) {
-	struct Signature *Result = (struct Signature *)malloc(sizeof(struct Signature));
+	if (_paramInParen != NULL) {
+		struct Signature *Result = (struct Signature *)malloc(sizeof(struct Signature));
 
-	Result->paramInParen = _paramInParen;
+		Result->paramInParen = _paramInParen;
 
-	return Result;
-
+		return Result;
+		
+	}
+	else {
+		return NULL; 
+	}
 }
 
 struct Signature *CreateSignatureWithResult(struct ParamInParen *_paramInParen, struct Result *_result) {
@@ -744,11 +754,17 @@ struct Signature *CreateSignatureWithResult(struct ParamInParen *_paramInParen, 
 }
 
 struct ParamInParen *CreateParametersInParens(struct ParameterList *_paramList) {
-	struct ParamInParen *Result = (struct ParamInParen *)malloc(sizeof(struct ParamInParen));
+	if (_paramList != NULL) {
+		struct ParamInParen *Result = (struct ParamInParen *)malloc(sizeof(struct ParamInParen));
 
-	Result->paramList = _paramList;
+		Result->paramList = _paramList;
 
-	return Result;
+		return Result;
+		
+	}
+	else {
+		return NULL;
+	}
 }
 
 struct ParameterList *CreateParameterDeclareList(struct ParameterDeclare *_paramDecl) {
