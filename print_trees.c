@@ -523,9 +523,6 @@ void printStmtList(int parentId, struct StatementList* stmtList){
 	}
 }
 
-void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc){}
-void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase){}
-
 void printForClause(int parentId, struct ForClause* forClause){
 	if (forClause != NULL) {
 		int id = ++maxId; 
@@ -820,7 +817,23 @@ void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
 }
 
 void printExpressionCaseClauseList(int parentId, struct ExpressionCaseClauseList* eccl) {
-	
+	while (eccl != NULL) {
+		printExpressionCaseClause(parentId, eccl->exprCaseClause);
+		eccl = eccl->nextExprCaseClause;
+	}
+}
+
+void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc) {
+	if (ecc != NULL) {
+		printExpressionSwitchCase(parentId, ecc->expreSwitchCase);
+		printStmtList(parentId, ecc->stmtList);
+	}
+}
+
+void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase) {
+	if (expressionSwitchCase != NULL) {
+		printExpressionList(parentId, expressionSwitchCase->exprList);
+	}
 }
 
 void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression){
