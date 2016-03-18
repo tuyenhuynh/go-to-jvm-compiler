@@ -266,7 +266,9 @@ void printConstDecl(int parentId, struct ConstDecl * constDecl){
 		printf("ConstDecl is NULL\n"); 
 	}
 }
-void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl){}
+void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl){
+	
+}
 
 
 void printVarSpec(int parentId, struct VarSpec* varSpec){
@@ -305,34 +307,151 @@ void printVarSpecList(int parentId, struct VarSpecList* varSpecList){
 }
 
 
-void print_statement(int parentId, struct Statement* statement){}
-void print_simple_stmt(int parentId, struct SimpleStmt* simpleStmt){}
-void print_return_stmt(int parentId, struct ReturnStmt* returnStmt){}
-void print_block(int parentId, struct Block* block){}
-void print_switch_stmt(int parentId, struct SwitchStmt* switchStmt){}
-void print_if_stmt(int parentId, struct IfStmt* ifStmt){}
-void print_for_stmt(int parentId, struct ForStmt* forStmt){}
-void print_if_stmt_expression(int parentId, struct IfStmtExpression* ifStmtExpr){}
-void print_else_block(int parentId, struct ElseBlock* elseBlock){}
-void print_stmt_list(int parentId, struct StatementList* stmtList){}
-void print_switch_body(int parentId, struct SwitchBody* switchBody){}
-void print_expression_case_clause_list(int parentId, struct ExpressionCaseClauseList* eccl){}
-void print_expression_case_clause(int parentId, struct ExpressionCaseClause* ecc){}
-void print_expression_switch_case(int parentId, struct ExpressionSwitchCase* expressionSwitchCase){}
-void print_for_clause(int parentId, struct ForClause* ForClause){}
-void print_signature(int parentId, struct Signature* signature){}
-void print_param_in_paren(int parentId, struct ParamInParen* paramInParen){}
-void print_param_list(int parentId, struct ParameterList* paramList){}
-void print_param_declare(int parentId, struct ParameterDeclare* paramDeclare){}
-void print_result(int parentId, struct Result* result){}
-void print_function_call(int parentId, struct FunctionCall* functionCall){}
-void print_switch_initial_expression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression){}
-void print_for_init_stmt(int parentId, struct ForInitStmt* forInitStmt){}
-void print_for_condition(int parentId, struct ForCondition* forCondition){}
-void print_for_post_stmt(int parentId, struct ForPostStmt* forPostStmt){}
-void print_print_stmt(int parentId, struct PrintStatement* printStmt){}
-void print_scan_stmt(int parentId, struct ScanStatement* scanStmt){}
+void printStatement(int parentId, struct Statement* statement){
+	if (statement != NULL) {
+		maxId++; 
+		int id = maxId;
+		printEdgeWithDestName(parentId, id, "STMT"); 
+		switch (statement->stmtType) {
+			case SIMPLE_STMT: {
+				printSimpleStmt(id, statement->simpleStmt);
+				break; 
+			}
+			case VAR_DECL_STMT: {
+				printVarDecl(id, statement->varDecl);
+				break; 
+			}
+			case CONST_DECL_STMT: {
+				printConstDecl(id, statement->constDecl);
+				break; 
+			}
+			case RETURN_STMT: {
+				printReturnStmt(id, statement->returnStmt); 
+				break; 
+			}
+			case BREAK_STMT: {
+				maxId++; 
+				printEdgeWithDestName(id, maxId, "BREAK"); 
+				break; 
+			}
+			case CONTINUE_STMT: {
+				maxId++;
+				printEdgeWithDestName(id, maxId, "CONTINUE");
+				break;
+			}
+			case BLOCK: {
+				printBlock(id, statement->block);
+				break; 
+			}
+			case IF_STMT: {
+				printIfStmt(id, statement->ifStmt);
+				break; 
+			}
+			case SWITCH_STMT: {
+				printSwitchStmt(id, statement->switchStmt); 
+				break; 
+			}
+			case FOR_STMT: {
+				printForStmt(id, statement->forStmt); 
+				break; 
+			}
+			case PRINT_STMT: {
+				printPrintStmt(id, statement->printStatement); 
+				break; 
+			}
+			case SCAN_STMT: {
+				printScanStmt(id, statement->scanStatement); 
+				break; 
+			}
+			default: {
+				printf("Unknown Statement type\n"); 
+			}
+		}
+	}
+	else {
+		printf("Statement is NULL\n"); 
+	}
+}
 
+void printSimpleStmt(int parentId, struct SimpleStmt* simpleStmt){
+	if (simpleStmt != NULL) {
+		maxId++; 
+		int id = maxId;
+		printEdgeWithDestName(parentId, id, "SIMPLE_EXPR"); 
+		switch (simpleStmt->stmtType) {
+			case EXPR_SIMPLE_STMT: {
+				printExpression(id, simpleStmt->expr); 
+				break; 
+			}
+			case INC_SIMPLE_STMT: {
+				maxId++; 
+				printEdgeWithDestName(id, maxId, "++");
+				printExpression(maxId, simpleStmt->expr); 
+				break; 
+			}
+			case DEC_SIMPLE_STMT: {
+				maxId++;
+				printEdgeWithDestName(id, maxId, "--");
+				printExpression(maxId, simpleStmt->expr);
+				break; 
+			}
+			case ASSIGN_STMT: {
+				printAssignStatement(id, simpleStmt->exprListLeft, simpleStmt->exprListRight); 
+				break; 
+			}
+
+		}
+	}
+	else {
+		printf("SimpleStatement is NULL\n"); 
+	}
+}
+
+void printAssignStatement(int parentId, struct ExpressionList* leftExprList, struct ExpressionList* rightExprList){
+	printf("printAssignStatement not implemented\n"); 
+}
+
+void printReturnStmt(int parentId, struct ReturnStmt* returnStmt){
+	printf("printReturnStmt not implemented");
+}
+void printBlock(int parentId, struct Block* block){
+	
+}
+void printIfStmt(int parentId, struct IfStmt* ifStmt){}
+void printForStmt(int parentId, struct ForStmt* forStmt){}
+void printIfStmtExpression(int parentId, struct IfStmtExpression* ifStmtExpr){}
+void printElseBlock(int parentId, struct ElseBlock* elseBlock){}
+void printStmtList(int parentId, struct StatementList* stmtList){}
+void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc){}
+void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase){}
+void printForClause(int parentId, struct ForClause* ForClause){}
+void printSignature(int parentId, struct Signature* signature){}
+void printParamInParen(int parentId, struct ParamInParen* paramInParen){}
+void printParamList(int parentId, struct ParameterList* paramList){}
+void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare){}
+void printResult(int parentId, struct Result* result){}
+void printForInitStmt(int parentId, struct ForInitStmt* forInitStmt){}
+void printForCondition(int parentId, struct ForCondition* forCondition){}
+
+void printForPostStmt(int parentId, struct ForPostStmt* forPostStmt){
+	if (forPostStmt != NULL) {
+		maxId++; 
+		int id = maxId; 
+		printEdgeWithDestName(parentId, id, "FOR_POST");
+		//forPostStmt->
+	}
+	else {
+		printf("forPostStmt is NULL\n");
+	}
+}
+
+void printPrintStmt(int parentId, struct PrintStatement* printStmt){
+	printf("printPrintStmt not implemented\n");
+}
+
+void printScanStmt(int parentId, struct ScanStatement* scanStmt){
+	printf("printScanStmt not implemented\n");
+}
 
 void expressionTypeToString(enum ExpressionType exprType, char* result) {
 	if (result == NULL) {
@@ -427,8 +546,6 @@ void expressionTypeToString(enum ExpressionType exprType, char* result) {
 	}
 }
 
-void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList){}
-
 void printIdentifierList(int parentId, struct IdentifierList * identifierList){
 	if (identifierList != NULL) {
 		maxId++; 
@@ -459,14 +576,6 @@ void printTypeName(int parentId, struct Type* typeName){
 	}
 }
 
-void print_statement(int parentId, struct Statement* statement){}
-void printSimpleStmt(int parentId, struct SimpleStmt* simpleStmt){}
-void print_return_stmt(int parentId, struct ReturnStmt* returnStmt){}
-void print_block(int parentId, struct Block* block){}
-
-
-
-
 void printSwitchStmt(int parentId, struct SwitchStmt* switchStmt) {
 	if (switchStmt != NULL) {
 		maxId++;
@@ -480,14 +589,6 @@ void printSwitchStmt(int parentId, struct SwitchStmt* switchStmt) {
 	}
 }
 
-
-void print_if_stmt(int parentId, struct IfStmt* ifStmt){}
-void print_for_stmt(int parentId, struct ForStmt* forStmt){}
-void print_if_stmt_expression(int parentId, struct IfStmtExpression* ifStmtExpr){}
-void print_else_block(int parentId, struct ElseBlock* elseBlock){}
-void print_stmt_list(int parentId, struct StatementList* stmtList){}
-
-
 void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
 	if (switchBody != NULL) {
 		maxId++;
@@ -498,18 +599,10 @@ void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
 	}
 
 }
+
 void printExpressionCaseClauseList(int parentId, struct ExpressionCaseClauseList* eccl) {
 	
 }
-void print_expression_case_clause(int parentId, struct ExpressionCaseClause* ecc){}
-void print_expression_switch_case(int parentId, struct ExpressionSwitchCase* expressionSwitchCase){}
-void print_for_clause(int parentId, struct ForClause* ForClause){}
-void print_signature(int parentId, struct Signature* signature){}
-void print_param_in_paren(int parentId, struct ParamInParen* paramInParen){}
-void print_param_list(int parentId, struct ParameterList* paramList){}
-void print_param_declare(int parentId, struct ParameterDeclare* paramDeclare){}
-void print_result(int parentId, struct Result* result){}
-void print_function_call(int parentId, struct FunctionCall* functionCall){}
 
 void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression){
 	if (switchInitialAndExpression != NULL) {
@@ -517,11 +610,4 @@ void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpressio
 		printExpression(parentId, switchInitialAndExpression->expression);
 		printSimpleStmt(parentId, switchInitialAndExpression->initialStmt);
 	}
-
-
 }
-void print_for_init_stmt(int parentId, struct ForInitStmt* forInitStmt){}
-void print_for_condition(int parentId, struct ForCondition* forCondition){}
-void print_for_post_stmt(int parentId, struct ForPostStmt* forPostStmt){}
-void print_print_stmt(int parentId, struct PrintStatement* printStmt){}
-void print_scan_stmt(int parentId, struct ScanStatement* scanStmt){}
