@@ -49,9 +49,7 @@ void printImports(int parentId, struct Imports* imports) {
 }
 
 void printImportStatementList(int parentId, struct ImportStmtList* importStmtList) {}
-
 //import is not very clear
-
 void printPrimitiveExpression(int parentId, char*name, char*value) {
 	maxId++; 
 	int nodeId =maxId; 
@@ -277,8 +275,6 @@ void printVarDecl(int parentId, struct VarDecl * varDecl){
 	}
 }
 
-
-
 void printConstDecl(int parentId, struct ConstDecl * constDecl){
 	if (constDecl != NULL) {
 		maxId++; 
@@ -488,8 +484,6 @@ void printForStmt(int parentId, struct ForStmt* forStmt){}
 void printIfStmtExpression(int parentId, struct IfStmtExpression* ifStmtExpr){}
 void printElseBlock(int parentId, struct ElseBlock* elseBlock){}
 void printStmtList(int parentId, struct StatementList* stmtList){}
-void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc){}
-void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase){}
 void printForClause(int parentId, struct ForClause* ForClause){}
 void printSignature(int parentId, struct Signature* signature){
 	if (signature != NULL) {
@@ -694,10 +688,9 @@ void printTypeName(int parentId, struct Type* typeName){
 
 void printSwitchStmt(int parentId, struct SwitchStmt* switchStmt) {
 	if (switchStmt != NULL) {
-		maxId++;
-		int id = maxId;
-		printSwitchInitialExpression(parentId, switchStmt->initialAndExpression);
-		id++;
+		int id = ++maxId;
+		printEdgeWithDestName(parentId, id, "SWITCH");
+		printSwitchInitialExpression(id, switchStmt->initialAndExpression);
 		printSwitchBody(id, switchStmt->switchBody);
 	}
 	else {
@@ -705,10 +698,19 @@ void printSwitchStmt(int parentId, struct SwitchStmt* switchStmt) {
 	}
 }
 
+void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression) {
+	if (switchInitialAndExpression != NULL) {
+		printExpression(parentId, switchInitialAndExpression->expression);
+		printSimpleStmt(parentId, switchInitialAndExpression->initialStmt);
+	}
+}
+
+
 void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
 	if (switchBody != NULL) {
-		maxId++;
-		printExpressionCaseClauseList(parentId, switchBody->eccl);
+		int id = ++maxId;
+		printEdgeWithDestName(parentId, id, "SWITCH_BODY");
+		printExpressionCaseClauseList(id, switchBody->eccl);
 	}
 	else {
 		printf("Switch body is null\n");
@@ -717,13 +719,21 @@ void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
 }
 
 void printExpressionCaseClauseList(int parentId, struct ExpressionCaseClauseList* eccl) {
-	
+	while (eccl != NULL) {
+		printExpressionCaseClause(parentId, eccl->exprCaseClause);
+		eccl = eccl->nextExprCaseClause;
+	}
 }
 
-void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression){
-	if (switchInitialAndExpression != NULL) {
-		maxId++;
-		printExpression(parentId, switchInitialAndExpression->expression);
-		printSimpleStmt(parentId, switchInitialAndExpression->initialStmt);
+void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc) {
+	if (ecc != NULL) {
+		printExpressionSwitchCase(parentId, ecc->expreSwitchCase);
+		printStmtList(parentId, ecc->stmtList);
+	}
+}
+
+void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase) {
+	if (expressionSwitchCase != NULL) {
+		printExpressionList(parentId, expressionSwitchCase->exprList);
 	}
 }
