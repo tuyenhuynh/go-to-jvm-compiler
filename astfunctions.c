@@ -1,6 +1,8 @@
 #include "trees.h"
 #include "astfunctions.h"
 
+
+
 struct Program *CreateProgram(struct Package *_pkg, struct Imports *_imports, struct DeclarationList *_declList) {
 	struct Program *Result = (struct Program *)malloc(sizeof(struct Program));
 

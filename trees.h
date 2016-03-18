@@ -1,6 +1,10 @@
 #ifndef _TREES_H_
 #define _TREES_H_
 
+struct Tree {
+	struct Program* program; 
+};
+
 struct Program {
 	struct Package *pkg;
 	struct Imports *imports;

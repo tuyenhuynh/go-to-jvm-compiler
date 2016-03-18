@@ -4,7 +4,9 @@
 #include "trees.h"
 #include "astfunctions.h" 
 
-int maxId = 0;
+extern struct Program *root; 
+
+
 void printBinaryExpression(int parentId, struct Expression* expression);
 void printUnaryExpression(int parentId, struct Expression* expression);
 void expressionTypeToString(enum ExpressionType exprType, char* result);
@@ -13,12 +15,14 @@ void printFunctionCall(int parentId, struct FunctionCall* functionCall);
 void printExpressionList(int parentId, struct ExpressionList* expressionList);
 
 
-void print_program(struct Program* program);
-void print_package(int parentId, struct Package* package);
+void printProgram();
+void printPackage(int parentId, struct Package* package);
 void printDeclarationList(int parentId, struct DeclarationList* declarationList);
 void printDeclaration(int parentId, struct Declaration* declaration);
-void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList);
-void print_import(int parentId, struct Import* import);
+void printImportStatementList(int parentId, struct ImportStmtList* importStmtList);
+void printImport(int parentId, struct Import* import);
+void printImports(int parentId, struct Imports* imports); 
+
 void printVarDecl(int parentId, struct VarDecl * varDecl);
 void printVarSpec(int parentId, struct VarSpec* varSpec); 
 void printVarSpecList(int parentId, struct VarSpecList* varSpecList); 

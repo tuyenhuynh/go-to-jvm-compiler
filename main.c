@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "scanner.h"
 #include "parser.h"
+#include "print_trees.h"
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +18,8 @@ int main(int argc, char *argv[])
 		if (!yyparse()) 
 		{
 			printf("Parsing was successful\n");
+			printProgram(); 
+
 		}
 		else 
 		{

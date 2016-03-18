@@ -5,17 +5,50 @@
 
 #pragma warning (disable:4996)
 
-void print_program(struct Program* program) {}
+int maxId = 0;
 
-void print_package(int parentId, struct Package* package) {
+void printProgram() {
+
+	if (root != NULL) {
+		FILE* file = freopen("ast.dot", "w", stdout);
+
+		printf("digraph {\n");
+		//here root's id is 0
+		int rootId = maxId; 
+		printf("%d[label = root]", rootId);
+		printPackage(rootId, root->pkg); 
+		printImports(rootId, root->imports); 
+		printDeclarationList(rootId, root->declList);
+		printf("\n}\n");
+		fclose(stdout);
+	}
+	else {
+		printf("program is null\n"); 
+	}
+}
+
+void printPackage(int parentId, struct Package* package) {
+	if (package != NULL) {
+		maxId++;
+		int id = maxId; 
+		printEdgeWithDestName(parentId, id, "PACKAGE");
+		maxId++; 
+		printEdgeWithDestName(id, maxId, package->packageName);
+	}
+	else {
+		printf("Package is NULL\n"); 
+	}
+}
+
+void printImport(int parentId, struct Import* import) {
 	
 }
 
-void print_import(int parentId, struct Import* import) {
+void printImports(int parentId, struct Imports* imports) {
 	
 }
 
-void print_import_statement_list(int parentId, struct ImportStmtList* importStmtList) {}
+void printImportStatementList(int parentId, struct ImportStmtList* importStmtList) {}
 
 //import is not very clear
 
@@ -268,6 +301,22 @@ void printConstDecl(int parentId, struct ConstDecl * constDecl){
 }
 void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl){
 	
+	if (functionDecl != NULL) {
+		maxId++; 
+		int id = maxId; 
+		printEdgeWithDestName(parentId, id, "FUNC_DECL"); 
+		//print function name
+		printPrimitiveExpression(id, "ID", functionDecl->identifier);
+		//print function signature
+		printSignature(id, functionDecl->signature); 
+		//print function boby
+		if (functionDecl->block != NULL) {
+			printBlock(id, functionDecl->block); 
+		}
+	}
+	else {
+		printf("Function Declare is NULL"); 
+	}
 }
 
 
@@ -412,12 +461,29 @@ void printAssignStatement(int parentId, struct ExpressionList* leftExprList, str
 }
 
 void printReturnStmt(int parentId, struct ReturnStmt* returnStmt){
-	printf("printReturnStmt not implemented");
+	printf("printReturnStmt not implemented\n");
 }
 void printBlock(int parentId, struct Block* block){
-	
+	if (block != NULL) {
+		maxId++; 
+		int id = maxId; 
+		printEdgeWithDestName(parentId, id, "BLOCK");
+		printStmtList(id, block->stmtList); 
+	}
+	else {
+		printf("Block is empty\n"); 
+	}
 }
-void printIfStmt(int parentId, struct IfStmt* ifStmt){}
+
+void printIfStmt(int parentId, struct IfStmt* ifStmt){
+	if (ifStmt != NULL) {
+		//TODO: continue to implement;
+		//int id = 
+	}
+	else {
+		printf("If Stmt is empty\n"); 
+	}
+}
 void printForStmt(int parentId, struct ForStmt* forStmt){}
 void printIfStmtExpression(int parentId, struct IfStmtExpression* ifStmtExpr){}
 void printElseBlock(int parentId, struct ElseBlock* elseBlock){}
@@ -425,10 +491,59 @@ void printStmtList(int parentId, struct StatementList* stmtList){}
 void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc){}
 void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase){}
 void printForClause(int parentId, struct ForClause* ForClause){}
-void printSignature(int parentId, struct Signature* signature){}
-void printParamInParen(int parentId, struct ParamInParen* paramInParen){}
-void printParamList(int parentId, struct ParameterList* paramList){}
-void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare){}
+void printSignature(int parentId, struct Signature* signature){
+	if (signature != NULL) {
+		maxId++;
+		int id = maxId; 
+		printEdgeWithDestName(parentId, id, "Signature");
+		printParamInParen(id, signature->paramInParen); 		
+	}
+	else {
+		printf("Signature is NULL\n"); 
+	}
+}
+void printParamInParen(int parentId, struct ParamInParen* paramInParen){
+	if (paramInParen != NULL) {
+		if (paramInParen->paramList != NULL) {
+			maxId++;
+			int id = maxId;
+			printEdgeWithDestName(parentId, id, "ParamList");
+			//printParamList(id, paramInParen->paramList);
+		}
+	}
+	else {
+		printf("Signature is NULL\n");
+	}
+}
+
+void printParamList(int parentId, struct ParameterList* paramList){
+	if (paramList != NULL) {
+		while (paramList != NULL) {
+			printParamDeclare(parentId, paramList->paramDecl); 
+			paramList = paramList->nextParamDecl; 
+		}
+	}
+	else {
+		printf("ParamList is NULL\n"); 
+	}
+}
+
+void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare){
+	if (paramDeclare != NULL) {
+		maxId++; 
+		int id = maxId; 
+		printEdgeWithDestName(parentId, id, "PARAM_DECL"); 
+		if (paramDeclare->type != NULL) {
+			printTypeName(id, paramDeclare->type); 
+		}
+		if (paramDeclare->identifier != NULL) {
+			printPrimitiveExpression(id, "ID", paramDeclare->identifier); 
+		}
+	}
+	else {
+		printf("ParamDeclare is NULL \n"); 
+	}
+}
 void printResult(int parentId, struct Result* result){}
 void printForInitStmt(int parentId, struct ForInitStmt* forInitStmt){}
 void printForCondition(int parentId, struct ForCondition* forCondition){}
@@ -438,6 +553,7 @@ void printForPostStmt(int parentId, struct ForPostStmt* forPostStmt){
 		maxId++; 
 		int id = maxId; 
 		printEdgeWithDestName(parentId, id, "FOR_POST");
+		//TODO: continue to implement
 		//forPostStmt->
 	}
 	else {
