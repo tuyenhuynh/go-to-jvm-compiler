@@ -49,7 +49,9 @@ void printImports(int parentId, struct Imports* imports) {
 }
 
 void printImportStatementList(int parentId, struct ImportStmtList* importStmtList) {}
+
 //import is not very clear
+
 void printPrimitiveExpression(int parentId, char*name, char*value) {
 	maxId++; 
 	int nodeId =maxId; 
@@ -275,6 +277,8 @@ void printVarDecl(int parentId, struct VarDecl * varDecl){
 	}
 }
 
+
+
 void printConstDecl(int parentId, struct ConstDecl * constDecl){
 	if (constDecl != NULL) {
 		maxId++; 
@@ -459,6 +463,7 @@ void printAssignStatement(int parentId, struct ExpressionList* leftExprList, str
 void printReturnStmt(int parentId, struct ReturnStmt* returnStmt){
 	printf("printReturnStmt not implemented\n");
 }
+
 void printBlock(int parentId, struct Block* block){
 	if (block != NULL) {
 		maxId++; 
@@ -480,22 +485,81 @@ void printIfStmt(int parentId, struct IfStmt* ifStmt){
 		printf("If Stmt is empty\n"); 
 	}
 }
-void printForStmt(int parentId, struct ForStmt* forStmt){}
+void printForStmt(int parentId, struct ForStmt* forStmt){
+	if (forStmt != NULL) {
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "FOR"); 
+
+		if (forStmt->expr != NULL) {
+			printExpression(id, forStmt->expr); 
+		}
+		if (forStmt->forClause != NULL) {
+			printForClause(id, forStmt->forClause); 
+		}
+		if (forStmt->block != NULL) {
+			printBlock(id, forStmt->block);
+		}
+	}
+	else {
+		printf("ForStmt is null\n");
+	}
+}
+
+
 void printIfStmtExpression(int parentId, struct IfStmtExpression* ifStmtExpr){}
 void printElseBlock(int parentId, struct ElseBlock* elseBlock){}
-void printStmtList(int parentId, struct StatementList* stmtList){}
-void printForClause(int parentId, struct ForClause* ForClause){}
+
+void printStmtList(int parentId, struct StatementList* stmtList){
+	if (stmtList != NULL) {
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "STMT_LIST"); 
+		while (stmtList != NULL) {
+			printStatement(id, stmtList->stmt); 
+			stmtList = stmtList->nextStmt; 
+		}
+	}
+	else {
+		printf("StatementList is null \n");
+	}
+}
+
+void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc){}
+void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase){}
+
+void printForClause(int parentId, struct ForClause* forClause){
+	if (forClause != NULL) {
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "FOR_CLAUSE");
+		if (forClause->forInitStmt != NULL) {
+			printForInitStmt(id, forClause->forInitStmt); 
+		}
+		if (forClause->forCondition != NULL) {
+			printForCondition(id, forClause->forCondition); 
+		}
+		if (forClause->forPostStmt != NULL) {
+			printForPostStmt(id, forClause->forPostStmt);
+		}
+	}
+	else {
+		printf("ForClause is NULL\n");
+	}
+}
+
 void printSignature(int parentId, struct Signature* signature){
 	if (signature != NULL) {
 		maxId++;
 		int id = maxId; 
 		printEdgeWithDestName(parentId, id, "Signature");
-		printParamInParen(id, signature->paramInParen); 		
+		printParamInParen(id, signature->paramInParen); 
+		if (signature->result != NULL) {
+			printResult(id, signature->result);
+		}
 	}
 	else {
 		printf("Signature is NULL\n"); 
 	}
 }
+
 void printParamInParen(int parentId, struct ParamInParen* paramInParen){
 	if (paramInParen != NULL) {
 		if (paramInParen->paramList != NULL) {
@@ -538,17 +602,59 @@ void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare){
 		printf("ParamDeclare is NULL \n"); 
 	}
 }
-void printResult(int parentId, struct Result* result){}
-void printForInitStmt(int parentId, struct ForInitStmt* forInitStmt){}
-void printForCondition(int parentId, struct ForCondition* forCondition){}
+
+void printResult(int parentId, struct Result* result){
+	if (result != NULL) {
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "ReturnType"); 
+		if (result->type != NULL) {
+			printTypeName(id, result->type); 
+		}
+		if (result->paramInParen != NULL) {
+			printParamInParen(id, result->paramInParen);
+		}
+	}
+	else {
+		printf("ReturnType is null\n"); 
+	}
+}
+
+
+void printForInitStmt(int parentId, struct ForInitStmt* forInitStmt){
+	if (forInitStmt != NULL) {
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "FOR_INIT");
+		if (forInitStmt->initStmt != NULL) {
+			printSimpleStmt(id, forInitStmt->initStmt);
+		}
+	}
+	else {
+		printf("ForInit is null\n");
+	}
+}
+
+void printForCondition(int parentId, struct ForCondition* forCondition){
+	if (forCondition != NULL) {
+		maxId++;
+		int id = maxId;
+		printEdgeWithDestName(parentId, id, "FOR_POST");
+		if (forCondition->expression != NULL) {
+			printExpression(id, forCondition->expression);
+		}
+	}
+	else {
+		printf("forCondition is NULL\n");
+	}
+}
 
 void printForPostStmt(int parentId, struct ForPostStmt* forPostStmt){
 	if (forPostStmt != NULL) {
 		maxId++; 
 		int id = maxId; 
 		printEdgeWithDestName(parentId, id, "FOR_POST");
-		//TODO: continue to implement
-		//forPostStmt->
+		if (forPostStmt->postStmt != NULL) {
+			printSimpleStmt(id, forPostStmt->postStmt);
+		}
 	}
 	else {
 		printf("forPostStmt is NULL\n");
@@ -688,9 +794,13 @@ void printTypeName(int parentId, struct Type* typeName){
 
 void printSwitchStmt(int parentId, struct SwitchStmt* switchStmt) {
 	if (switchStmt != NULL) {
-		int id = ++maxId;
+
+		//
+		int id = ++maxId; 
 		printEdgeWithDestName(parentId, id, "SWITCH");
+
 		printSwitchInitialExpression(id, switchStmt->initialAndExpression);
+		
 		printSwitchBody(id, switchStmt->switchBody);
 	}
 	else {
@@ -698,19 +808,10 @@ void printSwitchStmt(int parentId, struct SwitchStmt* switchStmt) {
 	}
 }
 
-void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression) {
-	if (switchInitialAndExpression != NULL) {
-		printExpression(parentId, switchInitialAndExpression->expression);
-		printSimpleStmt(parentId, switchInitialAndExpression->initialStmt);
-	}
-}
-
-
 void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
 	if (switchBody != NULL) {
-		int id = ++maxId;
-		printEdgeWithDestName(parentId, id, "SWITCH_BODY");
-		printExpressionCaseClauseList(id, switchBody->eccl);
+		maxId++;
+		printExpressionCaseClauseList(parentId, switchBody->eccl);
 	}
 	else {
 		printf("Switch body is null\n");
@@ -719,21 +820,13 @@ void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
 }
 
 void printExpressionCaseClauseList(int parentId, struct ExpressionCaseClauseList* eccl) {
-	while (eccl != NULL) {
-		printExpressionCaseClause(parentId, eccl->exprCaseClause);
-		eccl = eccl->nextExprCaseClause;
-	}
+	
 }
 
-void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc) {
-	if (ecc != NULL) {
-		printExpressionSwitchCase(parentId, ecc->expreSwitchCase);
-		printStmtList(parentId, ecc->stmtList);
-	}
-}
-
-void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase) {
-	if (expressionSwitchCase != NULL) {
-		printExpressionList(parentId, expressionSwitchCase->exprList);
+void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression){
+	if (switchInitialAndExpression != NULL) {
+		maxId++;
+		printExpression(parentId, switchInitialAndExpression->expression);
+		printSimpleStmt(parentId, switchInitialAndExpression->initialStmt);
 	}
 }
