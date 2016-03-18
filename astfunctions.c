@@ -434,8 +434,8 @@ struct Statement *CreateStmtFromSimpleStmt(enum StatementType _stmtType, struct 
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+
 	Result->simpleStmt = _simpleStmt;
-	
 	Result->block = NULL;
 	Result->constDecl = NULL;
 	Result->forStmt = NULL;
@@ -454,7 +454,18 @@ struct Statement *CreateVarDeclStmt(enum StatementType _stmtType, struct VarDecl
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+	
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
 	Result->varDecl = _varDecl;
+
 
 	return Result;
 }
@@ -464,7 +475,17 @@ struct Statement *CreateConstDeclStmt(enum StatementType _stmtType, struct Const
 
 	Result->stmtType = _stmtType;
 
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
 	Result->constDecl = _constDecl;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
+
 
 	return Result;
 }
@@ -473,7 +494,17 @@ struct Statement *CreateStmtFromReturnStmt(enum StatementType _stmtType, struct 
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
 	Result->returnStmt = _returnStmt;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
+
 
 	return Result;
 }
@@ -483,6 +514,17 @@ struct Statement *CreateStatement(enum StatementType _stmtType) {
 
 	Result->stmtType = _stmtType;
 
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
+
 	return Result;
 }
 
@@ -490,7 +532,17 @@ struct Statement *CreateStmtFromBlock(enum StatementType _stmtType, struct Block
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+
+	Result->simpleStmt = NULL;
 	Result->block = _block;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
 
 	return Result;
 }
@@ -499,7 +551,17 @@ struct Statement *CreateStmtFromIfStmt(enum StatementType _stmtType, struct IfSt
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
 	Result->ifStmt = _ifStmt;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
+
 
 	return Result;
 }
@@ -508,7 +570,17 @@ struct Statement *CreateStmtFromSwitchStmt(enum StatementType _stmtType, struct 
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
 	Result->switchStmt = _switchStmt;
+	Result->varDecl = NULL;
+
 
 	return Result;
 }
@@ -517,7 +589,17 @@ struct Statement *CreateStmtFromForStmt(enum StatementType _stmtType, struct For
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
+	Result->constDecl = NULL;
 	Result->forStmt = _forStmt;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
+
 
 	return Result;
 }
@@ -526,7 +608,19 @@ struct Statement *CreateStmtFromPrinStmt(enum StatementType _stmtType, struct Pr
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
 	Result->printStatement = _printStatement;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
+
+
+	return Result;
 
 	return Result;
 }
@@ -535,7 +629,19 @@ struct Statement *CreateStmtFromScanStmt(enum StatementType _stmtType, struct Sc
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 
 	Result->stmtType = _stmtType;
+	Result->simpleStmt = NULL;
+	Result->block = NULL;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
 	Result->scanStatement = _scanStatement;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
+
+
+	return Result;
 
 	return Result;
 }
