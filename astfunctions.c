@@ -247,6 +247,12 @@ struct PrimaryExpression *CreateBoolExpr(enum ExpressionType _exprType, int _boo
 
 	Result->boolValue = _boolValue;
 
+	Result->expr = NULL;
+	Result->funcCall = NULL;
+	Result->identifier = NULL;
+	Result->primaryExpr = NULL;
+	Result->stringLiteral = NULL;
+
 	return Result;
 }
 
@@ -258,6 +264,12 @@ struct PrimaryExpression *CreateDecimalExpression(enum ExpressionType _exprType,
 
 	Result->decNumber = _decNumber;
 
+	Result->expr = NULL;
+	Result->funcCall = NULL;
+	Result->identifier = NULL;
+	Result->primaryExpr = NULL;
+	Result->stringLiteral = NULL;
+
 	return Result;
 }
 
@@ -268,15 +280,26 @@ struct PrimaryExpression *CreateFloatExpression(enum ExpressionType _exprType, f
 
 	Result->floatNumber = _floatNumber;
 
+	Result->expr = NULL;
+	Result->funcCall = NULL;
+	Result->identifier = NULL;
+	Result->primaryExpr = NULL;
+	Result->stringLiteral = NULL;
+
 	return Result;
 }
 
 struct PrimaryExpression *CreateStringExpression(enum ExpressionType _exprType, char* _stringLiteral) {
 	struct PrimaryExpression *Result = (struct PrimaryExpression *)malloc(sizeof(struct PrimaryExpression));
 
-Result->exprType = _exprType;
+	Result->exprType = _exprType;
 
-Result->stringLiteral = _stringLiteral;
+	Result->stringLiteral = _stringLiteral;
+
+	Result->expr = NULL;
+	Result->funcCall = NULL;
+	Result->identifier = NULL;
+	Result->primaryExpr = NULL;
 
 return Result;
 }
@@ -287,6 +310,11 @@ struct PrimaryExpression *CreateIdExpression(enum ExpressionType _exprType, char
 	Result->exprType = _exprType;
 
 	Result->identifier = _identifier;
+
+	Result->expr = NULL;
+	Result->funcCall = NULL;
+	Result->primaryExpr = NULL;
+	Result->stringLiteral = NULL;
 
 	return Result;
 }
@@ -299,6 +327,10 @@ struct PrimaryExpression *CreateCompositePrimaryExpression(enum ExpressionType _
 	Result->primaryExpr = _primaryExpr;
 
 	Result->expr = _expr;
+
+	Result->funcCall = NULL;
+	Result->identifier = NULL;
+	Result->stringLiteral = NULL;
 
 	return Result;
 }
@@ -320,6 +352,11 @@ struct PrimaryExpression *CreatePrimaryExpressionFromExpression(enum ExpressionT
 
 	Result->expr = _expr;
 
+	Result->funcCall = NULL;
+	Result->identifier = NULL;
+	Result->primaryExpr = NULL;
+	Result->stringLiteral = NULL;
+
 	return Result;
 }
 
@@ -327,6 +364,8 @@ struct FunctionCall *CreateEmptyFunctionCall(struct PrimaryExpression *_primaryE
 	struct FunctionCall *Result = (struct FunctionCall *)malloc(sizeof(struct FunctionCall));
 
 	Result->primaryExpr = _primaryExpr;
+
+	Result->exprList = NULL;
 	return Result;
 }
 
@@ -345,6 +384,9 @@ struct Expression *CreateUnaryExpression(enum ExpressionType _exprType, struct P
 	Result->exprType = _exprType;
 	Result->primaryExpr = _primaryExpr;
 
+	Result->leftExpr = NULL;
+	Result->rightExpr = NULL;
+
 	return Result;
 }
 
@@ -356,6 +398,8 @@ struct Expression *CreateBinaryExpression(enum ExpressionType _exprType, struct 
 	Result->leftExpr = _leftExpr;
 
 	Result->rightExpr = _rightExpr;
+
+	Result->primaryExpr = NULL;
 
 	return Result;
 
@@ -386,6 +430,17 @@ struct Statement *CreateStmtFromSimpleStmt(enum StatementType _stmtType, struct 
 
 	Result->stmtType = _stmtType;
 	Result->simpleStmt = _simpleStmt;
+	
+	Result->block = NULL;
+	Result->constDecl = NULL;
+	Result->forStmt = NULL;
+	Result->ifStmt = NULL;
+	Result->printStatement = NULL;
+	Result->returnStmt = NULL;
+	Result->scanStatement = NULL;
+	Result->switchStmt = NULL;
+	Result->varDecl = NULL;
+
 
 	return Result;
 }
