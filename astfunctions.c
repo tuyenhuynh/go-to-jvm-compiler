@@ -934,12 +934,10 @@ struct FunctionDecl *CreateFunctionDeclarationWithBlock(char *_identifier, struc
 }
 
 struct Signature *CreateSignature(struct ParamInParen *_paramInParen) {
-	if (_paramInParen != NULL) {
-		struct Signature *Result = (struct Signature *)malloc(sizeof(struct Signature));
+	struct Signature *Result = (struct Signature *)malloc(sizeof(struct Signature));
 
-		Result->paramInParen = _paramInParen;
-		Result->result = NULL;
-	}
+	Result->paramInParen = _paramInParen;
+	Result->result = NULL;
 }
 
 struct Signature *CreateSignatureWithResult(struct ParamInParen *_paramInParen, struct Result *_result) {
@@ -952,17 +950,11 @@ struct Signature *CreateSignatureWithResult(struct ParamInParen *_paramInParen, 
 }
 
 struct ParamInParen *CreateParametersInParens(struct ParameterList *_paramList) {
-	if (_paramList != NULL) {
-		struct ParamInParen *Result = (struct ParamInParen *)malloc(sizeof(struct ParamInParen));
+	struct ParamInParen *Result = (struct ParamInParen *)malloc(sizeof(struct ParamInParen));
 
-		Result->paramList = _paramList;
+	Result->paramList = _paramList;
 		
-		return Result;
-		
-	}
-	else {
-		return NULL;
-	}
+	return Result;
 }
 
 struct ParameterList *CreateParameterDeclareList(struct ParameterDeclare *_paramDecl) {
