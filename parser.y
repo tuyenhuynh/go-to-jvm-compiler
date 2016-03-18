@@ -497,7 +497,7 @@ signature:
 	; 
 
 parameters_in_parentheses:
-	'(' ')'													{$$ = CreateParametersInParens(NULL);}
+	'(' ')'													//{$$ = CreateParametersInParens(NULL);}
 	|	'(' parameter_list ')'								{$$ = CreateParametersInParens($2);}
 	; 
 
