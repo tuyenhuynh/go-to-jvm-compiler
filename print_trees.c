@@ -457,11 +457,24 @@ void printSimpleStmt(int parentId, struct SimpleStmt* simpleStmt){
 }
 
 void printAssignStatement(int parentId, struct ExpressionList* leftExprList, struct ExpressionList* rightExprList){
-	printf("printAssignStatement not implemented\n"); 
+
+	int id = ++maxId; 
+	printEdgeWithDestName(parentId, id, "="); 
+	printExpression(id, leftExprList); 
+	printExpression(id, rightExprList);
 }
 
 void printReturnStmt(int parentId, struct ReturnStmt* returnStmt){
-	printf("printReturnStmt not implemented\n");
+	if (returnStmt != NULL) {
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "RETURN");
+		if (returnStmt->exprList != NULL) {
+			printExpressionList(id, returnStmt->exprList);
+		}
+	}
+	else {
+		printf("Return stmt is null\n");
+	}
 }
 
 void printBlock(int parentId, struct Block* block){
