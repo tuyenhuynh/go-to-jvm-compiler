@@ -33,6 +33,7 @@ struct Import *CreateImportFromStatement(char *_importStmt) {
 	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
 
 	Result->importStmt = _importStmt;
+	Result->importStmtList = NULL;
 
 	return Result;
 }
@@ -41,6 +42,7 @@ struct Import *CreateCompositeImportFromStatementList(struct ImportStmtList *_im
 	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
 
 	Result->importStmtList = _importStmtList;
+	Result->importStmt = NULL;
 
 	return Result;
 }
@@ -87,6 +89,9 @@ struct Declaration *CreateDeclarationFromVarDecl(enum DeclType _declType, struct
 	Result->declType = _declType;
 	Result->varDecl = _varDecl;
 
+	Result->constDecl = NULL;
+	Result->funcDecl = NULL;
+
 	return Result;
 }
 
@@ -94,6 +99,9 @@ struct Declaration *CreateDeclarationFromConstDecl(enum DeclType _declType, stru
 	struct Declaration *Result = (struct Declaration *)malloc(sizeof(struct Declaration));
 	Result->declType = _declType;
 	Result->constDecl = _constDecl;
+	
+	Result->funcDecl = NULL;
+	Result->varDecl = NULL;
 
 	return Result;
 }
@@ -103,15 +111,18 @@ struct Declaration *CreateDeclarationFromFuncDecl(enum DeclType _declType, struc
 	Result->declType = _declType;
 	Result->funcDecl = _funcDecl;
 
+	Result->constDecl = NULL;
+	Result->varDecl = NULL;
+
 	return Result;
 }
-
-
 
 struct ConstDecl *CreateConstDecl(struct VarSpec *_varSpec) {
 	struct ConstDecl *Result = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
 
 	Result->varSpec = _varSpec;
+
+	Result->varSpecList = NULL;
 
 	return Result;
 
@@ -122,6 +133,8 @@ struct ConstDecl *CreateConstDeclFromList(struct VarSpecList *_varSpecList) {
 
 	Result->varSpecList = _varSpecList;
 
+	Result->varSpec = NULL;
+
 	return Result;
 
 }
@@ -129,6 +142,8 @@ struct ConstDecl *CreateConstDeclFromList(struct VarSpecList *_varSpecList) {
 struct Type *CreateTypeFromTypeName(enum TypeNames _typeName) {
 	struct Type *Result = (struct Type *)malloc(sizeof(struct Type));
 	Result->typeName = _typeName;
+
+	Result->expr = NULL;
 
 	return Result;
 }
@@ -148,6 +163,7 @@ struct IdentifierListType *CreateIdListWithType(struct IdentifierList *_identifi
 	Result->type = _type;
 	Result->identifierList = _identifierList;
 
+
 	return Result;
 
 }
@@ -156,6 +172,9 @@ struct VarDecl *CreateSimpleVarDecl(struct VarSpec *_varSpec) {
 	struct VarDecl *Result = (struct VarDecl *)malloc(sizeof(struct VarDecl));
 
 	Result->varSpec = _varSpec;
+
+	Result->varSpecList = NULL;
+
 	return Result;
 
 }
@@ -165,6 +184,8 @@ struct VarDecl *CreateCompositeVarDecl(struct VarSpecList *_varSpecList) {
 
 
 	Result->varSpecList = _varSpecList;
+
+	Result->varSpec = NULL;
 	return Result;
 }
 
@@ -172,6 +193,8 @@ struct VarSpec *CreateSimpleVarSpecWType(struct IdentifierListType *_idListType)
 	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
 
 	Result->idListType = _idListType;
+	Result->exprList = NULL;
+	Result->idList = NULL;
 
 	return Result;
 }
@@ -181,6 +204,7 @@ struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *_idListTy
 
 	Result->idListType = _idListType;
 	Result->exprList = _exprList;
+	Result->idList = NULL;
 
 	return Result;
 }
@@ -189,6 +213,8 @@ struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *_idList, str
 	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
 
 	Result->idList = _idList;
+
+	Result->idListType = NULL;
 
 	Result->exprList = _exprList;
 
