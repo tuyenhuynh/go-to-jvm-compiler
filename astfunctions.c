@@ -678,6 +678,7 @@ struct IfStmt *CreateIfStatement(struct IfStmtExpression *_ifStmtExpr, struct Bl
 
 	Result->ifStmtExpr = _ifStmtExpr;
 	Result->block = _block;
+	Result->elseBlock = NULL;
 
 	return Result;
 }
@@ -696,6 +697,7 @@ struct IfStmtExpression *CreateIfStmtExpression(struct Expression *_expr) {
 	struct IfStmtExpression *Result = (struct IfStmtExpression *)malloc(sizeof(struct IfStmtExpression));
 
 	Result->expr = _expr;
+	Result->simpleStmt = NULL;
 
 	return Result;
 }
@@ -705,13 +707,13 @@ struct IfStmtExpression *CreateCompositeIfStmtExpression(struct SimpleStmt *_sim
 
 	Result->simpleStmt = _simpleStmt;
 	Result->expr = _expr;
-
 	return Result;
 }
 
 struct ElseBlock *CreateElseBlockFromIfStmt(struct IfStmt *_ifStmt) {
 	struct ElseBlock *Result = (struct ElseBlock *)malloc(sizeof(struct ElseBlock));
 	Result->ifStmt = _ifStmt;
+	Result->block = NULL;
 
 	return Result;
 }
@@ -720,6 +722,7 @@ struct ElseBlock *CreateElseBlockFromBlock(struct Block *_block) {
 	struct ElseBlock *Result = (struct ElseBlock *)malloc(sizeof(struct ElseBlock));
 
 	Result->block = _block;
+	Result->ifStmt = NULL;
 
 	return Result;
 }
@@ -756,7 +759,7 @@ struct SwitchStmt * CreateSwitchStatement(struct  SwitchInitialAndExpression * _
 	struct SwitchStmt * Result = (struct SwitchStmt*) malloc(sizeof (struct SwitchStmt));
 
 	Result->initialAndExpression = _initialAndExpression; 
-	Result->switchBody = _switchBody; 
+	Result->switchBody = _switchBody;
 	return Result ; 
 }
 
@@ -821,6 +824,9 @@ struct SimpleStmt *CreateSimpleStmt(enum StatementType _stmtType, struct Express
 	Result->stmtType = _stmtType;
 	Result->expr = _expr;
 
+	Result->exprListLeft = NULL;
+	Result->exprListRight = NULL;
+
 	return Result;
 
 }
@@ -832,6 +838,7 @@ struct SimpleStmt *CreatAssignSimpleStmt(enum StatementType _stmtType, struct Ex
 
 	Result->exprListLeft = _exprListLeft;
 	Result->exprListRight = _exprListRight;
+	Result->expr = NULL;
 
 	
 
