@@ -3,16 +3,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
 int maxId = 0;
 
-void printProgram() {
+void printProgram(char* output) {
 
 	if (root != NULL) {
-		FILE* file = freopen("ast.dot", "w", stdout);
+		FILE* file = freopen(output, "w", stdout);
 
 		printf("digraph {\n");
-		//here root's id is 0
 		int rootId = maxId; 
 		printf("%d[label = root]", rootId);
 		printPackage(rootId, root->pkg); 
@@ -75,15 +73,9 @@ void printExpression(int parentId, struct Expression* expression) {
 				printPrimitiveExpression(parentId, "ID", expression->primaryExpr->identifier);
 				break;
 			}
-			case PE_COMPOSITE: {
-				//TODO: implement this
-				break;
-			}
-			case FUNCTION_CALL: {
-				//TODO: implement this
-			}
-			case FUNCTION_CALL_EMPTY: {
-				//TODO: implement this
+			case PRIMARY: {
+				printPrimaryExpression(parentId, expression->primaryExpr);
+				break; 
 			}
 			case NOT_UNARY_EXPR:
 			case PLUS_UNARY_EXPR:
@@ -104,6 +96,7 @@ void printExpression(int parentId, struct Expression* expression) {
 			case DIV_EXPRESSION:
 			case MOD_EXPRESSION: {
 				printBinaryExpression(parentId, expression);
+				break; 
 			}
 		}
 	}
@@ -145,14 +138,15 @@ void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr)
 				break; 
 			}
 			case DECIMAL_EXPR: {
-				char buffer[10];
-				itoa(primaryExpr->primaryExpr->decNumber, buffer, 10);
+				char buffer[20];
+				itoa(primaryExpr->decNumber, buffer, 10);
 				printPrimitiveExpression(parentId, "INT", buffer);
 				break;
 			}
 			case FLOAT_EXPR: {
-				char buffer[10];
-				gcvt(primaryExpr->primaryExpr->floatNumber, 10, buffer);
+				char buffer[20];
+				gcvt(primaryExpr->floatNumber, 10, buffer);
+				buffer[19] = '\0';
 				printPrimitiveExpression(parentId, "FLOAT", buffer);
 				break;
 			}
@@ -164,18 +158,19 @@ void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr)
 				printPrimitiveExpression(parentId, "ID", primaryExpr->identifier);
 				break;
 			}
+			case EXPRESSION: {
+				printExpression(parentId, primaryExpr->expr);
+				break; 
+			}
 			case PE_COMPOSITE: {
 				printEdgeWithDestName(parentId, id, "ARRAY_ACCESS"); 
 				printPrimaryExpression(id, primaryExpr->primaryExpr);
 				printExpression(id, primaryExpr->expr);
 				break;
 			}
-			case FUNCTION_CALL: {
+			case FUNCTION_CALL: 
+			case FUNCTION_CALL_EMPTY:{
 				printFunctionCall(parentId, primaryExpr->funcCall); 
-				break; 
-			}
-			case FUNCTION_CALL_EMPTY: {
-				//TODO: implement this
 				break; 
 			}
 		}
@@ -242,15 +237,12 @@ void printVarDecl(int parentId, struct VarDecl * varDecl){
 	if (varDecl != NULL) {
 		maxId++; 
 		int id = maxId;
-		printEdgeWithDestName(parentId, id, "VAR");
+		printEdgeWithDestName(parentId, id, "VAR_DECL");
 		if (varDecl->varSpec != NULL) {
 			printVarSpec(id, varDecl->varSpec); 
 		}
 		else if (varDecl->varSpecList != NULL) {
 			printVarSpecList(id, varDecl->varSpecList);
-		}
-		else {
-			printf("VarDecl is undefined\n"); 
 		}
 	}
 }
@@ -266,10 +258,6 @@ void printConstDecl(int parentId, struct ConstDecl * constDecl){
 		else if (constDecl->varSpecList != NULL) {
 			printVarSpecList(id, constDecl->varSpecList);
 		}
-		else {
-			printf("Const spec is undefined\n"); 
-		}
-
 	}
 }
 
@@ -303,16 +291,14 @@ void printVarSpec(int parentId, struct VarSpec* varSpec){
 		}
 
 		if (varSpec->exprList != NULL) {
-			maxId++;
-			printEdgeWithDestName(id, maxId, "EXPR_LIST");
-			printExpressionList(maxId, varSpec->exprList);
+			printExpressionList(id, varSpec->exprList);
 		}
 	}
 }
 
 void printVarSpecList(int parentId, struct VarSpecList* varSpecList){
 	if (printVarSpecList != NULL) {
-		int id = maxId++; 
+		int id = ++maxId; 
 		printEdgeWithDestName(parentId, id, "VAR_SPEC_LIST");
 		struct VarSpec* varSpec = varSpecList->firstVarSpec; 
 		while (varSpec != NULL) {
@@ -390,7 +376,7 @@ void printSimpleStmt(int parentId, struct SimpleStmt* simpleStmt){
 	if (simpleStmt != NULL) {
 		maxId++; 
 		int id = maxId;
-		printEdgeWithDestName(parentId, id, "SIMPLE_EXPR"); 
+		printEdgeWithDestName(parentId, id, "SIMPLE_STMT"); 
 		switch (simpleStmt->stmtType) {
 			case EXPR_SIMPLE_STMT: {
 				printExpression(id, simpleStmt->expr); 
@@ -398,27 +384,43 @@ void printSimpleStmt(int parentId, struct SimpleStmt* simpleStmt){
 			}
 			case INC_SIMPLE_STMT: {
 				maxId++; 
-				printEdgeWithDestName(id, maxId, "++");
+				printEdgeWithDestName(id, maxId, "INC_AFTER");
 				printExpression(maxId, simpleStmt->expr); 
 				break; 
 			}
 			case DEC_SIMPLE_STMT: {
 				maxId++;
-				printEdgeWithDestName(id, maxId, "--");
+				printEdgeWithDestName(id, maxId, "DEC_AFTER");
 				printExpression(maxId, simpleStmt->expr);
 				break; 
 			}
 			case ASSIGN_STMT: {
-				printAssignStatement(id, simpleStmt->exprListLeft, simpleStmt->exprListRight); 
+				printAssignStatement(id, simpleStmt->exprListLeft, simpleStmt->exprListRight, "\"=\"");
 				break; 
+			}
+			case PLUS_ASSIGN_STMT: {
+				printAssignStatement(id, simpleStmt->exprListLeft, simpleStmt->exprListRight, "\"\+=\"");
+				break;
+			}
+			case MINUS_ASSIGN_STMT: {
+				printAssignStatement(id, simpleStmt->exprListLeft, simpleStmt->exprListRight, "\"\-=\"");
+				break;
+			}
+			case MUL_ASSIGN_STMT: {
+				printAssignStatement(id, simpleStmt->exprListLeft, simpleStmt->exprListRight, "\"\*=\"");
+				break;
+			}
+			case DIV_ASSIGN_STMT: {
+				printAssignStatement(id, simpleStmt->exprListLeft, simpleStmt->exprListRight, "\"\/=\"");
+				break;
 			}
 		}
 	}
 }
 
-void printAssignStatement(int parentId, struct ExpressionList* leftExprList, struct ExpressionList* rightExprList){
+void printAssignStatement(int parentId, struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, char* assign_type){
 	int id = ++maxId; 
-	printEdgeWithDestName(parentId, id, "="); 
+	printEdgeWithDestName(parentId, id, assign_type); 
 	printExpressionList(id, leftExprList); 
 	printExpressionList(id, rightExprList);
 }
@@ -629,49 +631,49 @@ void expressionTypeToString(enum ExpressionType exprType, char* result) {
 		strcpy(result, "!");
 		break;
 	case PLUS_UNARY_EXPR:
-		strcpy(result, "+");
+		strcpy(result, "\"+\"");
 		break;
 	case MINUS_UNARY_EXPR:
-		strcpy(result, "-");
+		strcpy(result, "\"-\"");
 		break;
 	case AND_EXPRESSION:
-		strcpy(result, "&&");
+		strcpy(result, "\"&&\"");
 		break;
 	case OR_EXPRESSION:
-		strcpy(result, "||");
+		strcpy(result, "\"||\"");
 		break;
 	case EQU_EXPRESSION:
-		strcpy(result, "==");
+		strcpy(result, "\"==\"");
 		break;
 	case NE_EXPRESSION:
-		strcpy(result, "!=");
+		strcpy(result, "\"!=\"");
 		break;
 	case GT_EXPRESSION:
-		strcpy(result, ">");
+		strcpy(result, "\">\"");
 		break;
 	case GTE_EXPRESSION:
-		strcpy(result, ">=");
+		strcpy(result, "\">=\"");
 		break;
 	case LT_EXPRESSION:
-		strcpy(result, "<");
+		strcpy(result, "\"<\"");
 		break;
 	case LTE_EXPRESSION:
-		strcpy(result, ">=");
+		strcpy(result, "\"<=\"");
 		break;
 	case PLUS_EXPRESSION:
-		strcpy(result, "+");
+		strcpy(result, "\"+\"");
 		break;
 	case MINUS_EXPRESSION:
-		strcpy(result, "-");
+		strcpy(result, "\"-\"");
 		break;
 	case MUL_EXPRESSION:
-		strcpy(result, "*");
+		strcpy(result, "\"*\"");
 		break;
 	case DIV_EXPRESSION:
-		strcpy(result, "/");
+		strcpy(result, "\"/\"");
 		break;
 	case MOD_EXPRESSION:
-		strcpy(result, "%");
+		strcpy(result, "\"%\"");
 		break;
 	case EXPRESSION:
 		//TODO:CHECK THIS
@@ -708,7 +710,7 @@ void printIdentifierList(int parentId, struct IdentifierList * identifierList){
 
 void printTypeName(int parentId, struct Type* typeName){
 	if (typeName != NULL) {
-		int id = maxId++; 
+		int id = ++maxId; 
 		printEdgeWithDestName(parentId, id, "TYPE"); 
 		maxId++;
 		switch (typeName->typeName) {
@@ -771,8 +773,10 @@ void printExpressionCaseClauseList(int parentId, struct ExpressionCaseClauseList
 
 void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc) {
 	if (ecc != NULL) {
-		printExpressionSwitchCase(parentId, ecc->expreSwitchCase);
-		printStmtList(parentId, ecc->stmtList);
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "CLAUSE"); 
+		printExpressionSwitchCase(id, ecc->expreSwitchCase);
+		printStmtList(id, ecc->stmtList);
 	}
 }
 
@@ -784,7 +788,7 @@ void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expres
 
 void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression){
 	if (switchInitialAndExpression != NULL) {
-		printExpression(parentId, switchInitialAndExpression->expression);
 		printSimpleStmt(parentId, switchInitialAndExpression->initialStmt);
+		printExpression(parentId, switchInitialAndExpression->expression);
 	}
 }

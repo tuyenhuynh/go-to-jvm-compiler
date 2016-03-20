@@ -277,7 +277,7 @@ declaration:
 
 const_declare:
 	CONST var_specification											{$$ = CreateConstDecl($2);}
-	|	CONST	'('	')'												{}							
+	|	CONST	'('	')'												{$$ = CreateConstDecl(NULL);}							
 	|	CONST	'(' var_specification_list ')'						{$$ = CreateConstDeclFromList($3);}
 	;
 
@@ -300,7 +300,7 @@ identifier_list_type:
 
 var_declare:	
 	VAR var_specification								{$$ = CreateSimpleVarDecl($2);}
-	|	VAR '(' ')'										{}
+	|	VAR '(' ')'										{$$ = NULL;}
 	|	VAR '(' var_specification_list  ')'				{$$ = CreateCompositeVarDecl($3);}
 	;
 
@@ -440,7 +440,7 @@ expression_case_clause:
 
 expression_switch_case: 
 	CASE expression_list									{$$ = CreateExprSwitchCase($2);}
-	|	DEFAULT												{}											
+	|	DEFAULT												{$$ = CreateExprSwitchCase(NULL);}												
 	; 
 	
 simple_statement:

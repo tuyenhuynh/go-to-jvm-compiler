@@ -845,18 +845,10 @@ struct FunctionDecl *CreateFunctionDeclarationWithBlock(char *_identifier, struc
 
 struct Signature *CreateSignature(struct ParamInParen *_paramInParen) {
 	struct Signature *Result = (struct Signature *)malloc(sizeof(struct Signature));
-<<<<<<< HEAD
 
 	Result->paramInParen = _paramInParen;
 	Result->result = NULL;
 	return Result;
-
-
-=======
-
-	Result->paramInParen = _paramInParen;
-	Result->result = NULL;
->>>>>>> a968278dfbf6f3b9c980ddf649f75cd5b6cc984e
 }
 
 struct Signature *CreateSignatureWithResult(struct ParamInParen *_paramInParen, struct Result *_result) {
