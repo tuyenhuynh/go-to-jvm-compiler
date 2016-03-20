@@ -403,7 +403,7 @@ else_block :
 	; 
 	
 block: 
-	'{' '}'												{}
+	'{' '}'												{$$ = CreateBlock(NULL);}
 	|	'{' statement_list '}'							{$$ = CreateBlock($2);}
 	;
 
@@ -425,7 +425,7 @@ switch_initial_and_expression:
 
 
 switch_body:
-														{}
+														{$$ = CreateSwitchBody(NULL);}
 	|	expression_case_clause_list						{$$ = CreateSwitchBody($1);}
 	;
  
@@ -466,17 +466,17 @@ for_clause:
 
 
 for_init_statement:	
-															{}
+															{$$ = CreateForInitStmt (NULL) ; }
 	|	simple_statement									{$$ = CreateForInitStmt ($1) ; }
 	;  
 
 for_condition:											
-															{}
+															{$$ = CreateForCondition (NULL) ; }
 	|	expression											{$$ = CreateForCondition ($1) ; }
 	; 
 
 for_post_statement:
-															{}	
+															{$$ = CreateForPostStmt(NULL) ;}	
 	|	simple_statement									{$$ = CreateForPostStmt($1) ;}
 	; 
 

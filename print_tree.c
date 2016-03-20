@@ -1,4 +1,4 @@
-#include "print_trees.h"
+#include "print_tree.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -52,40 +52,42 @@ void printExpression(int parentId, struct Expression* expression) {
 	if (expression != NULL) {
 		maxId++;
 		int id = maxId; 
+		printEdgeWithDestName(parentId, id, "EXPR"); 
 		switch (expression->exprType) {
 			case DECIMAL_EXPR: {
 				char buffer[10];
 				itoa(expression->primaryExpr->decNumber, buffer, 10);
-				printPrimitiveExpression(parentId, "INT", buffer);
+				printPrimitiveExpression(id, "INT", buffer);
 				break;
 			}	 
 			case FLOAT_EXPR: {
 				char buffer[10];
 				gcvt(expression->primaryExpr->floatNumber, 10, buffer);
-				printPrimitiveExpression(parentId, "FLOAT", buffer);
+				printPrimitiveExpression(id, "FLOAT", buffer);
 				break;
 			}
 			case STRING_EXPR: {
-				printPrimitiveExpression(parentId, "STRING", expression->primaryExpr->stringLiteral);
+				printPrimitiveExpression(id, "STRING", expression->primaryExpr->stringLiteral);
 				break;
 			}
 			case ID_EXPRESSION: {
-				printPrimitiveExpression(parentId, "ID", expression->primaryExpr->identifier);
+				printPrimitiveExpression(id, "ID", expression->primaryExpr->identifier);
 				break;
 			}
 			case PRIMARY: {
-				printPrimaryExpression(parentId, expression->primaryExpr);
+				printPrimaryExpression(id, expression->primaryExpr);
 				break; 
 			}
 			case NOT_UNARY_EXPR:
 			case PLUS_UNARY_EXPR:
 			case MINUS_UNARY_EXPR: {
-				printUnaryExpression(parentId, expression);
+				printUnaryExpression(id, expression);
 				break; 
 			}
 			case AND_EXPRESSION:
 			case OR_EXPRESSION:
 			case NE_EXPRESSION:
+			case EQU_EXPRESSION:
 			case GT_EXPRESSION:
 			case GTE_EXPRESSION:
 			case LT_EXPRESSION:
@@ -95,7 +97,7 @@ void printExpression(int parentId, struct Expression* expression) {
 			case MUL_EXPRESSION:
 			case DIV_EXPRESSION:
 			case MOD_EXPRESSION: {
-				printBinaryExpression(parentId, expression);
+				printBinaryExpression(id, expression);
 				break; 
 			}
 		}
@@ -182,14 +184,10 @@ void printFunctionCall(int parentId, struct FunctionCall* functionCall) {
 		maxId++; 
 		int id = maxId; 
 		printEdgeWithDestName(parentId, id, "F_CALL");
-		//TODO:
-		//stuck with components of function name
-		//should print node NAME ???
 		maxId++; 
 		printEdgeWithDestName(id, maxId, functionCall->primaryExpr->identifier);
 		maxId++; 
 		printEdgeWithDestName(id, maxId, "PARAMS");
-		//here maxId comes to be parentNode of expressionList 
 		printExpressionList(maxId, functionCall->exprList); 
 	}
 }
@@ -226,9 +224,6 @@ void printDeclaration(int parentId, struct Declaration* declaration) {
 		}
 		else if (declaration->declType == FUNC_DECL) {
 			printFunctionDecl(parentId, declaration->funcDecl);
-		}
-		else {
-			printf("Unknown declaration type\n");
 		}
 	}
 }
@@ -270,7 +265,7 @@ void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl){
 		printPrimitiveExpression(id, "ID", functionDecl->identifier);
 		//print function signature
 		printSignature(id, functionDecl->signature); 
-		//print function boby
+		//print function body
 		if (functionDecl->block != NULL) {
 			printBlock(id, functionDecl->block); 
 		}
@@ -307,7 +302,6 @@ void printVarSpecList(int parentId, struct VarSpecList* varSpecList){
 		}
 	}
 }
-
 
 void printStatement(int parentId, struct Statement* statement){
 	if (statement != NULL) {
@@ -446,29 +440,28 @@ void printBlock(int parentId, struct Block* block){
 
 void printIfStmt(int parentId, struct IfStmt* ifStmt){
 	if (ifStmt != NULL) {
-		//TODO: continue to implement;
-		//int id = 
-	}
-}
-void printForStmt(int parentId, struct ForStmt* forStmt){
-	if (forStmt != NULL) {
 		int id = ++maxId; 
-		printEdgeWithDestName(parentId, id, "FOR"); 
-
-		if (forStmt->expr != NULL) {
-			printExpression(id, forStmt->expr); 
-		}
-		if (forStmt->forClause != NULL) {
-			printForClause(id, forStmt->forClause); 
-		}
-		if (forStmt->block != NULL) {
-			printBlock(id, forStmt->block);
+		printEdgeWithDestName(parentId, id, "IF"); 
+		printIfStmtExpression(id, ifStmt->ifStmtExpr); 
+		printBlock(id, ifStmt->block);
+		if (ifStmt->elseBlock != NULL) {
+			printElseBlock(id, ifStmt->elseBlock); 
 		}
 	}
 }
 
+void printIfStmtExpression(int parentId, struct IfStmtExpression* ifStmtExpr){
+	if (ifStmtExpr != NULL) {
 
-void printIfStmtExpression(int parentId, struct IfStmtExpression* ifStmtExpr){}
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "EXPR_COND"); 
+		if (ifStmtExpr->simpleStmt != NULL) {
+			printSimpleStmt(id, ifStmtExpr->simpleStmt); 
+		}
+		printExpression(id, ifStmtExpr->expr);
+	}
+}
+
 void printElseBlock(int parentId, struct ElseBlock* elseBlock){}
 
 void printStmtList(int parentId, struct StatementList* stmtList){
@@ -479,22 +472,6 @@ void printStmtList(int parentId, struct StatementList* stmtList){
 		while (stmt != NULL) {
 			printStatement(id, stmt); 
 			stmt = stmt->nextStatement; 
-		}
-	}
-}
-
-void printForClause(int parentId, struct ForClause* forClause){
-	if (forClause != NULL) {
-		int id = ++maxId; 
-		printEdgeWithDestName(parentId, id, "FOR_CLAUSE");
-		if (forClause->forInitStmt != NULL) {
-			printForInitStmt(id, forClause->forInitStmt); 
-		}
-		if (forClause->forCondition != NULL) {
-			printForCondition(id, forClause->forCondition); 
-		}
-		if (forClause->forPostStmt != NULL) {
-			printForPostStmt(id, forClause->forPostStmt);
 		}
 	}
 }
@@ -528,7 +505,7 @@ void printParamList(int parentId, struct ParameterList* paramList){
 		printEdgeWithDestName(parentId, id, "ParamList");
 		struct ParameterDeclare* paramDecl = paramList->firstParamDecl; 
 		while (paramDecl != NULL) {
-			printParamDeclare(parentId, paramDecl); 
+			printParamDeclare(id, paramDecl); 
 			paramDecl = paramDecl->nextParamDecl; 
 		}
 	}
@@ -561,6 +538,39 @@ void printResult(int parentId, struct Result* result){
 	}
 }
 
+void printForStmt(int parentId, struct ForStmt* forStmt) {
+	if (forStmt != NULL) {
+		int id = ++maxId;
+		printEdgeWithDestName(parentId, id, "FOR");
+
+		if (forStmt->expr != NULL) {
+			printExpression(id, forStmt->expr);
+		}
+		if (forStmt->forClause != NULL) {
+			printForClause(id, forStmt->forClause);
+		}
+		if (forStmt->block != NULL) {
+			printBlock(id, forStmt->block);
+		}
+	}
+}
+
+void printForClause(int parentId, struct ForClause* forClause) {
+	if (forClause != NULL) {
+		int id = ++maxId;
+		printEdgeWithDestName(parentId, id, "FOR_CLAUSE");
+		if (forClause->forInitStmt != NULL) {
+			printForInitStmt(id, forClause->forInitStmt);
+		}
+		if (forClause->forCondition != NULL) {
+			printForCondition(id, forClause->forCondition);
+		}
+		if (forClause->forPostStmt != NULL) {
+			printForPostStmt(id, forClause->forPostStmt);
+		}
+	}
+}
+
 void printForInitStmt(int parentId, struct ForInitStmt* forInitStmt){
 	if (forInitStmt != NULL) {
 		int id = ++maxId; 
@@ -575,7 +585,7 @@ void printForCondition(int parentId, struct ForCondition* forCondition){
 	if (forCondition != NULL) {
 		maxId++;
 		int id = maxId;
-		printEdgeWithDestName(parentId, id, "FOR_POST");
+		printEdgeWithDestName(parentId, id, "FOR_COND");
 		if (forCondition->expression != NULL) {
 			printExpression(id, forCondition->expression);
 		}
@@ -594,11 +604,19 @@ void printForPostStmt(int parentId, struct ForPostStmt* forPostStmt){
 }
 
 void printPrintStmt(int parentId, struct PrintStatement* printStmt){
-	printf("printPrintStmt not implemented\n");
+	if (printStmt != NULL) {
+		int id = ++maxId; 
+		printEdgeWithDestName(parentId, id, "PRINT");
+		printExpressionList(id, printStmt->expressionList); 
+	}
 }
 
 void printScanStmt(int parentId, struct ScanStatement* scanStmt){
-	printf("printScanStmt not implemented\n");
+	if (scanStmt != NULL) {
+		int id = ++maxId;
+		printEdgeWithDestName(parentId, id, "SCAN");
+		printIdentifierList(id, scanStmt->identifierList);
+	}
 }
 
 void expressionTypeToString(enum ExpressionType exprType, char* result) {
@@ -707,33 +725,60 @@ void printIdentifierList(int parentId, struct IdentifierList * identifierList){
 	}
 }
 
-
-void printTypeName(int parentId, struct Type* typeName){
-	if (typeName != NULL) {
+void printTypeName(int parentId, struct Type* type){
+	if (type != NULL) {
 		int id = ++maxId; 
 		printEdgeWithDestName(parentId, id, "TYPE"); 
 		maxId++;
-		switch (typeName->typeName) {
-			//TODO: check for id and array_type
-			case IDENTIFIER_TYPE_NAME: {
-				printEdgeWithDestName(id, maxId, "CUSTOM_TYPE");
-				break; 
+		if (type->expr == NULL) {
+
+			switch (type->typeName) {
+				case IDENTIFIER_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "CUSTOM");
+					break;
+				}
+				case STRING_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "STRING");
+					break;
+				}
+				case FLOAT32_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "FLOAT");
+					break;
+				}
+				case INT_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "INT");
+					break;
+				}
+				case BOOL_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "BOOL");
+					break;
+				}
 			}
-			case FLOAT32_TYPE_NAME: {
-				printEdgeWithDestName(id, maxId, "FLOAT_TYPE");
-				break; 
-			}
-			case INT_TYPE_NAME: {
-				printEdgeWithDestName(id, maxId, "INT_TYPE");
-				break; 
-			}
-			case BOOL_TYPE_NAME: {
-				printEdgeWithDestName(id, maxId, "BOOL_TYPE");
-				break; 
-			}
-			case ARRAY_ACCESS: {
-				printEdgeWithDestName(id, maxId, "ARRAY_TYPE");
-				break; 
+		}
+		else {
+			switch (type->typeName) {
+				case IDENTIFIER_TYPE_NAME: {
+					char buffer[30]; 
+					strcpy(buffer, "ARR_"); 
+					printEdgeWithDestName(id, maxId, "ARR_CUSTOM");
+					break;
+				}
+				case STRING_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "ARR_STRING");
+					break;
+				}
+				case FLOAT32_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "ARR_FLOAT");
+					break;
+				}
+				case INT_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "ARR_INT");
+					break;
+				}
+				case BOOL_TYPE_NAME: {
+					printEdgeWithDestName(id, maxId, "ARR_BOOL");
+					break;
+				}
 			}
 		}
 	}
@@ -758,7 +803,8 @@ void printSwitchBody(int parentId, struct SwitchBody* switchBody) {
 		printEdgeWithDestName(parentId, id, "SW_BODY"); 
 		if (switchBody != NULL) {
 			printExpressionCaseClauseList(id, switchBody->eccl);
-		}}
+		}
+	}
 }
 
 void printExpressionCaseClauseList(int parentId, struct ExpressionCaseClauseList* eccl) {

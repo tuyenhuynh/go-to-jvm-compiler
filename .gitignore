@@ -240,3 +240,4 @@ ast.png
 dotrun.bat
 parser.dot
 test1.go
+golang-to-jvm.vcxproj.filters

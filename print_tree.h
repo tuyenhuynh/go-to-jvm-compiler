@@ -14,7 +14,6 @@ void printPrimitiveExpression(int parentId, char*name, char*value);
 void printFunctionCall(int parentId, struct FunctionCall* functionCall); 
 void printExpressionList(int parentId, struct ExpressionList* expressionList);
 
-
 void printProgram(char* output);
 void printPackage(int parentId, struct Package* package);
 void printDeclarationList(int parentId, struct DeclarationList* declarationList);
@@ -30,7 +29,7 @@ void printAssignStatement(int parentId, struct ExpressionList* leftExprList, str
 void printConstDecl(int parentId, struct ConstDecl * constDecl);
 void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl);
 void printIdentifierList(int parentId, struct IdentifierList * identifierList);
-void printTypeName(int parentId, struct Type* typeName);
+void printTypeName(int parentId, struct Type* type);
 void printExpression(int parentId, struct Expression* expression);
 void printStatement(int parentId, struct Statement* statement);
 void printSimpleStmt(int parentId, struct SimpleStmt* simpleStmt);
@@ -60,7 +59,5 @@ void printForCondition(int parentId, struct ForCondition* forCondition);
 void printForPostStmt(int parentId, struct ForPostStmt* forPostStmt);
 void printPrintStmt(int parentId, struct PrintStatement* printStmt);
 void printScanStmt(int parentId, struct ScanStatement* scanStmt);
-
-
 
 #endif //_PRINT_TREE_

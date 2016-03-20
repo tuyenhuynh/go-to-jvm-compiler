@@ -52,9 +52,7 @@ struct StringList* CreateStringList(char* _string) {
 struct StringList* AppendToStringList(struct StringList* _strList, char* _string) {
 	struct StringNode* node = CreateStringNode(_string);
 	if (_strList == NULL) {
-		_strList = (struct StringList*) malloc(sizeof(struct StringList)); 
-		_strList->firstNode = node; 
-		_strList->lastNode = node; 
+		_strList = CreateStringList(_string); 
 	}
 	else {
 		_strList->lastNode->nextString = node; 
@@ -92,9 +90,7 @@ struct DeclarationList *CreateDeclarationList(struct Declaration *_decl) {
 
 struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl) {
 	if (_declList == NULL) {
-		_declList = (struct DeclarationList*)malloc(sizeof(struct DeclarationList)); 
-		_declList->firstDecl = _decl; 
-		_declList->lastDecl = _decl; 
+		_declList = CreateDeclarationList(_decl); 
 	}
 	else {
 		_declList->lastDecl->nextDecl = _decl;
@@ -252,9 +248,7 @@ struct VarSpecList *CreateVarSpecList(struct VarSpec *_varSpec) {
 
 struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct VarSpec *_varSpec) {
 	if (_varSpecList == NULL) {
-		_varSpecList = (struct VarSpecList*)malloc(sizeof(struct VarSpecList));
-		_varSpecList->firstVarSpec = _varSpec; 
-		_varSpecList->lastVarSpec = _varSpec; 
+		_varSpecList = CreateVarSpecList(_varSpec);
 	}
 	else {
 		_varSpecList->lastVarSpec->nextVarSpec = _varSpec;
@@ -442,9 +436,7 @@ struct ExpressionList *CreateExpressionList(struct Expression *_expr) {
 
 struct ExpressionList *AppendToExpressionList(struct ExpressionList *_exprList, struct Expression *_expr) {
 	if (_exprList == NULL) {
-		_exprList = (struct ExpressionList*) malloc(sizeof(struct ExpressionList)); 
-		_exprList->firstExpression = _expr; 
-		_exprList->lastExpression = _expr; 
+		_exprList = CreateExpressionList(_expr);
 	}
 	else {
 		_exprList->lastExpression->nextExpr = _expr;
@@ -500,7 +492,6 @@ struct Statement *CreateStmtFromReturnStmt(enum StatementType _stmtType, struct 
 	return Result;
 }
 
-//????
 struct Statement *CreateStatement(enum StatementType _stmtType) {
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 	clearStatement(Result); 
@@ -574,9 +565,7 @@ struct Identifier* CreateIdentifier(char* _idName) {
 struct IdentifierList *AppendToIdList(struct IdentifierList *_idList, char *_idName) {
 	struct Identifier* id = CreateIdentifier(_idName); 
 	if (_idList == NULL) {
-		_idList = (struct IdentifierList*) malloc(sizeof(struct IdentifierList)); 
-		_idList->firstId = id; 
-		_idList->lastId = id; 
+		_idList = CreateIdList(_idName); 
 	}
 	else {
 		_idList->lastId->nextId = id; 
@@ -665,9 +654,7 @@ struct StatementList *CreateStmtList(struct Statement *_stmt) {
 
 struct StatementList *AppendToStmtList(struct StatementList *_stmtList, struct Statement *_stmt) {
 	if (_stmtList == NULL) {
-		_stmtList = (struct StatementList *)malloc(sizeof(struct StatementList));
-		_stmtList->firstStmt = _stmt; 
-		_stmtList->lastStmt = _stmt; 
+		_stmtList = CreateStmtList(_stmt); 
 	}
 	else {
 		_stmtList->lastStmt->nextStatement = _stmt; 
@@ -710,9 +697,7 @@ struct ExpressionCaseClauseList *CreateExpressionCaseClauseList(struct Expressio
 
 struct ExpressionCaseClauseList *AppendToExpressionCaseClauseList(struct ExpressionCaseClauseList *_eccl, struct ExpressionCaseClause *_exprCaseClause) {
 	if (_eccl == NULL) {
-		_eccl = (struct ExpressionCaseClauseList *)malloc(sizeof(struct ExpressionCaseClauseList));
-		_eccl->firstExprCaseClause = _exprCaseClause; 
-		_eccl->lastExprCaseClause = _exprCaseClause; 
+		_eccl = CreateExpressionCaseClauseList(_exprCaseClause); 
 	}
 	else {
 		_eccl->lastExprCaseClause->nextExprCaseClause = _exprCaseClause; 
@@ -879,9 +864,7 @@ struct ParameterList *CreateParameterDeclareList(struct ParameterDeclare *_param
 
 struct ParameterList *AppendToParameterDeclareList(struct ParameterList *_paramDeclList, struct ParameterDeclare *_paramDecl) {
 	if (_paramDeclList == NULL) {
-		_paramDeclList = (struct ParameterList *)malloc(sizeof(struct ParameterList));
-		_paramDeclList->firstParamDecl = _paramDecl;
-		_paramDeclList->lastParamDecl = _paramDecl; 
+		_paramDeclList = CreateParameterDeclareList(_paramDecl); 
 	}
 	else {
 		_paramDeclList->lastParamDecl->nextParamDecl = _paramDecl; 
@@ -895,6 +878,7 @@ struct ParameterDeclare *CreateParameterDeclareWithoutId(struct Type *_type) {
 
 	Result->type = _type;
 	Result->identifier = NULL; 
+	Result->nextParamDecl = NULL; 
 	return Result;
 }
 
@@ -903,6 +887,7 @@ struct ParameterDeclare *CreateParameterDeclareWithId(char* _identifier, struct 
 
 	Result->identifier = _identifier;
 	Result->type = _type;
+	Result->nextParamDecl = NULL; 
 	
 	return Result;
 }

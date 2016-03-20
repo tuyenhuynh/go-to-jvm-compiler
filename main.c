@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "scanner.h"
 #include "parser.h"
-#include "print_trees.h"
+#include "print_tree.h"
 
 int main(int argc, char *argv[])
 {
