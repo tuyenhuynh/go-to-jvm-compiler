@@ -159,7 +159,13 @@ struct Expression {
 	struct PrimaryExpression *primaryExpr;
 	struct Expression *leftExpr;
 	struct Expression *rightExpr;
-	struct Expression* nextExpr; 
+	struct Expression* nextExpr;
+	struct SemanticType* semanticType;
+};
+
+struct SemanticType {
+	enum TypeName typeName;
+
 };
 
 struct PrimaryExpression
@@ -173,6 +179,8 @@ struct PrimaryExpression
 	struct PrimaryExpression *primaryExpr;
 	struct Expression *expr;
 	struct FunctionCall *funcCall; 
+
+	struct SemanticType* semanticType; 
 };
 
 struct FunctionCall {
