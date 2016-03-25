@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include "scanner.h"
 #include "parser.h"
+#include "print_tree.h"
 
 int main(int argc, char *argv[])
 {
-	if (argc != 2)
+	if (argc != 3)
 	{
-		printf("Program takes only one argument (path to source code file)\n");
+		printf("Program should take 3 arguments (path to source code file)\n");
 		return 1;
 	}
 
@@ -17,6 +18,7 @@ int main(int argc, char *argv[])
 		if (!yyparse()) 
 		{
 			printf("Parsing was successful\n");
+			printProgram(argv[2]); 
 		}
 		else 
 		{

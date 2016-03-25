@@ -66,7 +66,9 @@
 	
 	struct Declaration *DeclarationUnion;
 
-	struct ImportStmtList *ImportStmtListUnion;
+	struct StringList *StringListUnion;
+
+	struct IdentifierList* IdentifierListUnion; 
 
 	struct VarDecl *VarDeclUnion;
 
@@ -145,9 +147,7 @@
 	struct PrintStatement * PrintStatementUnion ; 
 
 	struct ScanStatement * ScanStatementUnion ; 
-
-	struct ScanIdentifierList * ScanIdentifierListUnion ; 
-	 
+ 
 }
 
 %type<ProgramUnion> program
@@ -156,12 +156,11 @@
 %type<DeclListUnion> declaration_list
 %type<ImportUnion> import
 %type<DeclarationUnion> declaration
-%type<string> import_statement
-%type<ImportStmtListUnion> import_statement_list
+%type<StringListUnion> library_list
 %type<VarDeclUnion> var_declare
 %type<ConstDeclUnion> const_declare
 %type<FunctionDeclUnion> function_declaration
-%type<IdListUnion> identifier_list
+%type<IdentifierListUnion> identifier_list
 %type<IdListTypeUnion> identifier_list_type
 %type<ExprListUnion> expression_list
 %type<TypeUnion> type
@@ -197,7 +196,7 @@
 %type<ForPostStmtUnion> for_post_statement ; 
 %type<PrintStatementUnion> print_statement ; 
 %type<ScanStatementUnion> scan_statement ; 
-%type<ScanIdentifierListUnion> scan_identifier_list; 
+%type<IdentifierListUnion> scan_identifier_list; 
 
 %start program
 
@@ -249,24 +248,20 @@ package:
 imports:
 														{}
 	|	imports import									{
-															imports = (struct Imports *)malloc(sizeof(struct Imports));
+															imports = (struct Imports *)malloc(sizeof(struct Imports)); 	
 															$$ = AppendToImportsList(imports, $2);
 														}
 	; 
 
 import:
-	IMPORT import_statement								{$$ = CreateImportFromStatement($2);}
-	|	IMPORT '(' ')'									{}
-	|	IMPORT '(' import_statement_list ')'			{$$ = CreateCompositeImportFromStatementList($3);}
+	IMPORT STRING_LITERAL									{$$ = CreateImportFromLib($2);}
+	|	IMPORT '(' ')'										{}
+	|	IMPORT '(' library_list ')'							{$$ = CreateImportFromLibList($3);}
 	; 
 
-import_statement:
-	STRING_LITERAL										{$$ = $1;}							
-	; 
-
-import_statement_list:
-	import_statement ';'									{$$ = CreateImportStatementList($1);}			
-	|	import_statement_list  import_statement	';'			{$$ = AppendToImportStatementList($1, $2);}
+library_list:
+	STRING_LITERAL ';'									{$$ = CreateStringList($1);}			
+	|	library_list  STRING_LITERAL';'					{$$ = AppendToStringList($1, $2);}
 	; 
 
 declaration_list:
@@ -282,7 +277,7 @@ declaration:
 
 const_declare:
 	CONST var_specification											{$$ = CreateConstDecl($2);}
-	|	CONST	'('	')'												{}							
+	|	CONST	'('	')'												{$$ = CreateConstDecl(NULL);}							
 	|	CONST	'(' var_specification_list ')'						{$$ = CreateConstDeclFromList($3);}
 	;
 
@@ -305,7 +300,7 @@ identifier_list_type:
 
 var_declare:	
 	VAR var_specification								{$$ = CreateSimpleVarDecl($2);}
-	|	VAR '(' ')'										{}
+	|	VAR '(' ')'										{$$ = NULL;}
 	|	VAR '(' var_specification_list  ')'				{$$ = CreateCompositeVarDecl($3);}
 	;
 
@@ -408,7 +403,7 @@ else_block :
 	; 
 	
 block: 
-	'{' '}'												{}
+	'{' '}'												{$$ = CreateBlock(NULL);}
 	|	'{' statement_list '}'							{$$ = CreateBlock($2);}
 	;
 
@@ -430,7 +425,7 @@ switch_initial_and_expression:
 
 
 switch_body:
-														{}
+														{$$ = CreateSwitchBody(NULL);}
 	|	expression_case_clause_list						{$$ = CreateSwitchBody($1);}
 	;
  
@@ -445,7 +440,7 @@ expression_case_clause:
 
 expression_switch_case: 
 	CASE expression_list									{$$ = CreateExprSwitchCase($2);}
-	|	DEFAULT												{}												
+	|	DEFAULT												{$$ = CreateExprSwitchCase(NULL);}												
 	; 
 	
 simple_statement:
@@ -471,17 +466,17 @@ for_clause:
 
 
 for_init_statement:	
-															{}
+															{$$ = CreateForInitStmt (NULL) ; }
 	|	simple_statement									{$$ = CreateForInitStmt ($1) ; }
 	;  
 
 for_condition:											
-															{}
+															{$$ = CreateForCondition (NULL) ; }
 	|	expression											{$$ = CreateForCondition ($1) ; }
 	; 
 
 for_post_statement:
-															{}	
+															{$$ = CreateForPostStmt(NULL) ;}	
 	|	simple_statement									{$$ = CreateForPostStmt($1) ;}
 	; 
 
@@ -497,7 +492,7 @@ signature:
 	; 
 
 parameters_in_parentheses:
-	'(' ')'													{}
+	'(' ')'													{$$ = CreateParametersInParens(NULL);}
 	|	'(' parameter_list ')'								{$$ = CreateParametersInParens($2);}
 	; 
 
@@ -513,7 +508,7 @@ parameter_declare:
 	
 result:
 	parameters_in_parentheses								{$$ = CreateResultFromParameters($1);}
-	|	type												{$$ = CreateResultFormType($1);}
+	|	type												{$$ = CreateResultFromType($1);}
 	;
 
 print_statement:
@@ -525,8 +520,8 @@ scan_statement:
 	; 
 
 scan_identifier_list:										
-	'&'	IDENTIFIER											{$$ = CreateScanItemList($2) ;}
-	|	scan_identifier_list ',' '&'	IDENTIFIER			{$$ = AppendItemToScanItemList($1, $4) ;}
+	'&'	IDENTIFIER											{$$ = CreateIdList($2) ;}
+	|	scan_identifier_list ',' '&'	IDENTIFIER			{$$ = AppendToIdList($1, $4) ;}
 	;									
 
 %%

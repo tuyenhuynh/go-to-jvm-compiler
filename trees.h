@@ -1,6 +1,25 @@
 #ifndef _TREES_H_
 #define _TREES_H_
 
+struct Tree {
+	struct Program* program; 
+};
+
+struct StringNode {
+	char* string; 
+	struct StringNode*  nextString; 
+};
+
+struct StringList {
+	struct StringNode* firstNode; 
+	struct StringNode* lastNode; 
+};
+
+struct Identifier {
+	char* name; 
+	struct Identifier* nextId; 
+};
+
 struct Program {
 	struct Package *pkg;
 	struct Imports *imports;
@@ -12,24 +31,21 @@ struct Package {
 };
 
 struct Imports {
-	struct Import *import;
-	struct Imports *nextImport;
+	struct Import *firstImport;
+	struct Import *lastImport;
 };
 
 struct DeclarationList {
-	struct Declaration *decl;
-	struct DeclarationList *nextDecl;
+	struct Declaration *firstDecl;
+	struct Declaration *lastDecl;
 };
 
 struct Import {
-	char *importStmt;
-	struct ImportStmtList *importStmtList;
+	struct StringNode* lib; 
+	struct StringList* libList; 
+	struct Import* nextImport; 
 };
 
-struct ImportStmtList {
-	char *importStmt;
-	struct ImportStmtList *nextImportStmt;
-};
 
 enum DeclType {
 	CONST_DECL,
@@ -42,6 +58,7 @@ struct Declaration {
 	struct VarDecl *varDecl;
 	struct ConstDecl *constDecl;
 	struct FunctionDecl *funcDecl;
+	struct Declaration* nextDecl; 
 };
 
 struct VarDecl {
@@ -53,11 +70,12 @@ struct VarSpec {
 	struct IdentifierListType *idListType;
 	struct IdentifierList *idList;
 	struct ExpressionList *exprList;
+	struct VarSpec*  nextVarSpec; 
 };
 
 struct VarSpecList {
-	struct VarSpec *varSpec;
-	struct VarSpecList *nextVarSpec;
+	struct VarSpec *firstVarSpec;
+	struct VarSpec *lastVarSpec;
 };
 
 struct ConstDecl {
@@ -72,8 +90,8 @@ struct FunctionDecl {
 };
 
 struct IdentifierList {
-	char *identifier;
-	struct IdentifierList *nextIdentifier;
+	struct Identifier* firstId;  
+	struct Identifier* lastId; 
 };
 
 struct IdentifierListType {
@@ -82,10 +100,9 @@ struct IdentifierListType {
 };
 
 struct ExpressionList {
-	struct Expression *expr;
-	struct ExpressionList *nextExpr;
+	struct Expression *firstExpression;
+	struct Expression *lastExpression;
 };
-
 
 enum TypeNames {
 	IDENTIFIER_TYPE_NAME,
@@ -142,6 +159,7 @@ struct Expression {
 	struct PrimaryExpression *primaryExpr;
 	struct Expression *leftExpr;
 	struct Expression *rightExpr;
+	struct Expression* nextExpr; 
 };
 
 struct PrimaryExpression
@@ -154,12 +172,12 @@ struct PrimaryExpression
 	int boolValue;
 	struct PrimaryExpression *primaryExpr;
 	struct Expression *expr;
-	struct FunctionCall *funcCall;
+	struct FunctionCall *funcCall; 
 };
 
 struct FunctionCall {
 	struct PrimaryExpression *primaryExpr;
-	struct ExpressionList *exprList;
+	struct ExpressionList *exprList; 
 };
 
 enum StatementType {
@@ -198,11 +216,12 @@ struct Statement {
 	struct ForStmt *forStmt;
 	struct ScanStatement *scanStatement;
 	struct PrintStatement *printStatement;
+	struct Statement* nextStatement; 
 };
 
 struct StatementList {
-	struct Statement *stmt;
-	struct StatementList *nextStmt;
+	struct Statement *firstStmt;
+	struct Statement *lastStmt;
 };
 
 struct SimpleStmt {
@@ -252,13 +271,14 @@ struct SwitchBody {
 };
 
 struct ExpressionCaseClauseList {
-	struct ExpressionCaseClause *exprCaseClause;
-	struct ExpressionCaseClauseList *nextExprCaseClause;
+	struct ExpressionCaseClause *firstExprCaseClause;
+	struct ExpressionCaseClause *lastExprCaseClause;
 };
 
 struct ExpressionCaseClause {
 	struct ExpressionSwitchCase *expreSwitchCase;
 	struct StatementList *stmtList;
+	struct ExpressionCaseClause* nextExprCaseClause; 
 };
 
 struct ExpressionSwitchCase {
@@ -287,13 +307,15 @@ struct ParamInParen {
 };
 
 struct ParameterList {
-	struct ParameterDeclare *paramDecl;
-	struct ParameterList *nextParamDecl;
+	struct ParameterDeclare *firstParamDecl;
+	struct ParameterDeclare *lastParamDecl;
+
 };
 
 struct ParameterDeclare {
 	struct Type *type;
 	char* identifier;
+	struct ParameterDeclare* nextParamDecl; 
 };
 
 struct Result {
@@ -318,12 +340,7 @@ struct PrintStatement {
 };
 
 struct ScanStatement {
-	struct ScanIdentifierList *scanIdentifierList;
-};
-
-struct ScanIdentifierList {
-	char* identifier;
-	struct ScanIdentifierList * nextIdentifier;
+	struct IdentifierList *identifierList;
 };
 
 #endif// _TREES_H_
