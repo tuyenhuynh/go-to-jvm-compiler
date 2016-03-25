@@ -2,6 +2,7 @@
 #define _SEMANTIC_H_
 #include <stdbool.h>
 #include <trees.h>
+#include <stdlib.h>
 
 struct SemanticType* checkExpressionType(struct Expression* expr);
 

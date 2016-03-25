@@ -2,7 +2,7 @@
 #define _ASTFUNCTIONS_H_
 
 #include "trees.h"
-#include <malloc.h>
+#include <stdlib.h>
 
 struct Program *CreateProgram(struct Package *_pkg, struct Imports *_imports, struct DeclarationList *_declList);
 struct Package *CreatePackage(char *_pkgName);
