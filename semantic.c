@@ -337,5 +337,74 @@ bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName) {
 }
 
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
-	return true; 
+	bool isOk = true; 
+	isOk = checkSemanticSignature(functionDecl->signature);
+	if (functionDecl->block != NULL) {
+		isOk &= checkSemanticBlock(functionDecl->block);
+	}
+	else {
+		printf("Body of function %s not found", functionDecl->identifier); 
+		isOk = false; 
+	}
+	return isOk; 
 }
+
+bool checkSemanticBlock(struct Block* block, char* functionName) {
+	bool isOk = true; 
+	if (block->stmtList == NULL) {
+		return true; 
+	}
+	else {
+		struct Statement* stmt = block->stmtList->firstStmt; 
+		while (stmt != NULL) {
+			checkSemanticStmt(stmt, functionName);
+			stmt = stmt->nextStatement; 
+		}
+	}
+	return isOk; 
+}
+
+
+bool checkSemanticStmt(struct Statement* statement, char* functionName) {
+	bool isOk = true;
+	switch (statement->stmtType) {
+		case SIMPLE_STMT: {
+			isOk &= semanticSimpleStatement(statement->simpleStmt, functionName);
+			break;
+		}
+		case VAR_DECL_STMT: {
+			isOk &= semanticVarDecl(statement->varDecl);
+			break;
+		}
+		case CONST_DECL_STMT: {
+			isOk &= semanticConstDecl(statement->constDecl);
+			break;
+		}
+		case BLOCK: {
+			isOk &= semanticBlock(statement->block, functionName);
+			break;
+		}
+		case IF_STMT: {
+			isOk &= semanticIfStmt(statement->ifStmt, functionName);
+			break;
+		}
+		case SWITCH_STMT: {
+			isOk &= semanticSwitchStmt(statement->switchStmt, functionName);
+			break;
+		}
+		case FOR_STMT: {
+			isOk &= semanticForStmt(statement->forStmt, functionName);
+			break;
+		}
+		case PRINT_STMT: {
+			isOk &= semanticPrintStmt(statement->printStatement, functionName);
+			break;
+		}
+		case SCAN_STMT: {
+			isOk &= semanticScanStmt(statement->scanStatement, functionName);
+			break;
+		}
+	}
+	return isOk; 
+}
+

@@ -29,5 +29,6 @@ bool checkSemanticStmt(struct Statement* statement, char* functionName);
 bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName);
 bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, char* functionName);
 bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, char* functionName);
+bool checkSemanticBlock(struct Block* block, char* functionName);
 
 #endif //_SEMANTIC_H_
