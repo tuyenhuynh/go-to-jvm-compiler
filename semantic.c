@@ -340,7 +340,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 	bool isOk = true; 
 	isOk = checkSemanticSignature(functionDecl->signature);
 	if (functionDecl->block != NULL) {
-		isOk &= checkSemanticBlock(functionDecl->block);
+		isOk &= checkSemanticBlock(functionDecl->block, functionDecl->identifier);
 	}
 	else {
 		printf("Body of function %s not found", functionDecl->identifier); 
@@ -369,42 +369,72 @@ bool checkSemanticStmt(struct Statement* statement, char* functionName) {
 	bool isOk = true;
 	switch (statement->stmtType) {
 		case SIMPLE_STMT: {
-			isOk &= semanticSimpleStatement(statement->simpleStmt, functionName);
+			isOk &= checkSemanticSimpleStmt(statement->simpleStmt, functionName);
 			break;
 		}
 		case VAR_DECL_STMT: {
-			isOk &= semanticVarDecl(statement->varDecl);
+			isOk &= checkSemanticVarDecl(statement->varDecl, functionName);
 			break;
 		}
 		case CONST_DECL_STMT: {
-			isOk &= semanticConstDecl(statement->constDecl);
+			isOk &= checkSemanticConstDecl(statement->constDecl, functionName);
 			break;
 		}
 		case BLOCK: {
-			isOk &= semanticBlock(statement->block, functionName);
+			isOk &= checkSemanticBlock(statement->block, functionName);
 			break;
 		}
 		case IF_STMT: {
-			isOk &= semanticIfStmt(statement->ifStmt, functionName);
+			isOk &= checkSemanticIfStmt(statement->ifStmt, functionName);
 			break;
 		}
 		case SWITCH_STMT: {
-			isOk &= semanticSwitchStmt(statement->switchStmt, functionName);
+			isOk &= checkSemanticSwitchStmt(statement->switchStmt, functionName);
 			break;
 		}
 		case FOR_STMT: {
-			isOk &= semanticForStmt(statement->forStmt, functionName);
+			isOk &= checkSemanticForStmt(statement->forStmt, functionName);
 			break;
 		}
 		case PRINT_STMT: {
-			isOk &= semanticPrintStmt(statement->printStatement, functionName);
+			isOk &= checkSemanticPrintStmt(statement->printStatement, functionName);
 			break;
 		}
 		case SCAN_STMT: {
-			isOk &= semanticScanStmt(statement->scanStatement, functionName);
+			isOk &= checkSemanticScanStmt(statement->scanStatement, functionName);
 			break;
 		}
 	}
 	return isOk; 
 }
 
+bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName) {
+	return true; 
+}
+bool checkSemanticIfStmt(struct IfStmt* ifStmt, char* functionName) {
+	return true; 
+}
+bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName) {
+	return true; 
+}
+bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName) {
+	return true; 
+}
+bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName) {
+	return true; 
+}
+bool checkSemanticSignature(struct Signature* signature) {
+	return true;
+}
+bool checkSemanticParamList(struct ParameterList* paramList) {
+	return true;
+}
+bool checkSemanticReturnType(struct Result* result) {
+	return true;
+}
+bool checkSemanticPrintStmt(struct PrintStatement* printStmt, char* functionName) {
+	return true;
+}
+bool checkSemanticScanStmt(struct ScanStatement* scanStmt, char* f) {
+	return true; 
+}

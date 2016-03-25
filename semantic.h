@@ -19,7 +19,7 @@ bool checkSemanticSignature(struct Signature* signature);
 bool checkSemanticParamList(struct ParameterList* paramList); 
 bool checkSemanticReturnType(struct Result* result); 
 bool checkSemanticPrintStmt(struct PrintStatement* printStmt, char* functionName);
-bool checkSemanticSancStmt(struct ScanStatement* scanStmt, char* functionName); 
+bool checkSemanticScanStmt(struct ScanStatement* scanStmt, char* functionName); 
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt); 
 bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, char* functionName);
 bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName);
