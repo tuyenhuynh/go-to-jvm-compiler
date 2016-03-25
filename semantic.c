@@ -1,4 +1,5 @@
 #include "semantic.h"
+#include <string.h>
 
 struct SemanticType* checkExpressionType(struct Expression* expr) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
@@ -291,4 +292,50 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 	}
 	primaryExpr->semanticType = type;
 	return type;
+}
+
+bool doSemantic(struct Program* program) {
+	bool isOk = true; 
+	if (program->pkg != NULL) {
+		char* packageName = program->pkg->packageName;
+		if (strcmp(packageName, "main") != 0) {
+			printf("Semantic error. Package name must be main\n");
+			isOk = false;
+		}
+		
+	}
+
+	struct DeclarationList* declList = program->declList;
+	
+	if (declList != NULL) {
+		struct Declaration* decl = declList->firstDecl;
+		while (decl != NULL) {
+			if (decl->declType == CONST_DECL) {
+				isOk &= checkSemanticConstDecl(decl->constDecl, NULL);
+			}
+			else if (decl->declType == VAR_DECL) {
+				isOk &= checkSemanticVarDecl(decl->varDecl, NULL);
+			}
+			else if (decl->declType == FUNC_DECL) {
+				isOk &= checkSemanticFunctionDecl(decl->funcDecl, NULL);
+			}
+		}
+	}
+	else {
+		printf("Semantic error. No declaration found");
+		isOk = false; 
+	}
+	//yield an error if function main not found 
+	return isOk; 
+}
+
+bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName) {
+	return true; 
+}
+bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName) {
+	return true; 
+}
+
+bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
+	return true; 
 }

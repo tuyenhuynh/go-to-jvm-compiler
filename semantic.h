@@ -14,7 +14,7 @@ bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName);
 bool checkSemanticBlock(struct Block* block, char* functionName); 
 bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName);
 bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName ); 
-bool checkSemanticFunction(struct FunctionDecl* functionDecl);
+bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl);
 bool checkSemanticSignature(struct Signature* signature);
 bool checkSemanticParamList(struct ParameterList* paramList); 
 bool checkSemanticReturnType(struct Result* result); 
@@ -29,4 +29,5 @@ bool checkSemanticStmt(struct Statement* statement, char* functionName);
 bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName);
 bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, char* functionName);
 bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, char* functionName);
+
 #endif //_SEMANTIC_H_
