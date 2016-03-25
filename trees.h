@@ -164,7 +164,7 @@ struct Expression {
 };
 
 struct SemanticType {
-	enum TypeName typeName;
+	enum TypeNames typeName;
 
 };
 
