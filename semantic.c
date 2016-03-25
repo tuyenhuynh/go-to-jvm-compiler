@@ -1,5 +1,4 @@
 #include "semantic.h"
-#define NULL 0
 
 struct SemanticType* checkExpressionType(struct Expression* expr) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
@@ -17,7 +16,8 @@ struct SemanticType* checkExpressionType(struct Expression* expr) {
 			}
 			else
 			{
-				// error
+				printf("Semantic error. Operand must be bool type \n");
+				type = NULL;
 			}
 			break;
 		}
@@ -30,109 +30,203 @@ struct SemanticType* checkExpressionType(struct Expression* expr) {
 				type->typeName = FLOAT32_TYPE_NAME;
 			else
 			{
-				// error
+				printf("Semantic error. Operand must be int or bool type \n");
+				type = NULL;
 			}
 			break;
 		}
 		case AND_EXPRESSION:
 		case OR_EXPRESSION:
 		{
-			if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-			{
-
-			}
-			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
-			{
-
-			}
-			else if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-			{
-
-			}
-			else if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
+			if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
 				expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
 				type->typeName = BOOL_TYPE_NAME;
 			else
 			{
-				// error
+				printf("Semantic error. Left and right operands should be bool type \n");
+				type = NULL;
 			}
 			break;
 		}
 		case EQU_EXPRESSION:
+		case NE_EXPRESSION:
 		{
-			// a == b
-			if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-			{
+			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
 				type->typeName = BOOL_TYPE_NAME;
-			}
-			// checks e.g. a == 3.2 ; a == 3; a == "s"; a == true;
-			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == INT_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == STRING_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-
-			// checks e.g. 3.2 == a ; 3 == a; "s" == a; true == a;
-			else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-			else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-			else if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-
-
-			// 3 == 2; true == false
-			else if (expr->leftExpr->semanticType->typeName ==
-				expr->rightExpr->semanticType->typeName)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
 			else
 			{
-				// error
+				printf("Semantic error. Left and right operands should be same type\n");
+				type = NULL;
 			}
 			break;
 		}
-		case NE_EXPRESSION:
+
 		case GT_EXPRESSION:
 		case GTE_EXPRESSION:
 		case LT_EXPRESSION:
 		case LTE_EXPRESSION:
 		{
+			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
+			{
+				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be bool type \n");
+					type = NULL;
+				}
+				else
+				{
+					type->typeName = BOOL_TYPE_NAME;
+				}
+			}
+			else
+			{
+				printf("Semantic error. Left and right operands should be same type\n");
+				type = NULL;
+			}
+			break;
+		}
 
+		case PLUS_EXPRESSION:
+		{
+			if(expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
+			{
+				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be bool type \n");
+					type = NULL;
+				}
+				
+				else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
+					type->typeName = FLOAT32_TYPE_NAME;
+				
+				else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
+					type->typeName = INT_TYPE_NAME;
+				
+				else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME)
+					type->typeName = STRING_TYPE_NAME;
+				
+				else
+				{
+					printf("Semantic error. Unknown type \n");
+					type = NULL;
+				}
+			}
+			else
+			{
+				printf("Semantic error. Left and right operands should be same type\n");
+				type = NULL;
+			}
+			break;
+		}
+		case MINUS_EXPRESSION:
+		case MUL_EXPRESSION:
+		{
+			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
+			{
+				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be bool type \n");
+					type = NULL;
+				}
+
+				else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
+					type->typeName = FLOAT32_TYPE_NAME;
+
+				else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
+					type->typeName = INT_TYPE_NAME;
+
+				else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be string type \n");
+					type = NULL;
+				}
+
+				else
+				{
+					printf("Semantic error. Unknown type \n");
+					type = NULL;
+				}
+			}
+			else
+			{
+				printf("Semantic error. Left and right operands should be same type\n");
+				type = NULL;
+			}
+			break;
+		}
+		
+		case DIV_EXPRESSION:
+		{
+			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
+			{
+				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be bool type \n");
+					type = NULL;
+				}
+
+				else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
+					type->typeName = FLOAT32_TYPE_NAME;
+
+				else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
+					type->typeName = FLOAT32_TYPE_NAME;
+
+				else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be string type \n");
+					type = NULL;
+				}
+
+				else
+				{
+					printf("Semantic error. Unknown type \n");
+					type = NULL;
+				}
+			}
+			else
+			{
+				printf("Semantic error. Left and right operands should be same type\n");
+				type = NULL;
+			}
+			break;
+		}
+		case MOD_EXPRESSION: 
+		{
+			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
+			{
+				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be bool type \n");
+					type = NULL;
+				}
+
+				else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be float type \n");
+					type = NULL;
+				}
+
+				else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
+					type->typeName = FLOAT32_TYPE_NAME;
+
+				else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME)
+				{
+					printf("Semantic error. Left and right operands shouldn't be string type \n");
+					type = NULL;
+				}
+
+				else
+				{
+					printf("Semantic error. Unknown type \n");
+					type = NULL;
+				}
+			}
+			else
+			{
+				printf("Semantic error. Left and right operands should be same type\n");
+				type = NULL;
+			}
+			break;
 		}
 	}
 
