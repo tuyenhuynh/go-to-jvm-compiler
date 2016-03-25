@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <trees.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 struct SemanticType* checkExpressionType(struct Expression* expr);
 

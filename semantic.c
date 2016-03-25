@@ -3,94 +3,137 @@
 
 struct SemanticType* checkExpressionType(struct Expression* expr) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
-	switch (expr->exprType) {
-	case PRIMARY: {
-		type = checkPrimaryExpressionType(expr->primaryExpr);
-		break;
-	}
-	case NOT_UNARY_EXPR:
+	switch (expr->exprType) 
 	{
-		if (expr->primaryExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
+		case PRIMARY: {
+			type = checkPrimaryExpressionType(expr->primaryExpr);
+			break;
+		}
+		case NOT_UNARY_EXPR:
+		{
+			if (expr->primaryExpr->semanticType->typeName == BOOL_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			else
+			{
+				// error
+			}
+			break;
+		}
+		case PLUS_UNARY_EXPR:
+		case MINUS_UNARY_EXPR:
+		{
+			if (expr->primaryExpr->semanticType->typeName == INT_TYPE_NAME)
+				type->typeName = INT_TYPE_NAME;
+			else if (expr->primaryExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
+				type->typeName = FLOAT32_TYPE_NAME;
+			else
+			{
+				// error
+			}
+			break;
+		}
+		case AND_EXPRESSION:
+		case OR_EXPRESSION:
+		{
+			if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
+			{
+
+			}
+			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
+			{
+
+			}
+			else if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
+			{
+
+			}
+			else if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
+				type->typeName = BOOL_TYPE_NAME;
+			else
+			{
+				// error
+			}
+			break;
+		}
+		case EQU_EXPRESSION:
+		{
+			// a == b
+			if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			// checks e.g. a == 3.2 ; a == 3; a == "s"; a == true;
+			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == INT_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == STRING_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+
+			// checks e.g. 3.2 == a ; 3 == a; "s" == a; true == a;
+			else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			else if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
+				expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+
+
+			// 3 == 2; true == false
+			else if (expr->leftExpr->semanticType->typeName ==
+				expr->rightExpr->semanticType->typeName)
+			{
+				type->typeName = BOOL_TYPE_NAME;
+			}
+			else
+			{
+				// error
+			}
+			break;
+		}
+		case NE_EXPRESSION:
+		case GT_EXPRESSION:
+		case GTE_EXPRESSION:
+		case LT_EXPRESSION:
+		case LTE_EXPRESSION:
 		{
 
 		}
-		else if (expr->primaryExpr->semanticType->typeName == BOOL_TYPE_NAME)
-		{
-			type->typeName = BOOL_TYPE_NAME;
-		}
-		else
-		{
-			// error
-		}
-		break;
-	}
-	case PLUS_UNARY_EXPR:
-	case MINUS_UNARY_EXPR:
-	{
-		if (expr->primaryExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-		{
-
-		}
-		else if (expr->primaryExpr->semanticType->typeName == INT_TYPE_NAME)
-			type->typeName = INT_TYPE_NAME;
-		else if (expr->primaryExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
-			type->typeName = FLOAT32_TYPE_NAME;
-		else
-		{
-			// error
-		}
-		break;
-	}
-	case AND_EXPRESSION:
-	case OR_EXPRESSION:
-	{
-		if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-			expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-		{
-
-		}
-		else if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-			expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
-		{
-
-		}
-		else if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
-			expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-		{
-
-		}
-		else if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
-			expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
-			type->typeName = BOOL_TYPE_NAME;
-		else
-		{
-			// error
-		}
-		break;
-	}
-	case EQU_EXPRESSION:
-	case NE_EXPRESSION:
-	case GT_EXPRESSION:
-	case GTE_EXPRESSION:
-	case LT_EXPRESSION:
-	case LTE_EXPRESSION:
-	{
-		if (expr->leftExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME &&
-			expr->rightExpr->semanticType->typeName == IDENTIFIER_TYPE_NAME)
-		{
-
-		}
-		else if (expr->leftExpr->semanticType->typeName ==
-			expr->rightExpr->semanticType->typeName)
-		{
-			type->typeName = BOOL_TYPE_NAME;
-		}
-		else
-		{
-			// error
-		}
-		break;
-	}
 	}
 
 	return type;
