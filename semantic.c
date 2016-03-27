@@ -317,7 +317,7 @@ bool doSemantic(struct Program* program) {
 				isOk &= checkSemanticVarDecl(decl->varDecl, NULL);
 			}
 			else if (decl->declType == FUNC_DECL) {
-				isOk &= checkSemanticFunctionDecl(decl->funcDecl, NULL);
+				isOk &= checkSemanticFunctionDecl(decl->funcDecl);
 			}
 		}
 	}
@@ -336,6 +336,10 @@ bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName) {
 	return true; 
 }
 
+bool checkSemanticVarSpec(struct VarSpec* varSpec, char* functionName)
+{
+}
+
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 	bool isOk = true; 
 	isOk = checkSemanticSignature(functionDecl->signature);
@@ -344,7 +348,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 	}
 	else {
 		printf("Body of function %s not found", functionDecl->identifier); 
-		isOk = false; 
+		isOk &= false; 
 	}
 	return isOk; 
 }
@@ -354,63 +358,130 @@ bool checkSemanticBlock(struct Block* block, char* functionName) {
 	if (block->stmtList == NULL) {
 		return true; 
 	}
-	else {
-		struct Statement* stmt = block->stmtList->firstStmt; 
-		while (stmt != NULL) {
-			checkSemanticStmt(stmt, functionName);
-			stmt = stmt->nextStatement; 
-		}
+	struct Statement* stmt = block->stmtList->firstStmt; 
+	while (stmt != NULL) {
+		isOk &= checkSemanticStmt(stmt, functionName);
+		stmt = stmt->nextStatement; 
 	}
 	return isOk; 
 }
 
 
 bool checkSemanticStmt(struct Statement* statement, char* functionName) {
-	bool isOk = true;
 	switch (statement->stmtType) {
 		case SIMPLE_STMT: {
-			isOk &= checkSemanticSimpleStmt(statement->simpleStmt, functionName);
-			break;
+			return checkSemanticSimpleStmt(statement->simpleStmt, functionName);
 		}
 		case VAR_DECL_STMT: {
-			isOk &= checkSemanticVarDecl(statement->varDecl, functionName);
-			break;
+			return checkSemanticVarDecl(statement->varDecl, functionName);
 		}
 		case CONST_DECL_STMT: {
-			isOk &= checkSemanticConstDecl(statement->constDecl, functionName);
-			break;
+			return checkSemanticConstDecl(statement->constDecl, functionName);
 		}
 		case BLOCK: {
-			isOk &= checkSemanticBlock(statement->block, functionName);
-			break;
+			return checkSemanticBlock(statement->block, functionName);
 		}
 		case IF_STMT: {
-			isOk &= checkSemanticIfStmt(statement->ifStmt, functionName);
-			break;
+			return checkSemanticIfStmt(statement->ifStmt, functionName);
 		}
 		case SWITCH_STMT: {
-			isOk &= checkSemanticSwitchStmt(statement->switchStmt, functionName);
-			break;
+			return checkSemanticSwitchStmt(statement->switchStmt, functionName);
 		}
 		case FOR_STMT: {
-			isOk &= checkSemanticForStmt(statement->forStmt, functionName);
-			break;
+			return checkSemanticForStmt(statement->forStmt, functionName);
 		}
 		case PRINT_STMT: {
-			isOk &= checkSemanticPrintStmt(statement->printStatement, functionName);
-			break;
+			return checkSemanticPrintStmt(statement->printStatement, functionName);
 		}
 		case SCAN_STMT: {
-			isOk &= checkSemanticScanStmt(statement->scanStatement, functionName);
-			break;
+			return checkSemanticScanStmt(statement->scanStatement, functionName);
 		}
 	}
-	return isOk; 
+	return true; 
 }
 
 bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName) {
-	return true; 
+	switch(simpleStmt->stmtType)
+	{
+		case EXPR_SIMPLE_STMT:
+		{
+			if (checkExpressionType(simpleStmt->expr) == NULL)
+				return false;
+			break;
+		}
+		case INC_SIMPLE_STMT:
+		case DEC_SIMPLE_STMT:
+		{
+			if (checkExpressionType(simpleStmt->expr) != NULL)
+			{
+				if (checkExpressionType(simpleStmt->expr)->typeName != FLOAT32_TYPE_NAME ||
+					checkExpressionType(simpleStmt->expr)->typeName != INT_TYPE_NAME)
+					return false;
+			}
+			else
+				//add error msg
+				return false;
+			break;
+		}
+
+		case ASSIGN_STMT:
+		{
+			if (simpleStmt->exprListLeft != NULL && simpleStmt->exprListRight != NULL)
+			{
+				return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, NULL);
+			}
+			//add error msg
+			return false;
+		}
+		case PLUS_ASSIGN_STMT:
+		case MINUS_ASSIGN_STMT:
+		case MUL_ASSIGN_STMT:
+		case DIV_ASSIGN_STMT: {
+			if (simpleStmt->exprListLeft != NULL && simpleStmt->exprListRight != NULL)
+			{
+				if(exprListSize(simpleStmt->exprListLeft) == 1 && exprListSize(simpleStmt->exprListRight) == 1)
+				{
+					return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, NULL);
+				}
+				// add error msg
+				return false;
+			}
+			// add error msg
+			return false;
+		}
+	}
+	return true;
 }
+
+bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, char* functionName)
+{
+	bool isOk = true;
+	if (exprListSize(leftExprList) == exprListSize(rightExprList))
+	{
+		struct Expression *leftExpr = leftExprList->firstExpression;
+		struct Expression *rightExpr = rightExprList->firstExpression;
+		while(leftExpr != NULL || isOk != false)
+		{
+			isOk = checkSemanticAssignStmt(leftExpr, rightExpr, NULL);
+			leftExpr = leftExpr->nextExpr;
+			rightExpr = rightExpr->nextExpr;
+		}
+	}
+	else
+	{
+		printf("Assignment count mismatch \n");
+		isOk = false;
+	}
+	return isOk;
+}
+
+bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, char* functionName)
+{
+	if (leftExpr->semanticType != rightExpr->semanticType)
+		return false;
+	return true;
+}
+
 bool checkSemanticIfStmt(struct IfStmt* ifStmt, char* functionName) {
 	return true; 
 }
@@ -437,4 +508,12 @@ bool checkSemanticPrintStmt(struct PrintStatement* printStmt, char* functionName
 }
 bool checkSemanticScanStmt(struct ScanStatement* scanStmt, char* f) {
 	return true; 
+}
+
+bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt)
+{
+}
+
+bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, char* functionName)
+{
 }

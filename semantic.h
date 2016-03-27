@@ -1,5 +1,6 @@
 #ifndef _SEMANTIC_H_
 #define _SEMANTIC_H_
+#include "helpers.h"
 #include <stdbool.h>
 #include <trees.h>
 #include <stdlib.h>
