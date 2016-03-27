@@ -329,17 +329,6 @@ bool doSemantic(struct Program* program) {
 	return isOk; 
 }
 
-bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName) {
-	return true; 
-}
-bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName) {
-	return true; 
-}
-
-bool checkSemanticVarSpec(struct VarSpec* varSpec, char* functionName)
-{
-}
-
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 	bool isOk = true; 
 	isOk = checkSemanticSignature(functionDecl->signature);
@@ -365,7 +354,6 @@ bool checkSemanticBlock(struct Block* block, char* functionName) {
 	}
 	return isOk; 
 }
-
 
 bool checkSemanticStmt(struct Statement* statement, char* functionName) {
 	switch (statement->stmtType) {
@@ -407,21 +395,18 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName) 
 		{
 			if (checkExpressionType(simpleStmt->expr) == NULL)
 				return false;
-			break;
+			return true;
 		}
 		case INC_SIMPLE_STMT:
 		case DEC_SIMPLE_STMT:
 		{
-			if (checkExpressionType(simpleStmt->expr) != NULL)
-			{
-				if (checkExpressionType(simpleStmt->expr)->typeName != FLOAT32_TYPE_NAME ||
-					checkExpressionType(simpleStmt->expr)->typeName != INT_TYPE_NAME)
+			struct SemanticType * type = checkExpressionType(simpleStmt->expr);
+			if (type != NULL) {
+				if (type->typeName != FLOAT32_TYPE_NAME && type->typeName != INT_TYPE_NAME) {
 					return false;
-			}
-			else
-				//add error msg
-				return false;
-			break;
+				}
+			//add error msg
+			return false;
 		}
 
 		case ASSIGN_STMT:
@@ -450,7 +435,6 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName) 
 			return false;
 		}
 	}
-	return true;
 }
 
 bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, char* functionName)
@@ -485,35 +469,58 @@ bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rig
 bool checkSemanticIfStmt(struct IfStmt* ifStmt, char* functionName) {
 	return true; 
 }
+
 bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName) {
 	return true; 
 }
+
 bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName) {
 	return true; 
 }
+
 bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName) {
 	return true; 
 }
+
 bool checkSemanticSignature(struct Signature* signature) {
 	return true;
 }
+
 bool checkSemanticParamList(struct ParameterList* paramList) {
 	return true;
 }
+
 bool checkSemanticReturnType(struct Result* result) {
 	return true;
 }
+
 bool checkSemanticPrintStmt(struct PrintStatement* printStmt, char* functionName) {
 	return true;
 }
+
 bool checkSemanticScanStmt(struct ScanStatement* scanStmt, char* f) {
 	return true; 
 }
 
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt)
 {
+	return true;
 }
 
 bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, char* functionName)
 {
+	return true;
+}
+
+bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName) {
+	return true;
+}
+
+bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName) {
+	return true;
+}
+
+bool checkSemanticVarSpec(struct VarSpec* varSpec, char* functionName)
+{
+	return true;
 }
