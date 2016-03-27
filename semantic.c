@@ -445,12 +445,13 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 	{
 		struct Expression *leftExpr = leftExprList->firstExpression;
 		struct Expression *rightExpr = rightExprList->firstExpression;
-		while(leftExpr != NULL || isOk != false)
+		while(leftExpr != NULL && isOk != false)
 		{
 			isOk = checkSemanticAssignStmt(leftExpr, rightExpr, NULL);
 			leftExpr = leftExpr->nextExpr;
 			rightExpr = rightExpr->nextExpr;
 		}
+		//add error msg if !isOk
 	}
 	else
 	{
@@ -462,7 +463,7 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 
 bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, char* functionName)
 {
-	if (leftExpr->semanticType != rightExpr->semanticType)
+	if (leftExpr->semanticType->typeName != rightExpr->semanticType->typeName)
 		return false;
 	return true;
 }
