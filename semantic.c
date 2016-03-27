@@ -511,11 +511,6 @@ bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName) {
 	{
 		isOk = checkSemanticIfStmt(elseBlock->ifStmt, NULL);
 	}
-	else
-	{
-		// add error message
-		isOk = false;
-	}
 
 	if(elseBlock->block != NULL)
 	{
@@ -531,7 +526,7 @@ bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName) {
 }
 
 bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName) {
-	return true; 
+
 }
 
 bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName) {

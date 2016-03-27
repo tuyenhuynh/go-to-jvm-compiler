@@ -147,13 +147,6 @@ enum ExpressionType {
 	BOOL_FALSE_EXPRESSION
 };
 
-enum SwitchInitialExpressionType {
-	ALWAYS_TRUE, 
-	WITH_INITIAL_STMT, 
-	WITH_EXPRESSION,  
-	WITH_INITIAL_AND_EXPRESSION
-};
-
 struct Expression {
 	enum ExpressionType exprType;
 	struct PrimaryExpression *primaryExpr;
@@ -261,6 +254,13 @@ struct IfStmtExpression {
 struct ElseBlock {
 	struct IfStmt *ifStmt;
 	struct Block *block;
+};
+
+enum SwitchInitialExpressionType {
+	ALWAYS_TRUE,
+	WITH_INITIAL_STMT,
+	WITH_EXPRESSION,
+	WITH_INITIAL_AND_EXPRESSION
 };
 
 struct SwitchStmt {
