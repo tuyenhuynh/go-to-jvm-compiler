@@ -469,7 +469,39 @@ bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rig
 }
 
 bool checkSemanticIfStmt(struct IfStmt* ifStmt, char* functionName) {
-	return true; 
+	bool isOk = true;
+	
+	if(ifStmt->ifStmtExpr == NULL)
+	{
+		// add error message
+		isOk = false;
+	}
+	else if(ifStmt->block == NULL)
+	{
+		// add error message
+		isOk = false;
+	}
+	else
+	{
+		if (ifStmt->ifStmtExpr->expr == NULL)
+		{
+			// add error message
+			isOk = false;
+		}
+		else
+		{
+			if (ifStmt->ifStmtExpr->simpleStmt != NULL)
+				isOk &= checkSemanticSimpleStmt(ifStmt->ifStmtExpr->simpleStmt, NULL);
+			
+			if(checkExpressionType(ifStmt->ifStmtExpr->expr)->typeName != BOOL_TYPE_NAME)
+			{
+				// add erro message
+				isOk &= false;
+			}
+		}
+	}
+
+	return isOk;
 }
 
 bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName) {
