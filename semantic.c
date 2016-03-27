@@ -526,7 +526,91 @@ bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName) {
 }
 
 bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName) {
+	bool isOk = true;
 
+	if (switchStmt->initialAndExpression != NULL)
+	{
+		switch (switchStmt->initialAndExpression->switchType)
+		{
+		case WITH_INITIAL_STMT:
+		{
+			isOk &= checkSemanticSimpleStmt(switchStmt->initialAndExpression->initialStmt, NULL);
+			break;
+		}
+		case WITH_EXPRESSION:
+		{
+			if (switchStmt->initialAndExpression->expression == NULL)
+			{
+				// add error message 
+				isOk &= false;
+			}
+			break;
+		}
+		case WITH_INITIAL_AND_EXPRESSION:
+		{
+			isOk &= checkSemanticSimpleStmt(switchStmt->initialAndExpression->initialStmt, NULL);
+			if (switchStmt->initialAndExpression->expression == NULL)
+			{
+				// add error message 
+				isOk &= false;
+			}
+			break;
+		}
+		}
+	}
+	else
+	{
+		// add error message
+		isOk &= false;
+	}
+
+	if(switchStmt->switchBody != NULL)
+	{
+		if(switchStmt->switchBody->eccl != NULL)
+		{
+			struct ExpressionCaseClause *ecc = switchStmt->switchBody->eccl->firstExprCaseClause;
+			while(ecc != NULL)
+			{
+				isOk &= checkSemanticExpressionCaseClause(ecc, NULL);
+				ecc = ecc->nextExprCaseClause;
+			}
+		}
+		else
+		{
+			// add error message
+			isOk &= false;
+		}
+	}
+	else
+	{
+		// add error message
+		isOk &= false;
+	}
+	return isOk;
+}
+
+bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, char* functionName)
+{
+	bool isOk = true;
+	if (ecc->expreSwitchCase != NULL && ecc->stmtList != NULL)
+	{
+		if (ecc->expreSwitchCase->exprList != NULL)
+		{
+			struct Expression *expr = ecc->expreSwitchCase->exprList->firstExpression;
+			while(expr != NULL)
+			{
+				if (checkExpressionType(expr) == NULL)
+					isOk &= false;
+				expr = expr->nextExpr;
+			}
+		}
+		else
+			isOk = false;
+	}
+	else
+		isOk = false;
+
+	return isOk;
 }
 
 bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName) {
