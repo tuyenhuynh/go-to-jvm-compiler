@@ -405,6 +405,7 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName) 
 				if (type->typeName != FLOAT32_TYPE_NAME && type->typeName != INT_TYPE_NAME) {
 					return false;
 				}
+			}
 			//add error msg
 			return false;
 		}
