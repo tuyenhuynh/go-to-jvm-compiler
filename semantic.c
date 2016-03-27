@@ -495,7 +495,7 @@ bool checkSemanticIfStmt(struct IfStmt* ifStmt, char* functionName) {
 			
 			if(checkExpressionType(ifStmt->ifStmtExpr->expr)->typeName != BOOL_TYPE_NAME)
 			{
-				// add erro message
+				// add error message
 				isOk &= false;
 			}
 		}
@@ -505,7 +505,29 @@ bool checkSemanticIfStmt(struct IfStmt* ifStmt, char* functionName) {
 }
 
 bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName) {
-	return true; 
+	bool isOk = true;
+
+	if(elseBlock->ifStmt != NULL)
+	{
+		isOk = checkSemanticIfStmt(elseBlock->ifStmt, NULL);
+	}
+	else
+	{
+		// add error message
+		isOk = false;
+	}
+
+	if(elseBlock->block != NULL)
+	{
+		isOk &= checkSemanticBlock(elseBlock->block, NULL);
+	}
+	else
+	{
+		// add error message 
+		isOk &= false;
+	}
+
+	return isOk;
 }
 
 bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName) {
