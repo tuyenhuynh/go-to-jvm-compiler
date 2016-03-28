@@ -436,6 +436,7 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName) 
 			return false;
 		}
 	}
+	return true;
 }
 
 bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, char* functionName)
