@@ -1,10 +1,10 @@
 #ifndef _SEMANTIC_H_
 #define _SEMANTIC_H_
-#include "helpers.h"
 #include <stdbool.h>
 #include <trees.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <semantic_struct.h>
 
 struct SemanticType* checkExpressionType(struct Expression* expr);
 
@@ -32,4 +32,16 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, char* functionName);
 bool checkSemanticBlock(struct Block* block, char* functionName);
 bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, char* functionName);
+bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
+struct LocalVariable* getLocalVariableFromTable(char* varName, HashTable* variablesTable);
+
+bool addLocalConstantsToConstantTable(struct VarSpec* varSpec, struct Method* method); 
+bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
+struct Constant* getConstantFromLocalConstantTable(char* constName, HashTable* constsTable, struct Method* method); 
+
+
+bool addConstantToConstantTable(List* constantsTable, enum ConstantType type, void* constant); 
+bool addMethodRefToConstantTable(List* constantsTable, enum ConstantType type, char* methodName, char* className); 
+struct Constant* getConstant(List* constantsTable, enum ConstantType type, void* value);
+
 #endif //_SEMANTIC_H_

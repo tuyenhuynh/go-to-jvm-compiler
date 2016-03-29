@@ -1,5 +1,8 @@
-#include "semantic.h"
+﻿#include "semantic.h"
 #include <string.h>
+#include "semantic_struct.h"
+#include "helpers.h"
+
 
 struct SemanticType* checkExpressionType(struct Expression* expr) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
@@ -649,14 +652,285 @@ bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct Parameter
 }
 
 bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName) {
+	bool isOk = true; 
+	//if(varDecl)
 	return true;
 }
 
 bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName) {
-	return true;
+	bool isOk = true;
+	if (constDecl->varSpec != NULL) {
+		struct VarSpec* varSpec = constDecl->varSpec; 
+		isOk = checkSemanticConstSpec(varSpec, functionName); 
+	}
+	else if (constDecl->varSpecList != NULL) {
+		struct VarSpec* varSpec = constDecl->varSpecList->firstVarSpec;
+		while (varSpec != NULL) {
+			isOk &= checkSemanticConstSpec(varSpec, functionName);
+			varSpec = varSpec->nextVarSpec;
+		}
+		//The compiler not support untyped variables declaration
+		isOk = false;
+	}
+	return isOk;
+}
+
+//TODO: check for value of constant (constant must have a value when it's declare, but in grammar, the value is optional)
+bool checkSemanticConstSpec(struct VarSpec* varSpec, char* functionName) {
+	bool isOk = true;
+	//check for match of number of variables and number of values 
+	if (varSpec->idListType != 0) {
+		if (varSpec->exprList != 0) {
+			if (varSpec->idListType->identifierList->size != varSpec->exprList->size) {
+				printf("Variable count and value count mismatch in function %s ", functionName);
+				isOk = false;
+			}
+			else {
+				struct Identifier* id = varSpec->idListType->identifierList->firstId;
+				struct Expression* expr = varSpec->exprList->firstExpression;
+				while (expr != NULL) {
+					//TODO: tackle the problem of how to retrieve the type of  expression if expression is an identifier
+					//so in check Expression type, there should be a call to getVariableFromTable
+					if (expr->exprType != INT_TYPE_NAME
+						&& expr->exprType != FLOAT32_TYPE_NAME
+						&& expr->exprType != STRING_TYPE_NAME
+						&& expr->exprType != BOOL_TYPE_NAME) {
+						//TODO: support const a int = 5 ; const b int = a ; 
+						printf("Constant initializer %s is not a constant %s", id, functionName);
+						isOk = false;
+					}
+					struct SemanticType* semanticType = checkExpressionType(expr);
+					if (semanticType != NULL) {
+						if (semanticType->typeName != varSpec->idListType->type->typeName) {
+							printf("Types  mismatch in variable declaration in function %s", functionName);
+							isOk = false;
+						}
+					}
+					id = id->nextId;
+					expr = expr->nextExpr;
+				}
+			}
+		}
+		else {
+			printf("Missing value in constant declaration   %s", functionName);
+		}
+	}
+	return isOk;
 }
 
 bool checkSemanticVarSpec(struct VarSpec* varSpec, char* functionName)
-{
-	return true;
+{	
+	bool isOk = true; 
+	//check for match of number of variables and number of values 
+	if (varSpec->idListType != 0) {
+		if (varSpec->exprList != 0) {
+			if (varSpec->idListType->identifierList->size != varSpec->exprList->size) {
+				printf("Variable count and value count mismatch in function %s ", functionName);
+				isOk = false; 
+			}
+			else {
+				struct Expression* expr = varSpec->exprList->firstExpression; 
+				while (expr != NULL) {
+					//TODO: tackle the problem of how to retrieve the type of  expression if expression is an identifier
+					//so in check Expression type, there should be a call to getVariableFromTable
+					struct SemanticType* semanticType =checkExpressionType(expr); 
+					if (semanticType != NULL) {
+						if (semanticType->typeName != varSpec->idListType->type->typeName) {
+							printf("Types  mismatch in variable declaration in function %s", functionName);
+							isOk = false; 
+						}
+					}
+				}
+			}
+		}
+	}
+	else {
+		//The compiler not support untyped variables declaration
+		isOk = false; 
+	}
+	return isOk ;
 }
+
+//TODO: transform the multiple assignment to single assignment
+bool addLocalVariablesToTable(struct VarSpec* varSpec, struct Method* method) {
+	bool isOk = true;
+	//here assumpt that we check semantic for variables first, then add them to local variable table
+	if (checkSemanticVarSpec(varSpec, method->constMethodref->value.utf8)) {
+		//TODO : implement size for variable
+		if (varSpec->idListType != NULL) {
+			struct IdentifierList* idList = varSpec->idListType->identifierList;
+			struct Identifier* id = idList->firstId;
+			struct Type* type = varSpec->idListType->type;
+			while (id != NULL) {
+				if (getLocalVariableFromTable(method->localVariablesTable, id->name) == NULL) {
+					struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+					localVariable->id = hashtable_size(method->localVariablesTable) + 1;
+					struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType));
+					semanticType->typeName = type->typeName;
+					localVariable->type = semanticType;
+					hashtable_add(method->localVariablesTable, id->name, localVariable);
+				}
+				else {
+					isOk = false;
+					printf("Variable with the same name %s exists in the table", id->name);
+				}
+				id = id->nextId;
+			}
+		}
+		else {
+			//The compiler currently doesnt support declarations without type 
+			isOk = false; 
+		}
+	}
+	else {
+		isOk = false; 
+	}
+	return isOk; 
+}
+
+struct LocalVariable* getLocalVariableFromTable(char* varName, HashTable* variablesTable) {
+	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+
+	if (hashtable_get(variablesTable, varName, &result) == CC_OK) {
+		return result; 
+	}
+	//fail
+	return NULL; 
+}
+
+void addConstantToConstantTable(List* constantsTable, enum ConstantType type, void* value) {
+	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant));
+	constant->type = type;
+	switch (type) {
+		case CONSTANT_Utf8: {
+			if (getConstant(constantsTable, type, value) != NULL) {
+				constant->value.utf8 = (char*)value; 
+				list_add(constantsTable, constant); 
+			}
+			break;
+		}
+		case CONSTANT_String: {
+			if (getConstant(constantsTable, type, value) != NULL) {
+				constant->value.utf8 = (char*)value; 
+				list_add(constantsTable, constant); 
+			}
+			break;
+		}
+		case CONSTANT_Integer: {
+			if (getConstant(constantsTable, type, value) != NULL) {
+				constant->value.intValue = *((int*)value);
+				list_add(constantsTable, constant);
+			}
+			break;
+		}
+		case CONSTANT_Float: {
+			if (getConstant(constantsTable, type, value) != NULL) {
+				constant->value.floatValue = *((float*)value);
+				list_add(constantsTable, constant);
+			}
+			break;
+		}
+		case CONSTANT_Class: {
+			//check it
+			if (getConstant(constantsTable, type, value) != NULL) {
+				constant->value.utf8 = (char*)value;
+				list_add(constantsTable, constant);
+			}
+			break;
+		}
+	}
+}
+
+struct Constant* getConstant(List* constantsTable, enum ConstantType type, void* value) {
+	struct Constant* result = (struct Constant*)malloc(sizeof(struct Constant)); 
+	int size = list_size(constantsTable);
+	bool found = false; 
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(constantsTable, i, &result); 
+		if (result->type == type) {
+			switch (type) {
+				case CONSTANT_Utf8: {
+					if (strcpy(result->value.utf8, (char*)value) == 0) {
+						found = true; 
+					}
+					break;
+				}
+				case CONSTANT_String: {
+					if (strcpy(result->value.utf8, (char*)value) == 0) {
+						found = true;
+					}
+					break;
+				}
+				case CONSTANT_Integer: {
+					if (result->value.intValue == *((int*)value)) {
+						found = true;
+					}
+					break;
+				}
+				case CONSTANT_Float: {
+					if (result->value.floatValue == *((float*)value)) {
+						found = true; 
+					}
+					break;
+				}
+				case CONSTANT_Class: {
+					if (strcpy(result->value.utf8, (char*)value) == 0) {
+						found = true;
+					}
+					break;
+				}									
+			}
+		}
+	}
+	if (!found) {
+		result = NULL; 
+	}
+	return result; 
+}
+
+
+
+bool addMethodRefToConstantTable(List* constantsTable, enum ConstantType type, char* className, char* methodName) {
+
+}
+
+
+/*
+//Global constant table
+bool addConstantToConstantTable(struct VarSpec* varSpec, HashTable* constantsTable) {
+
+	bool isOk = true;
+	//here assumpt that we check semantic for constants first, then add them to constants table
+	if (checkSemanticConstSpec(varSpec, NULL)) {
+		//TODO : implement size for variable
+		if (varSpec->idListType != NULL) {
+			struct Identifier* id = varSpec->idListType->identifierList->firstId;
+			struct Type* type = varSpec->idListType->type;
+			while (id != NULL) {
+				if (getConstant(id->name, constantsTable) == NULL) {
+					struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant));
+					constant->id = hashtable_size(constantsTable) + 1;
+					struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType));
+					semanticType->typeName = type->typeName;
+					localVariable->type = semanticType;
+					hashtable_add(method->localVariablesTable, id->name, localVariable);
+				}
+				else {
+					isOk = false;
+					printf("Variable with the same name %s exists in the table", id->name);
+				}
+				id = id->nextId;
+			}
+		}
+		else {
+			//The compiler currently doesnt support declarations without type 
+			isOk = false;
+		}
+	}
+	else {
+		isOk = false;
+	}
+	return isOk;
+}
+
+*/

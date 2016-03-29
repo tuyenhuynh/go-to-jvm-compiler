@@ -38,6 +38,7 @@ struct Imports {
 struct DeclarationList {
 	struct Declaration *firstDecl;
 	struct Declaration *lastDecl;
+	int size; 
 };
 
 struct Import {
@@ -76,6 +77,7 @@ struct VarSpec {
 struct VarSpecList {
 	struct VarSpec *firstVarSpec;
 	struct VarSpec *lastVarSpec;
+	int size; 
 };
 
 struct ConstDecl {
@@ -92,6 +94,7 @@ struct FunctionDecl {
 struct IdentifierList {
 	struct Identifier* firstId;  
 	struct Identifier* lastId; 
+	int size; 
 };
 
 struct IdentifierListType {
@@ -102,6 +105,7 @@ struct IdentifierListType {
 struct ExpressionList {
 	struct Expression *firstExpression;
 	struct Expression *lastExpression;
+	int size; 
 };
 
 enum TypeNames {
