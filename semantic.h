@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <semantic_struct.h>
+#include "list.h"
 
 struct SemanticType* checkExpressionType(struct Expression* expr);
 
@@ -39,8 +40,8 @@ bool addLocalConstantsToConstantTable(struct VarSpec* varSpec, struct Method* me
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 struct Constant* getConstantFromLocalConstantTable(char* constName, HashTable* constsTable, struct Method* method); 
 
-
-bool addConstantToConstantTable(List* constantsTable, enum ConstantType type, void* constant); 
+bool checkSemanticConstSpec(struct VarSpec* varSpec, char* functionName);
+void addConstantToConstantTable(List* constantsTable, enum ConstantType type, void* constant); 
 bool addMethodRefToConstantTable(List* constantsTable, enum ConstantType type, char* methodName, char* className); 
 struct Constant* getConstant(List* constantsTable, enum ConstantType type, void* value);
 

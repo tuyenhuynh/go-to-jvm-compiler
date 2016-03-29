@@ -3,7 +3,6 @@
 #include "semantic_struct.h"
 #include "helpers.h"
 
-
 struct SemanticType* checkExpressionType(struct Expression* expr) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
 	switch (expr->exprType) 
@@ -649,6 +648,8 @@ bool checkSemanticParamList(struct ParameterList* paramList) {
 }
 
 bool checkSemanticReturnType(struct Result* result) {
+	//The compiler supports functions which return one value
+	//if(result->)
 	return true;
 }
 
@@ -662,7 +663,14 @@ bool checkSemanticScanStmt(struct ScanStatement* scanStmt, char* f) {
 
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt)
 {
-	return true;
+	//Currently, we support return statement which return one expression
+	if (returnStmt->exprList->size == 1) {
+		return true;
+	}
+	else {
+		printf("Too many expressions in return statement"); 
+		return false; 
+	}
 }
 
 bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, char* functionName)
