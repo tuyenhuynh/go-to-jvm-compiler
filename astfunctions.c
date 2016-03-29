@@ -238,11 +238,12 @@ struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *_idList, str
 }
 
 struct VarSpecList *CreateVarSpecList(struct VarSpec *_varSpec) {
+	
 	struct VarSpecList *Result = (struct VarSpecList *)malloc(sizeof(struct VarSpecList));
 
 	Result->firstVarSpec = _varSpec;
 	Result->lastVarSpec = _varSpec;
-
+	Result->size = 1;
 	return Result;
 }
 
@@ -253,6 +254,7 @@ struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct
 	else {
 		_varSpecList->lastVarSpec->nextVarSpec = _varSpec;
 		_varSpecList->lastVarSpec = _varSpec;
+		_varSpecList->size += 1; 
 	}
 	
 	return _varSpecList;
@@ -429,7 +431,7 @@ struct ExpressionList *CreateExpressionList(struct Expression *_expr) {
 
 	Result->firstExpression = _expr;
 	Result->lastExpression = _expr;
-
+	Result->size = 1; 
 	return Result;
 
 }
@@ -441,6 +443,7 @@ struct ExpressionList *AppendToExpressionList(struct ExpressionList *_exprList, 
 	else {
 		_exprList->lastExpression->nextExpr = _expr;
 		_exprList->lastExpression = _expr;
+		_exprList->size += 1; 
 	}
 	return _exprList; 
 }
@@ -552,6 +555,7 @@ struct IdentifierList *CreateIdList(char *_idName) {
 	struct Identifier* id = CreateIdentifier(_idName); 
 	Result->firstId = id;
 	Result->lastId = id;
+	Result->size = 1; 
 	return Result;
 }
 
@@ -569,7 +573,8 @@ struct IdentifierList *AppendToIdList(struct IdentifierList *_idList, char *_idN
 	}
 	else {
 		_idList->lastId->nextId = id; 
-		_idList->lastId = id; 
+		_idList->lastId = id;
+		_idList->size += 1; 
 	}
 	return _idList;
 }
@@ -648,7 +653,7 @@ struct StatementList *CreateStmtList(struct Statement *_stmt) {
 
 	Result->firstStmt = _stmt;
 	Result->lastStmt = _stmt;
-
+	
 	return Result;
 }
 
