@@ -448,6 +448,7 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 	{
 		struct Expression *leftExpr = leftExprList->firstExpression;
 		struct Expression *rightExpr = rightExprList->firstExpression;
+		//Dont need to check for isOk
 		while(leftExpr != NULL && isOk != false)
 		{
 			isOk = checkSemanticAssignStmt(leftExpr, rightExpr, NULL);
@@ -466,6 +467,7 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 
 bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, char* functionName)
 {
+	
 	if (leftExpr->semanticType->typeName != rightExpr->semanticType->typeName)
 		return false;
 	return true;
@@ -554,30 +556,30 @@ bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName) 
 	{
 		switch (switchStmt->initialAndExpression->switchType)
 		{
-		case WITH_INITIAL_STMT:
-		{
-			isOk &= checkSemanticSimpleStmt(switchStmt->initialAndExpression->initialStmt, NULL);
-			break;
-		}
-		case WITH_EXPRESSION:
-		{
-			if (switchStmt->initialAndExpression->expression == NULL)
+			case WITH_INITIAL_STMT:
 			{
-				// add error message 
-				isOk &= false;
+				isOk &= checkSemanticSimpleStmt(switchStmt->initialAndExpression->initialStmt, NULL);
+				break;
 			}
-			break;
-		}
-		case WITH_INITIAL_AND_EXPRESSION:
-		{
-			isOk &= checkSemanticSimpleStmt(switchStmt->initialAndExpression->initialStmt, NULL);
-			if (switchStmt->initialAndExpression->expression == NULL)
+			case WITH_EXPRESSION:
 			{
-				// add error message 
-				isOk &= false;
+				if (switchStmt->initialAndExpression->expression == NULL)
+				{
+					// add error message 
+					isOk &= false;
+				}
+				break;
 			}
-			break;
-		}
+			case WITH_INITIAL_AND_EXPRESSION:
+			{
+				isOk &= checkSemanticSimpleStmt(switchStmt->initialAndExpression->initialStmt, NULL);
+				if (switchStmt->initialAndExpression->expression == NULL)
+				{
+					// add error message 
+					isOk &= false;
+				}
+				break;
+			}
 		}
 	}
 	else
@@ -636,20 +638,94 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, char* f
 }
 
 bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName) {
-	return true; 
+	bool isOk = true; 
+	if (forStmt->forClause != NULL) {
+		struct ForInitStmt* forInit = forStmt->forClause->forInitStmt; 
+		struct ForCondition* forCondition = forStmt->forClause->forCondition; 
+		struct ForPostStmt* forPostStmt = forStmt->forClause->forPostStmt; 
+		if (forInit != NULL) {
+			if (forInit->initStmt->stmtType == EXPR_SIMPLE_STMT) {
+				printf("Initial statment of for expression cannot be an expression\n"); 
+				isOk = false; 
+			}
+		}
+		//check for expression type of for-condition
+		if (forCondition != NULL) {
+			checkExpressionType(forCondition->expression);
+			if (forCondition->expression->semanticType != BOOL_TYPE_NAME) {
+				printf("Condition of for statment must be boolean type\n"); 
+				isOk = false; 
+			}
+		}
+		if (forPostStmt != NULL) {
+			if (forPostStmt->postStmt->stmtType == EXPR_SIMPLE_STMT) {
+				printf("Post statment of for expression cannot be an expression\n");
+				isOk = false; 
+			}
+		}
+	}
+	return isOk; 
 }
 
 bool checkSemanticSignature(struct Signature* signature) {
-	return true;
+	bool isOk = true; 
+	if (signature->paramInParen->paramList != NULL) {
+		isOk = checkSemanticParamList(signature->paramInParen->paramList); 
+	}
+	if (signature->result != NULL) {
+		isOk &= checkSemanticReturnType(signature->result); 
+	}
+	return isOk;
 }
 
 bool checkSemanticParamList(struct ParameterList* paramList) {
-	return true;
+	struct ParameterDeclare* param = paramList->firstParamDecl; 
+	bool isOk = true; 
+	while (param != NULL) {
+		if (param->identifier == NULL) {
+			printf("Semantic error. Parameter name not given.\n" ); 
+			isOk = false; 
+		}
+		if (param->type->typeName == IDENTIFIER_TYPE_NAME) {
+			printf("Semantic error. Unsupport type name: %d", param->type->typeName); 
+			isOk = false; 
+		}
+		param = param->nextParamDecl; 
+	}
+	return isOk;
 }
 
 bool checkSemanticReturnType(struct Result* result) {
+	bool isOk; 
 	//The compiler supports functions which return one value
-	//if(result->)
+	if (result->type != NULL) {
+		//INT|FLOAT|STRING|BOOL
+		if (result->type->typeName == IDENTIFIER_TYPE_NAME) {
+			printf("Semantic error. Unsupport type name: %d as return type\n", result->type->typeName);
+			isOk = false;
+		}
+	}
+	else {
+		//(INT|FLOAT|STRING|BOOL)
+		if (result->paramInParen->paramList != NULL) {
+			struct ParameterList* paramList = result->paramInParen->paramList;
+			if (paramList->firstParamDecl->nextParamDecl != NULL) {
+				if (paramList->firstParamDecl->type == IDENTIFIER_TYPE_NAME) {
+					printf("Semantic error. Unsupport type name: %d as return type\n", IDENTIFIER_TYPE_NAME);
+					isOk = false;
+				}
+			}
+			else {
+				printf("Semantic error. Function with multiple return values not supported.\n");
+				isOk = false;
+			}
+		}
+		else {
+			//()
+			printf("Semantic error. Return type undefined.\n");
+			isOk = false;
+		}
+	}
 	return true;
 }
 
@@ -663,7 +739,7 @@ bool checkSemanticScanStmt(struct ScanStatement* scanStmt, char* f) {
 
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt)
 {
-	//Currently, we support return statement which return one expression
+	//Currently ,only statements which return one expression are implemented
 	if (returnStmt->exprList->size == 1) {
 		return true;
 	}
@@ -675,7 +751,25 @@ bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt)
 
 bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, char* functionName)
 {
-	return true;
+	bool isOk = true; 
+	if (exprList->size != paramList->size) {
+		printf("Formal parameter count and parameter count mismatch\n"); 
+		isOk = false; 
+	}
+	else {
+		struct Expression* expr = exprList->firstExpression; 
+		struct ParameterDeclare* param = paramList->firstParamDecl; 
+		while (expr != NULL) {
+			//call check expression type to define type
+			checkExpressionType(expr);
+			if (expr->semanticType != param->type) {
+				printf("Formal paramter's type and parameter's type mismatch\n"); 
+				isOk = false; 
+			}
+			expr = expr->nextExpr; 
+		}
+	}
+	return isOk;
 }
 
 bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName) {
@@ -825,47 +919,86 @@ struct LocalVariable* getLocalVariableFromTable(char* varName, HashTable* variab
 	return NULL; 
 }
 
-void addConstantToConstantTable(List* constantsTable, enum ConstantType type, void* value) {
-	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant));
-	constant->type = type;
-	switch (type) {
-		case CONSTANT_Utf8: {
-			if (getConstant(constantsTable, type, value) != NULL) {
-				constant->value.utf8 = (char*)value; 
-				list_add(constantsTable, constant); 
+
+struct Constant* addConstantToConstantsTable(List* constantsTable, enum ConstantType type, void* value) {
+	struct Constant* constant = getConstant(constantsTable, type, value); 
+	if (constant == NULL) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant));
+		constant->type = type;
+		switch (type) {
+			case CONSTANT_Utf8: {
+				if (getConstant(constantsTable, type, value) != NULL) {
+					constant->value.utf8 = (char*)value;
+					list_add(constantsTable, constant);
+				}
+				break;
 			}
-			break;
-		}
-		case CONSTANT_String: {
-			if (getConstant(constantsTable, type, value) != NULL) {
-				constant->value.utf8 = (char*)value; 
-				list_add(constantsTable, constant); 
+			case CONSTANT_String: {
+				if (getConstant(constantsTable, type, value) != NULL) {
+					constant->value.utf8 = (char*)value;
+					list_add(constantsTable, constant);
+				}
+				break;
 			}
-			break;
-		}
-		case CONSTANT_Integer: {
-			if (getConstant(constantsTable, type, value) != NULL) {
-				constant->value.intValue = *((int*)value);
-				list_add(constantsTable, constant);
+			case CONSTANT_Integer: {
+				if (getConstant(constantsTable, type, value) != NULL) {
+					constant->value.intValue = *((int*)value);
+					list_add(constantsTable, constant);
+				}
+				break;
 			}
-			break;
-		}
-		case CONSTANT_Float: {
-			if (getConstant(constantsTable, type, value) != NULL) {
-				constant->value.floatValue = *((float*)value);
-				list_add(constantsTable, constant);
+			case CONSTANT_Float: {
+				if (getConstant(constantsTable, type, value) != NULL) {
+					constant->value.floatValue = *((float*)value);
+					list_add(constantsTable, constant);
+				}
+				break;
 			}
-			break;
-		}
-		case CONSTANT_Class: {
-			//check it
-			if (getConstant(constantsTable, type, value) != NULL) {
-				constant->value.utf8 = (char*)value;
-				list_add(constantsTable, constant);
+			case CONSTANT_Class: {
+				//check it
+				if (getConstant(constantsTable, type, value) != NULL) {
+					constant->value.utf8 = (char*)value;
+					list_add(constantsTable, constant);
+				}
+				break;
 			}
-			break;
 		}
 	}
+	return constant; 
+}
+
+
+struct Constant* addRefConstantToConstantsTable(List* constantsTable, enum ConstantType type, void* const1, void* const2) {
+	
+	struct Constant* constant1 = addConstantToConstantsTable(constantsTable, CONSTANT_Utf8, const1);
+	struct Constant* constant2 = addConstantToConstantsTable(constantsTable, CONSTANT_Utf8, const2);
+	
+	struct Constant* constant = getRefConstant(constantsTable, type, (char*)const1, (char*)const2);
+	if (constant == NULL) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant));
+		constant->type = type; 
+		constant->value.ref.const1 = constant1->value.utf8; 
+		constant->value.ref.const2 = constant2->value.utf8; 
+	}
+	return constant; 
+}
+
+struct Constant* getRefConstant(List* constantsTable, enum  ConstantType type, char* const1, char* const2) {
+	int size = list_size(constantsTable); 
+	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant)); 
+	bool found = false; 
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(constantsTable, i, &constant); 
+		if (strcpy(constant->value.ref.const1, const1) == 0
+			&& strcpy(constant->value.ref.const2, const2) == 0
+			&& type == constant->type) {
+			found = true; 
+		}
+	}
+	if (!found) {
+		constant = NULL; 
+	}
+	return constant; 
 }
 
 struct Constant* getConstant(List* constantsTable, enum ConstantType type, void* value) {
@@ -915,11 +1048,24 @@ struct Constant* getConstant(List* constantsTable, enum ConstantType type, void*
 	return result; 
 }
 
-
-
-bool addMethodRefToConstantTable(List* constantsTable, enum ConstantType type, char* className, char* methodName) {
-
+struct Method* getMethod(struct Class* class, char* methodName) {
+	struct Method* method = (struct Method*) malloc(sizeof(struct Method));
+	if (hashtable_get(class->methodsTable, methodName, &method) == CC_OK) {
+		return method; 
+	}
+	return NULL; 
 }
+
+struct Field* getField(struct Class* class, char* fieldName) {
+	struct Field* field = (struct Field*) malloc(sizeof(struct Field));
+	if (hashtable_get(class->fieldsTable, fieldName, &field) == CC_OK) {
+		return field; 
+	}
+	return NULL; 
+}
+
+
+
 
 
 /*

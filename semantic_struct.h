@@ -21,9 +21,9 @@ struct Constant {
 		float floatValue;
 		char* utf8;
 		struct {
-			int classId; 
-			int methodId; 
-		}methodRef;
+			char* const1; 
+			char* const2; 
+		}ref;
 	}value;
 	int id; 
 	 
@@ -33,6 +33,7 @@ struct Constant {
 struct LocalVariable {
 	int id; 
 	struct Type* type; 
+	char* name; 
 };
 
 struct Field {

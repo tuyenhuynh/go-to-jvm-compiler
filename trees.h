@@ -321,13 +321,14 @@ struct ParamInParen {
 struct ParameterList {
 	struct ParameterDeclare *firstParamDecl;
 	struct ParameterDeclare *lastParamDecl;
-
+	int size;
 };
 
 struct ParameterDeclare {
 	struct Type *type;
 	char* identifier;
 	struct ParameterDeclare* nextParamDecl; 
+	
 };
 
 struct Result {

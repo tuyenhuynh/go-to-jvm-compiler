@@ -863,6 +863,7 @@ struct ParameterList *CreateParameterDeclareList(struct ParameterDeclare *_param
 	struct ParameterList *Result = (struct ParameterList *)malloc(sizeof(struct ParameterList));
 	Result->firstParamDecl = _paramDecl;
 	Result->lastParamDecl = _paramDecl;
+	Result->size = 1;
 
 	return Result;
 }
@@ -873,7 +874,8 @@ struct ParameterList *AppendToParameterDeclareList(struct ParameterList *_paramD
 	}
 	else {
 		_paramDeclList->lastParamDecl->nextParamDecl = _paramDecl; 
-		_paramDeclList->lastParamDecl = _paramDecl; 
+		_paramDeclList->lastParamDecl = _paramDecl;
+		_paramDeclList->size += 1; 
 	}
 	return _paramDeclList; 
 }

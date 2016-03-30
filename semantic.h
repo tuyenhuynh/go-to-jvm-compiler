@@ -38,11 +38,15 @@ struct LocalVariable* getLocalVariableFromTable(char* varName, HashTable* variab
 
 bool addLocalConstantsToConstantTable(struct VarSpec* varSpec, struct Method* method); 
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
-struct Constant* getConstantFromLocalConstantTable(char* constName, HashTable* constsTable, struct Method* method); 
 
 bool checkSemanticConstSpec(struct VarSpec* varSpec, char* functionName);
-void addConstantToConstantTable(List* constantsTable, enum ConstantType type, void* constant); 
-bool addMethodRefToConstantTable(List* constantsTable, enum ConstantType type, char* methodName, char* className); 
+struct Constant* addConstantToConstantsTable(List* constantsTable, enum ConstantType type, void* value);
+struct Constant* addRefConstantToConstantTable(List* constantsTable, enum ConstantType type, void* const1, void* const2);
 struct Constant* getConstant(List* constantsTable, enum ConstantType type, void* value);
+struct Constant* getRefConstant(List* constantsTable, enum  ConstantType type, char* const1, char* const2);
+struct Constant* getConstantFromLocalConstantTable(char* constName, HashTable* constsTable, struct Method* method);
+
+struct Field* getField(struct Class* class, char* fieldName); 
+struct Method* getMethod(struct Class* class, char* methodName); 
 
 #endif //_SEMANTIC_H_
