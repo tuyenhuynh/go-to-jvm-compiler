@@ -7,6 +7,9 @@
 #include <semantic_struct.h>
 #include "list.h"
 
+const char* CLASS_NAME = "GO_CLASS";
+struct  Class* semanticClass; 
+
 struct SemanticType* checkExpressionType(struct Expression* expr);
 
 struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primaryExpr); 
@@ -17,12 +20,12 @@ bool checkSemanticBlock(struct Block* block, char* functionName);
 bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName);
 bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName ); 
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl);
-bool checkSemanticSignature(struct Signature* signature);
-bool checkSemanticParamList(struct ParameterList* paramList); 
-bool checkSemanticReturnType(struct Result* result); 
+bool checkSemanticSignature(struct Signature* signature, char* functionName);
+bool checkSemanticParamList(struct ParameterList* paramList, char* functionName); 
+bool checkSemanticReturnType(struct Result* result, char* functionName); 
 bool checkSemanticPrintStmt(struct PrintStatement* printStmt, char* functionName);
 bool checkSemanticScanStmt(struct ScanStatement* scanStmt, char* functionName); 
-bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt); 
+bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, char* functionName); 
 bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, char* functionName);
 bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName);
 bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName); 
@@ -41,7 +44,7 @@ bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable
 
 bool checkSemanticConstSpec(struct VarSpec* varSpec, char* functionName);
 struct Constant* addConstantToConstantsTable(List* constantsTable, enum ConstantType type, void* value);
-struct Constant* addRefConstantToConstantTable(List* constantsTable, enum ConstantType type, void* const1, void* const2);
+struct Constant* addRefConstantToConstantsTable(List* constantsTable, enum ConstantType type, void* const1, void* const2);
 struct Constant* getConstant(List* constantsTable, enum ConstantType type, void* value);
 struct Constant* getRefConstant(List* constantsTable, enum  ConstantType type, char* const1, char* const2);
 struct Constant* getConstantFromLocalConstantTable(char* constName, HashTable* constsTable, struct Method* method);
@@ -49,4 +52,6 @@ struct Constant* getConstantFromLocalConstantTable(char* constName, HashTable* c
 struct Field* getField(struct Class* class, char* fieldName); 
 struct Method* getMethod(struct Class* class, char* methodName); 
 
+
+char* getFunctionReturnType(struct FunctionDecl* functionDecl);
 #endif //_SEMANTIC_H_

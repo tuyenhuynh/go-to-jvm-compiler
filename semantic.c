@@ -240,71 +240,88 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 	struct SemanticType* type = (struct SemanticType*)malloc(sizeof(struct SemanticType));
 	//type->IS_ARRAY_ACCESS = false; 
 	switch (primaryExpr->exprType) {
-	case BOOL_TRUE_EXPRESSION:
-	case BOOL_FALSE_EXPRESSION: {
-		//TODO: implement this
-		break;
-	}
-	case DECIMAL_EXPR: {
-		type->typeName = INT_TYPE_NAME;
-		break;
-	}
-	case FLOAT_EXPR: {
-		type->typeName = FLOAT32_TYPE_NAME;
-		break;
-	}
-	case STRING_EXPR: {
-		type->typeName = STRING_TYPE_NAME;
-		break;
-	}
-	case ID_EXPRESSION: {
-		type->typeName = IDENTIFIER_TYPE_NAME;
-		//add id to table of variable
-		break;
-	}
-	case EXPRESSION: {
-		//how to eliminate multilevel expression ???
-		struct SemanticType* nestedType = checkExpressionType(primaryExpr->expr);
-		type = nestedType;
-		break;
-	}
-	case PE_COMPOSITE: {
-		struct SemanticType* leftExpr = checkExpressionType(primaryExpr->primaryExpr->expr);
-		struct SemanticType* rightExpr = checkExpressionType(primaryExpr->expr);
-		if (leftExpr->typeName != IDENTIFIER_TYPE_NAME) {
-			printf("Semantic error. Invalid array name type \n");
-			type = NULL;
+		case BOOL_TRUE_EXPRESSION:
+		case BOOL_FALSE_EXPRESSION: {
+			//TODO: implement this
+			break;
 		}
-		if (rightExpr->typeName != INT_TYPE_NAME) {
-			printf("Semantic error. Index must be integer type \n"); 
-			type = NULL;
+		case DECIMAL_EXPR: {
+			type->typeName = INT_TYPE_NAME;
+			break;
 		}
-		else {
-			//if identifier and expression type (int) is ok, how to know type of array access ???
-			//from table of variables ???
-			//TODO: define the type of this expression
+		case FLOAT_EXPR: {
+			type->typeName = FLOAT32_TYPE_NAME;
+			break;
 		}
-		break;
-	}
-	case FUNCTION_CALL:
-	case FUNCTION_CALL_EMPTY: {
-		//TODO: search the definition of function in constant table to find return type 
-		break;
-	}
+		case STRING_EXPR: {
+			type->typeName = STRING_TYPE_NAME;
+			break;
+		}
+		case ID_EXPRESSION: {
+			type->typeName = IDENTIFIER_TYPE_NAME;
+			//add id to table of variable
+			break;
+		}
+		case EXPRESSION: {
+			//how to eliminate multilevel expression ???
+			struct SemanticType* nestedType = checkExpressionType(primaryExpr->expr);
+			type = nestedType;
+			break;
+		}
+		case PE_COMPOSITE: {
+			struct SemanticType* leftExpr = checkExpressionType(primaryExpr->primaryExpr->expr);
+			struct SemanticType* rightExpr = checkExpressionType(primaryExpr->expr);
+			if (leftExpr->typeName != IDENTIFIER_TYPE_NAME) {
+				printf("Semantic error. Invalid array name type \n");
+				type = NULL;
+			}
+			if (rightExpr->typeName != INT_TYPE_NAME) {
+				printf("Semantic error. Index must be integer type \n"); 
+				type = NULL;
+			}
+			else {
+				//if identifier and expression type (int) is ok, how to know type of array access ???
+				//from table of variables ???
+				//TODO: define the type of this expression
+			}
+			break;
+		}
+		case FUNCTION_CALL:
+		case FUNCTION_CALL_EMPTY: {
+			//TODO: search the definition of function in constant table to find return type 
+			break;
+		}
 	}
 	primaryExpr->semanticType = type;
 	return type;
 }
 
 bool doSemantic(struct Program* program) {
+	//create class to wrap programm
+	semanticClass = (struct Class*)malloc(sizeof(struct Class));
+	semanticClass->className = CLASS_NAME;
+	//Create constantsTable
+	List* constantsTable; 
+	list_new(&constantsTable); 
+	semanticClass->constantsTable = constantsTable; 
+	//create fieldsTable
+	HashTable* fieldsTable; 
+	hashtable_new(&fieldsTable); 
+	semanticClass->fieldsTable = fieldsTable;
+	//create methodsTable
+	HashTable* methodsTable; 
+	hashtable_new(&methodsTable); 
+	semanticClass->methodsTable = methodsTable; 
+	//add CLASS to constantsTAble
+	addConstantToConstantsTable(semanticClass->constantsTable, CONSTANT_Class, CLASS_NAME); 
+	//
 	bool isOk = true; 
 	if (program->pkg != NULL) {
 		char* packageName = program->pkg->packageName;
 		if (strcmp(packageName, "main") != 0) {
 			printf("Semantic error. Package name must be main\n");
 			isOk = false;
-		}
-		
+		}	
 	}
 
 	struct DeclarationList* declList = program->declList;
@@ -333,14 +350,48 @@ bool doSemantic(struct Program* program) {
 
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 	bool isOk = true; 
-	isOk = checkSemanticSignature(functionDecl->signature);
-	if (functionDecl->block != NULL) {
-		isOk &= checkSemanticBlock(functionDecl->block, functionDecl->identifier);
+	struct Method* method = (struct Method*)malloc(sizeof(struct Method)); 
+	if (hashtable_get(semanticClass->methodsTable, functionDecl, &method) != CC_OK) {
+		//add methodRef to constants table 
+		char* type = getFunctionReturnType(functionDecl); 
+		struct Constant* nameAndType = addRefConstantToConstantsTable(semanticClass->constantsTable, CONSTANT_NameAndType, functionDecl->identifier, type);
+		struct Constant* clazz = getConstant(semanticClass->constantsTable, CONSTANT_Class, CLASS_NAME); 
+
+
+		//TODO:check for existing of method reference
+
+		//add methodRef to constantsTable
+		
+		struct Constant* constMethodRef = (struct Constant*)malloc(sizeof(struct Constant));
+		constMethodRef->type = CONSTANT_Methodref; 
+		constMethodRef->id = hashtable_size(semanticClass->constantsTable) +1 ;
+		constMethodRef->value.ref.const1 = clazz; 
+		constMethodRef->value.ref.const2 = nameAndType; 
+		list_add(semanticClass->constantsTable, &constMethodRef);
+
+		/*-----------------*/
+		//add method to methodsTable of class
+		hashtable_add(semanticClass->methodsTable, functionDecl->identifier, method);
+
+		//add variable to local variables table
+		hashtable_new(&method->localVariablesTable); 
+
+		//check semantic of signature
+		isOk = checkSemanticSignature(functionDecl->signature, functionDecl->identifier);
+		//check semantic of body
+		if (functionDecl->block != NULL) {
+			isOk &= checkSemanticBlock(functionDecl->block, functionDecl->identifier);
+		}
+		else {
+			printf("Body of function %s not found", functionDecl->identifier);
+			isOk &= false;
+		}
 	}
 	else {
-		printf("Body of function %s not found", functionDecl->identifier); 
-		isOk &= false; 
+		printf("Function with the same name as % has been define\n", functionDecl->identifier); 
+		bool isOk = false;
 	}
+	//TODO:check for compatible of return type in the body and in signature
 	return isOk; 
 }
 
@@ -667,18 +718,18 @@ bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName) {
 	return isOk; 
 }
 
-bool checkSemanticSignature(struct Signature* signature) {
+bool checkSemanticSignature(struct Signature* signature, char* functionName) {
 	bool isOk = true; 
 	if (signature->paramInParen->paramList != NULL) {
-		isOk = checkSemanticParamList(signature->paramInParen->paramList); 
+		isOk = checkSemanticParamList(signature->paramInParen->paramList,functionName); 
 	}
 	if (signature->result != NULL) {
-		isOk &= checkSemanticReturnType(signature->result); 
+		isOk &= checkSemanticReturnType(signature->result, functionName); 
 	}
 	return isOk;
 }
 
-bool checkSemanticParamList(struct ParameterList* paramList) {
+bool checkSemanticParamList(struct ParameterList* paramList, char* functionName) {
 	struct ParameterDeclare* param = paramList->firstParamDecl; 
 	bool isOk = true; 
 	while (param != NULL) {
@@ -690,9 +741,31 @@ bool checkSemanticParamList(struct ParameterList* paramList) {
 			printf("Semantic error. Unsupport type name: %d", param->type->typeName); 
 			isOk = false; 
 		}
+		if (isOk) {
+			addParamToVariableTable(param, functionName);
+		}
 		param = param->nextParamDecl; 
 	}
 	return isOk;
+}
+
+
+bool addParamToVariableTable(struct ParameterDeclare* paramDeclare, struct Method* method) {
+	bool isOk = true; 
+	HashTable* hashtable = method->localVariablesTable; 
+	struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable)); 
+	if (hashtable_get(hashtable, paramDeclare->identifier, &localVariable) != CC_OK) {
+		localVariable->name = paramDeclare->identifier; 
+		localVariable->type = paramDeclare->type; 
+		localVariable->id = hashtable_size(hashtable) + 1; 
+		hashtable_add(hashtable, paramDeclare->identifier, &localVariable);
+	}
+	else {
+		//TODO: get method name
+		printf("Variable with the same name in function %s has been defined", "method"); 
+		isOk = false; 
+	}
+	return isOk; 
 }
 
 bool checkSemanticReturnType(struct Result* result) {
@@ -1064,8 +1137,45 @@ struct Field* getField(struct Class* class, char* fieldName) {
 	return NULL; 
 }
 
-
-
+char* getFunctionReturnType(struct FunctionDecl* functionDecl) {
+	char* result = NULL; 
+	if (functionDecl->signature->result != NULL) {
+		struct Result* returnType = functionDecl->signature->result; 
+		struct Type* type; 
+		if (returnType != NULL) {
+			type = returnType->type;
+		}
+		else if (returnType->paramInParen != NULL) {
+			if (returnType->paramInParen->paramList != NULL && returnType->paramInParen->paramList->firstParamDecl->nextParamDecl == NULL) {
+				type = returnType->paramInParen->paramList->firstParamDecl->type; 
+			}
+		}
+		if (type != NULL) {
+			if (type == BOOL_TYPE_NAME) {
+				result = "bool";
+			}
+			else if (type == INT_TYPE_NAME) {
+				result = "int";
+			}
+			else if (type == FLOAT32_TYPE_NAME) {
+				result = "float";
+			}
+			else if (type == STRING_TYPE_NAME) {
+				result = "string";
+			}
+			else {
+				result = NULL; 
+			}
+		}
+		else {
+			result = NULL; 
+		}
+	}
+	else {
+		result = "void"; 
+	}
+	result = NULL; 
+}
 
 
 /*
