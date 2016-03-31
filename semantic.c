@@ -853,15 +853,15 @@ bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName) {
 
 bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName) {
 	bool isOk = true;
-	if (constDecl->varSpec != NULL) {
-		struct VarSpec* varSpec = constDecl->varSpec; 
-		isOk = checkSemanticConstSpec(varSpec, functionName); 
+	if (constDecl->constSpec != NULL) {
+		struct ConstSpec* constSpec = constDecl->constSpec; 
+		isOk = checkSemanticConstSpec(constSpec, functionName); 
 	}
-	else if (constDecl->varSpecList != NULL) {
-		struct VarSpec* varSpec = constDecl->varSpecList->firstVarSpec;
-		while (varSpec != NULL) {
-			isOk &= checkSemanticConstSpec(varSpec, functionName);
-			varSpec = varSpec->nextVarSpec;
+	else if (constDecl->constSpecList != NULL) {
+		struct ConstSpec* constSpec = constDecl->constSpecList->firstConstSpec;
+		while (constSpec != NULL) {
+			isOk &= checkSemanticConstSpec(constSpec, functionName);
+			constSpec = constSpec->nextConstSpec;
 		}
 		//The compiler not support untyped variables declaration
 		isOk = false;
@@ -870,18 +870,18 @@ bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName) {
 }
 
 //TODO: check for value of constant (constant must have a value when it's declare, but in grammar, the value is optional)
-bool checkSemanticConstSpec(struct VarSpec* varSpec, char* functionName) {
+bool checkSemanticConstSpec(struct ConstSpec* constSpec, char* functionName) {
 	bool isOk = true;
 	//check for match of number of variables and number of values 
-	if (varSpec->idListType != 0) {
-		if (varSpec->exprList != 0) {
-			if (varSpec->idListType->identifierList->size != varSpec->exprList->size) {
+	if (constSpec->idListType != 0) {
+		if (constSpec->exprList != 0) {
+			if (constSpec->idListType->identifierList->size != constSpec->exprList->size) {
 				printf("Variable count and value count mismatch in function %s ", functionName);
 				isOk = false;
 			}
 			else {
-				struct Identifier* id = varSpec->idListType->identifierList->firstId;
-				struct Expression* expr = varSpec->exprList->firstExpression;
+				struct Identifier* id = constSpec->idListType->identifierList->firstId;
+				struct Expression* expr = constSpec->exprList->firstExpression;
 				while (expr != NULL) {
 					//TODO: tackle the problem of how to retrieve the type of  expression if expression is an identifier
 					//so in check Expression type, there should be a call to getVariableFromTable
@@ -895,7 +895,7 @@ bool checkSemanticConstSpec(struct VarSpec* varSpec, char* functionName) {
 					}
 					struct SemanticType* semanticType = checkExpressionType(expr);
 					if (semanticType != NULL) {
-						if (semanticType->typeName != varSpec->idListType->type->typeName) {
+						if (semanticType->typeName != constSpec->idListType->type->typeName) {
 							printf("Types  mismatch in variable declaration in function %s", functionName);
 							isOk = false;
 						}

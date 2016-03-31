@@ -55,7 +55,6 @@ DECIMAL		[0-9]+
 "if"            {return IF;}
 "continue"      {return CONTINUE;}
 "for"           {return FOR;}
-"import"        {return IMPORT;}
 "return"        {return RETURN;}
 "var"			{return VAR;}
 
@@ -76,8 +75,8 @@ DECIMAL		[0-9]+
 				}
 "nil"			{return NIL;}
 
-"fmt.Scanln"	{return	SCANLN; }
-"fmt.Println"	{return PRINTLN; }
+"scan"	{return	SCANLN; }
+"print"	{return PRINTLN; }
 \"(\\.|[^\\"])*\"	{ 		yylval.string = (char*)malloc(strlen(yytext) + 1);
 							strcpy(yylval.string, yytext);
 							return STRING_LITERAL;

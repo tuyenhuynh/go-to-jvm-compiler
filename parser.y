@@ -43,7 +43,6 @@
 	extern int yylex(void);
 	extern void yyerror(const char *msg);
 
-	struct Imports *imports;
 	struct DeclarationList *declList;
 	struct Program *root;
 %}
@@ -58,11 +57,7 @@
 	
 	struct Package *PackageUnion;
 	
-	struct Imports *ImportsUnion;
-	
 	struct DeclarationList *DeclListUnion;
-
-	struct Import *ImportUnion;
 	
 	struct Declaration *DeclarationUnion;
 
@@ -91,6 +86,10 @@
 	struct VarSpec *VarSpecUnion;
 
 	struct VarSpecList *VarSpecListUnion;
+
+	struct ConstSpec *ConstSpecUnion;
+
+	struct ConstSpecList *ConstSpecListUnion;
 
 	struct Statement *StmtUnion;
 
@@ -152,11 +151,8 @@
 
 %type<ProgramUnion> program
 %type<PackageUnion> package
-%type<ImportsUnion> imports
 %type<DeclListUnion> declaration_list
-%type<ImportUnion> import
 %type<DeclarationUnion> declaration
-%type<StringListUnion> library_list
 %type<VarDeclUnion> var_declare
 %type<ConstDeclUnion> const_declare
 %type<FunctionDeclUnion> function_declaration
@@ -170,6 +166,8 @@
 %type<FunctionCallUnion> function_call
 %type<VarSpecUnion> var_specification
 %type<VarSpecListUnion> var_specification_list
+%type<ConstSpecUnion> const_specification
+%type<ConstSpecListUnion> const_specification_list
 %type<StmtUnion> statement
 %type<SimpleStmtUnion> simple_statement
 %type<ReturnStmtUnion> return_statement
@@ -196,7 +194,6 @@
 %type<ForPostStmtUnion> for_post_statement ; 
 %type<PrintStatementUnion> print_statement ; 
 %type<ScanStatementUnion> scan_statement ; 
-%type<IdentifierListUnion> scan_identifier_list; 
 
 %start program
 
@@ -216,7 +213,6 @@
 %token<floatValue> FLOAT_NUMBER 
 %token<string> STRING_LITERAL 
 %token PACKAGE
-%token IMPORT
 %token INT_TYPE FLOAT32_TYPE STRING_TYPE BOOL_TYPE NIL
 %token<boolValue> TRUE FALSE
 %token PLUS_PLUS MINUS_MINUS
@@ -238,30 +234,11 @@
 %%
 
 program: 
-	package imports declaration_list					{$$ = root = CreateProgram($1, $2, $3);}
+	package declaration_list					{$$ = root = CreateProgram($1, $2);}
 	;	
 
 package:
 	PACKAGE IDENTIFIER 								{$$ = CreatePackage($2);}
-	; 
-
-imports:
-														{}
-	|	imports import									{
-															imports = (struct Imports *)malloc(sizeof(struct Imports)); 	
-															$$ = AppendToImportsList(imports, $2);
-														}
-	; 
-
-import:
-	IMPORT STRING_LITERAL									{$$ = CreateImportFromLib($2);}
-	|	IMPORT '(' ')'										{}
-	|	IMPORT '(' library_list ')'							{$$ = CreateImportFromLibList($3);}
-	; 
-
-library_list:
-	STRING_LITERAL ';'									{$$ = CreateStringList($1);}			
-	|	library_list  STRING_LITERAL';'					{$$ = AppendToStringList($1, $2);}
 	; 
 
 declaration_list:
@@ -276,9 +253,9 @@ declaration:
 	; 
 
 const_declare:
-	CONST var_specification											{$$ = CreateConstDecl($2);}
+	CONST const_specification										{$$ = CreateConstDecl($2);}
 	|	CONST	'('	')'												{$$ = CreateConstDecl(NULL);}							
-	|	CONST	'(' var_specification_list ')'						{$$ = CreateConstDeclFromList($3);}
+	|	CONST	'(' const_specification_list ')'						{$$ = CreateConstDeclFromList($3);}
 	;
 
 type: 
@@ -315,6 +292,16 @@ var_specification_list:
 	|	var_specification_list  var_specification ';'	{$$ = AppendToVarSpecList($1, $2);}
 	; 
 
+const_specification: 
+	identifier_list_type ASSIGN_OP expression_list		{$$ = CreateCompositeConstSpecWtype($1, $3);}
+	|	identifier_list ASSIGN_OP expression_list		{$$ = CreateCompositeConstSpecWOType($1, $3);}
+	;  
+	
+const_specification_list: 
+	const_specification ';' 								{$$ = CreateConstSpecList($1);}
+	|	const_specification_list  const_specification ';'	{$$ = AppendToConstSpecList($1, $2);}
+	; 
+
 primary_expression:
 		TRUE											{$$ = CreateBoolExpr(BOOL_TRUE_EXPRESSION, $1);}
 	|	FALSE											{$$ = CreateBoolExpr(BOOL_FALSE_EXPRESSION, $1);}
@@ -325,7 +312,6 @@ primary_expression:
 	|	primary_expression '[' expression ']'			{$$ = CreateCompositePrimaryExpression(PE_COMPOSITE, $1, $3);}
 	|	function_call									{$$ = CreatePrimaryExpressionFromFuncCall(FUNCTION_CALL, $1);}
 	|	'(' expression ')'								{$$ = CreatePrimaryExpressionFromExpression(EXPRESSION, $2);}
-	|	primary_expression '.' IDENTIFIER
 	; 
 
 function_call:
@@ -374,7 +360,7 @@ statement:
 	|	if_statement									{$$ = CreateStmtFromIfStmt(IF_STMT, $1);}
 	|	switch_statement								{$$ = CreateStmtFromSwitchStmt(SWITCH_STMT, $1);}
 	|	for_statement									{$$ = CreateStmtFromForStmt(FOR_STMT, $1);}
-	|	print_statement									{$$ = CreateStmtFromPrinStmt(PRINT_STMT, $1);}
+	|	print_statement									{$$ = CreateStmtFromPrintStmt(PRINT_STMT, $1);}
 	|	scan_statement									{$$ = CreateStmtFromScanStmt(SCAN_STMT, $1);}
 	; 
 
@@ -516,13 +502,8 @@ print_statement:
 	; 
 
 scan_statement:
-	SCANLN '(' scan_identifier_list ')'						{$$ = CreateScanStmt ($3) ; }
-	; 
-
-scan_identifier_list:										
-	'&'	IDENTIFIER											{$$ = CreateIdList($2) ;}
-	|	scan_identifier_list ',' '&'	IDENTIFIER			{$$ = AppendToIdList($1, $4) ;}
-	;									
+	SCANLN '(' identifier_list ')'						{$$ = CreateScanStmt ($3) ; }
+	; 									
 
 %%
 

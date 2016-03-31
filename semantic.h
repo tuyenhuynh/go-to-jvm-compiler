@@ -54,4 +54,7 @@ struct Method* getMethod(struct Class* class, char* methodName);
 
 
 char* getFunctionReturnType(struct FunctionDecl* functionDecl);
+
+bool addParamToVariableTable(struct ParameterDeclare* paramDeclare, struct Method* method);
+
 #endif //_SEMANTIC_H_

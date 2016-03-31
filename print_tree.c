@@ -14,7 +14,6 @@ void printProgram(char* output) {
 		int rootId = maxId; 
 		printf("%d[label = root]", rootId);
 		printPackage(rootId, root->pkg); 
-		printImports(rootId, root->imports); 
 		printDeclarationList(rootId, root->declList);
 		printf("\n}\n");
 		fclose(stdout);
@@ -31,16 +30,6 @@ void printPackage(int parentId, struct Package* package) {
 	}
 }
 
-void printImport(int parentId, struct Import* import) {
-	
-}
-
-void printImports(int parentId, struct Imports* imports) {
-	
-}
-
-void printImportStatementList(int parentId, struct ImportStmtList* importStmtList) {}
-
 void printPrimitiveExpression(int parentId, char*name, char*value) {
 	maxId++; 
 	int nodeId =maxId; 
@@ -48,6 +37,7 @@ void printPrimitiveExpression(int parentId, char*name, char*value) {
 	maxId++; 
 	printEdgeWithDestName(nodeId, maxId, value);
 }
+
 void printExpression(int parentId, struct Expression* expression) {
 	if (expression != NULL) {
 		maxId++;
@@ -247,11 +237,11 @@ void printConstDecl(int parentId, struct ConstDecl * constDecl){
 		maxId++; 
 		int id = maxId;
 		printEdgeWithDestName(parentId, id, "CONST");
-		if (constDecl->varSpec != NULL) {
-			printVarSpec(id, constDecl->varSpec); 
+		if (constDecl->constSpec != NULL) {
+			printConstSpec(id, constDecl->constSpec); 
 		}
-		else if (constDecl->varSpecList != NULL) {
-			printVarSpecList(id, constDecl->varSpecList);
+		else if (constDecl->constSpecList != NULL) {
+			printConstSpecList(id, constDecl->constSpecList);
 		}
 	}
 }
@@ -292,13 +282,42 @@ void printVarSpec(int parentId, struct VarSpec* varSpec){
 }
 
 void printVarSpecList(int parentId, struct VarSpecList* varSpecList){
-	if (printVarSpecList != NULL) {
+	if (varSpecList != NULL) {
 		int id = ++maxId; 
 		printEdgeWithDestName(parentId, id, "VAR_SPEC_LIST");
 		struct VarSpec* varSpec = varSpecList->firstVarSpec; 
 		while (varSpec != NULL) {
 			printVarSpec(id, varSpec);
 			varSpec = varSpec->nextVarSpec;
+		}
+	}
+}
+
+void printConstSpec(int parentId, struct ConstSpec* constSpec) {
+	if (constSpec != NULL) {
+		maxId++;
+		int id = maxId;
+		printEdgeWithDestName(parentId, id, "CON_SPEC");
+		if (constSpec->idListType != NULL) {
+			printIdentifierList(id, constSpec->idListType->identifierList);
+			printTypeName(id, constSpec->idListType->type);
+		}
+		else if (constSpec->idList != NULL) {
+			printIdentifierList(id, constSpec->idList);
+		}
+
+		printExpressionList(id, constSpec->exprList);
+	}
+}
+
+void printConstSpecList(int parentId, struct ConstSpecList* constSpecList) {
+	if (constSpecList != NULL) {
+		int id = ++maxId;
+		printEdgeWithDestName(parentId, id, "CONST_SPEC_LIST");
+		struct ConstSpec* constSpec = constSpecList->firstConstSpec;
+		while (constSpec != NULL) {
+			printConstSpec(id, constSpec);
+			constSpec = constSpec->nextConstSpec;
 		}
 	}
 }

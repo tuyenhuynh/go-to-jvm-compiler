@@ -4,7 +4,7 @@
 #include "trees.h"
 #include <stdlib.h>
 
-struct Program *CreateProgram(struct Package *_pkg, struct Imports *_imports, struct DeclarationList *_declList);
+struct Program *CreateProgram(struct Package *_pkg, struct DeclarationList *_declList);
 struct Package *CreatePackage(char *_pkgName);
 struct Imports *AppendToImportsList(struct Imports *_imports, struct Import *_import);
 struct DeclarationList * CreateDeclarationList(struct Declaration * _decl);
@@ -12,8 +12,8 @@ struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declLis
 struct Declaration * CreateDeclarationFromVarDecl(enum DeclType _declType, struct VarDecl * _varDecl);
 struct Declaration * CreateDeclarationFromConstDecl(enum DeclType _declType, struct ConstDecl * _constDecl);
 struct Declaration * CreateDeclarationFromFuncDecl(enum DeclType _declType, struct FunctionDecl * _funcDecl);
-struct ConstDecl *CreateConstDecl(struct VarSpec *_varSpec);
-struct ConstDecl * CreateConstDeclFromList(struct VarSpecList * _varSpecList);
+struct ConstDecl *CreateConstDecl(struct ConstSpec *_constSpec);
+struct ConstDecl * CreateConstDeclFromList(struct ConstSpecList * _constSpecList);
 struct Identifier* CreateIdentifier(char* _idName);
 struct StringList* CreateStringList(char* _string);
 struct Import *CreateImportFromLib(char *_libName);
@@ -29,6 +29,10 @@ struct VarSpec *CreateCompositeVarSpecWtype(struct IdentifierListType *_idListTy
 struct VarSpec *CreateCompositeVarSpecWOType(struct IdentifierList *_idList, struct ExpressionList *_exprList);
 struct VarSpecList *CreateVarSpecList(struct VarSpec *_varSpec);
 struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct VarSpec *_varSpec);
+struct ConstSpec *CreateCompositeConstSpecWtype(struct IdentifierListType *_idListType, struct ExpressionList *_exprList);
+struct ConstSpec *CreateCompositeConstSpecWOType(struct IdentifierList *_idList, struct ExpressionList *_exprList);
+struct ConstSpecList *CreateConstSpecList(struct ConstSpec *_constSpec);
+struct ConstSpecList *AppendToConstSpecList(struct ConstSpecList *_constSpecList, struct ConstSpec *_constSpec);
 struct PrimaryExpression * CreateBoolExpr(enum ExpressionType _exprType, int _boolValue);
 struct PrimaryExpression *CreateDecimalExpression(enum ExpressionType _exprType, int _decNumber);
 struct PrimaryExpression *CreateFloatExpression(enum ExpressionType _exprType, float _floatNumber);
@@ -52,7 +56,7 @@ struct Statement * CreateStmtFromBlock(enum StatementType _stmtType, struct Bloc
 struct Statement * CreateStmtFromIfStmt(enum StatementType _stmtType, struct IfStmt * _ifStmt);
 struct Statement * CreateStmtFromSwitchStmt(enum StatementType _stmtType, struct SwitchStmt * _switchStmt);
 struct Statement * CreateStmtFromForStmt(enum StatementType _stmtType, struct ForStmt * _forStmt);
-struct Statement * CreateStmtFromPrinStmt(enum StatementType _stmtType, struct PrintStatement * _printStatement);
+struct Statement * CreateStmtFromPrintStmt(enum StatementType _stmtType, struct PrintStatement * _printStatement);
 struct Statement * CreateStmtFromScanStmt(enum StatementType _stmtType, struct ScanStatement * _scanStatement);
 struct IdentifierList * CreateIdList(char * _id);
 struct IdentifierList * AppendToIdList(struct IdentifierList * _idList, char * _id);

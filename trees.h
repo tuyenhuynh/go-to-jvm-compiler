@@ -22,7 +22,6 @@ struct Identifier {
 
 struct Program {
 	struct Package *pkg;
-	struct Imports *imports;
 	struct DeclarationList *declList;
 };
 
@@ -80,9 +79,23 @@ struct VarSpecList {
 	int size; 
 };
 
+
+struct ConstSpec {
+	struct IdentifierListType *idListType;
+	struct IdentifierList *idList;
+	struct ExpressionList *exprList;
+	struct ConstSpec*  nextConstSpec;
+};
+
+struct ConstSpecList {
+	struct ConstSpec *firstConstSpec;
+	struct ConstSpec *lastConstSpec;
+	int size;
+};
+
 struct ConstDecl {
-	struct VarSpec *varSpec;
-	struct VarSpecList *varSpecList;
+	struct ConstSpec *constSpec;
+	struct ConstSpecList *constSpecList;
 };
 
 struct FunctionDecl {

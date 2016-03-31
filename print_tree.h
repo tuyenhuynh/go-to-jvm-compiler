@@ -18,13 +18,12 @@ void printProgram(char* output);
 void printPackage(int parentId, struct Package* package);
 void printDeclarationList(int parentId, struct DeclarationList* declarationList);
 void printDeclaration(int parentId, struct Declaration* declaration);
-void printImportStatementList(int parentId, struct ImportStmtList* importStmtList);
-void printImport(int parentId, struct Import* import);
-void printImports(int parentId, struct Imports* imports); 
 
 void printVarDecl(int parentId, struct VarDecl * varDecl);
 void printVarSpec(int parentId, struct VarSpec* varSpec); 
-void printVarSpecList(int parentId, struct VarSpecList* varSpecList); 
+void printVarSpecList(int parentId, struct VarSpecList* varSpecList);
+void printConstSpec(int parentId, struct ConstSpec* constSpec);
+void printConstSpecList(int parentId, struct ConstSpecList* constSpecList);
 void printAssignStatement(int parentId, struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, char* assign_op); 
 void printConstDecl(int parentId, struct ConstDecl * constDecl);
 void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl);

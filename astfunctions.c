@@ -1,11 +1,10 @@
 #include "trees.h"
 #include "astfunctions.h"
 
-struct Program *CreateProgram(struct Package *_pkg, struct Imports *_imports, struct DeclarationList *_declList) {
+struct Program *CreateProgram(struct Package *_pkg, struct DeclarationList *_declList) {
 	struct Program *Result = (struct Program *)malloc(sizeof(struct Program));
 
 	Result->pkg = _pkg;
-	Result->imports = _imports;
 	Result->declList = _declList;
 
 	return Result;
@@ -135,21 +134,21 @@ struct Declaration *CreateDeclarationFromFuncDecl(enum DeclType _declType, struc
 	return Result;
 }
 
-struct ConstDecl *CreateConstDecl(struct VarSpec *_varSpec) {
+struct ConstDecl *CreateConstDecl(struct ConstSpec *_constSpec) {
 	struct ConstDecl *Result = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
 
-	Result->varSpec = _varSpec;
-	Result->varSpecList = NULL;
+	Result->constSpec = _constSpec;
+	Result->constSpecList = NULL;
 	return Result;
 
 }
 
-struct ConstDecl *CreateConstDeclFromList(struct VarSpecList *_varSpecList) {
+struct ConstDecl *CreateConstDeclFromList(struct ConstSpecList *_constSpecList) {
 	struct ConstDecl *Result = (struct ConstDecl *)malloc(sizeof(struct ConstDecl));
 
-	Result->varSpecList = _varSpecList;
+	Result->constSpecList = _constSpecList;
 
-	Result->varSpec = NULL; 
+	Result->constSpec = NULL; 
 	return Result;
 
 }
@@ -258,6 +257,55 @@ struct VarSpecList *AppendToVarSpecList(struct VarSpecList *_varSpecList, struct
 	}
 	
 	return _varSpecList;
+}
+
+struct ConstSpec *CreateCompositeConstSpecWtype(struct IdentifierListType *_idListType, struct ExpressionList *_exprList) {
+
+	struct ConstSpec *Result = (struct ConstSpec *)malloc(sizeof(struct ConstSpec));
+
+	Result->idListType = _idListType;
+	Result->exprList = _exprList;
+	Result->idList = NULL;
+
+	Result->exprList = NULL;
+
+	Result->nextConstSpec = NULL;
+	return Result; 
+
+}
+struct ConstSpec *CreateCompositeConstSpecWOType(struct IdentifierList *_idList, struct ExpressionList *_exprList) {
+	struct ConstSpec *Result = (struct ConstSpec *)malloc(sizeof(struct ConstSpec));
+
+	Result->idList = _idList;
+
+	Result->idListType = NULL;
+
+	Result->exprList = _exprList;
+
+	Result->nextConstSpec = NULL;
+
+	return Result;
+
+}
+struct ConstSpecList *CreateConstSpecList(struct ConstSpec *_constSpec) {
+	struct ConstSpecList *Result = (struct ConstSpecList *)malloc(sizeof(struct ConstSpecList));
+
+	Result->firstConstSpec = _constSpec;
+	Result->lastConstSpec = _constSpec;
+	Result->size = 1;
+	return Result;
+}
+struct ConstSpecList *AppendToConstSpecList(struct ConstSpecList *_constSpecList, struct ConstSpec *_constSpec) {
+	if (_constSpecList == NULL) {
+		_constSpecList = CreateConstSpecList(_constSpec);
+	}
+	else {
+		_constSpecList->lastConstSpec->nextConstSpec = _constSpec;
+		_constSpecList->lastConstSpec = _constSpec;
+		_constSpecList->size += 1;
+	}
+
+	return _constSpecList;
 }
 
 struct PrimaryExpression *CreateBoolExpr(enum ExpressionType _exprType, int _boolValue) {
@@ -534,7 +582,7 @@ struct Statement *CreateStmtFromForStmt(enum StatementType _stmtType, struct For
 	return Result;
 }
 
-struct Statement *CreateStmtFromPrinStmt(enum StatementType _stmtType, struct PrintStatement *_printStatement) {
+struct Statement *CreateStmtFromPrintStmt(enum StatementType _stmtType, struct PrintStatement *_printStatement) {
 	struct Statement *Result = (struct Statement *)malloc(sizeof(struct Statement));
 	clearStatement(Result); 
 	Result->stmtType = _stmtType;
