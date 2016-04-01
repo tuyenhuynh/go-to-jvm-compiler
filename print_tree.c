@@ -469,19 +469,30 @@ void printIfStmt(int parentId, struct IfStmt* ifStmt){
 	}
 }
 
-void printIfStmtExpression(int parentId, struct IfStmtExpression* ifStmtExpr){
+void printIfStmtExpression(int parentId, struct IfStmtExpression* ifStmtExpr) {
 	if (ifStmtExpr != NULL) {
 
-		int id = ++maxId; 
-		printEdgeWithDestName(parentId, id, "EXPR_COND"); 
+		int id = ++maxId;
+		printEdgeWithDestName(parentId, id, "EXPR_COND");
 		if (ifStmtExpr->simpleStmt != NULL) {
-			printSimpleStmt(id, ifStmtExpr->simpleStmt); 
+			printSimpleStmt(id, ifStmtExpr->simpleStmt);
 		}
 		printExpression(id, ifStmtExpr->expr);
 	}
 }
 
-void printElseBlock(int parentId, struct ElseBlock* elseBlock){}
+void printElseBlock(int parentId, struct ElseBlock* elseBlock)
+{
+	int id = ++maxId; 
+	printEdgeWithDestName(parentId, id, "ELSE"); 
+
+	if (elseBlock->ifStmt != NULL) {
+		printIfStmt(id, elseBlock->ifStmt); 
+	}
+	else {
+		printBlock(id, elseBlock->block);
+	}
+}
 
 void printStmtList(int parentId, struct StatementList* stmtList){
 	if (stmtList != NULL) {

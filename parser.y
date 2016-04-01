@@ -197,6 +197,7 @@
 
 %start program
 
+%token NEW_LINE TAB
 %token<string> IDENTIFIER
 %token FUNC RETURN 
 %token ASSIGN_OP PLUS_ASSIGN_OP MINUS_ASSIGN_OP MUL_ASSIGN_OP DIV_ASSIGN_OP
