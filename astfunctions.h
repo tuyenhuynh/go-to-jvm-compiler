@@ -6,7 +6,6 @@
 
 struct Program *CreateProgram(struct Package *_pkg, struct DeclarationList *_declList);
 struct Package *CreatePackage(char *_pkgName);
-struct Imports *AppendToImportsList(struct Imports *_imports, struct Import *_import);
 struct DeclarationList * CreateDeclarationList(struct Declaration * _decl);
 struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl);
 struct Declaration * CreateDeclarationFromVarDecl(enum DeclType _declType, struct VarDecl * _varDecl);
@@ -16,8 +15,6 @@ struct ConstDecl *CreateConstDecl(struct ConstSpec *_constSpec);
 struct ConstDecl * CreateConstDeclFromList(struct ConstSpecList * _constSpecList);
 struct Identifier* CreateIdentifier(char* _idName);
 struct StringList* CreateStringList(char* _string);
-struct Import *CreateImportFromLib(char *_libName);
-struct Import *CreateImportFromLibList(struct StringList *libList);
 struct StringList* AppendToStringList(struct StringList* _strList, char* _string);
 struct Type *CreateTypeFromTypeName(enum TypeNames _typeName);
 struct Type *CreateCompositeType(struct Expression *_expr, enum TypeNames _typeName);

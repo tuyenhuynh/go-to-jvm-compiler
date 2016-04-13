@@ -29,23 +29,12 @@ struct Package {
 	char *packageName;
 };
 
-struct Imports {
-	struct Import *firstImport;
-	struct Import *lastImport;
-};
 
 struct DeclarationList {
 	struct Declaration *firstDecl;
 	struct Declaration *lastDecl;
 	int size; 
 };
-
-struct Import {
-	struct StringNode* lib; 
-	struct StringList* libList; 
-	struct Import* nextImport; 
-};
-
 
 enum DeclType {
 	CONST_DECL,
