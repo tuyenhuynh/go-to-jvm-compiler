@@ -53,7 +53,6 @@ struct VarSpec {
 	struct IdentifierListType *idListType;
 	struct IdentifierList *idList;
 	struct ExpressionList *exprList;
-	
 	struct VarSpec*  nextVarSpec; 
 };
 
@@ -63,6 +62,10 @@ struct VarSpecList {
 	int size; 
 };
 
+struct ConstDecl {
+	struct ConstSpec *constSpec;
+	struct ConstSpecList *constSpecList;
+};
 
 struct ConstSpec {
 	struct IdentifierListType *idListType;
@@ -75,11 +78,6 @@ struct ConstSpecList {
 	struct ConstSpec *firstConstSpec;
 	struct ConstSpec *lastConstSpec;
 	int size;
-};
-
-struct ConstDecl {
-	struct ConstSpec *constSpec;
-	struct ConstSpecList *constSpecList;
 };
 
 struct FunctionDecl {
@@ -124,7 +122,6 @@ enum ExpressionType {
 	STRING_EXPR,
 	ID_EXPRESSION,
 	PE_COMPOSITE,
-	FUNCTION_CALL_EMPTY,
 	FUNCTION_CALL, 
 	NOT_UNARY_EXPR,
 	PLUS_UNARY_EXPR,

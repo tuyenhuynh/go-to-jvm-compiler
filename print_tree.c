@@ -149,8 +149,7 @@ void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr)
 				printExpression(id, primaryExpr->expr);
 				break;
 			}
-			case FUNCTION_CALL: 
-			case FUNCTION_CALL_EMPTY:{
+			case FUNCTION_CALL:{
 				printFunctionCall(parentId, primaryExpr->funcCall); 
 				break; 
 			}
@@ -657,9 +656,6 @@ void expressionTypeToString(enum ExpressionType exprType, char* result) {
 		break;
 	case PE_COMPOSITE:
 		strcpy(result, "ARRAY_ACCESS");
-		break;
-	case FUNCTION_CALL_EMPTY:
-		strcpy(result, "FUNC_CALL");
 		break;
 	case FUNCTION_CALL:
 		strcpy(result, "FUNC_CALL");

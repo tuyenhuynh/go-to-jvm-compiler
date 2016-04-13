@@ -286,8 +286,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 			}
 			break;
 		}
-		case FUNCTION_CALL:
-		case FUNCTION_CALL_EMPTY: {
+		case FUNCTION_CALL:{
 			//TODO: search the definition of function in constant table to find return type 
 			break;
 		}
