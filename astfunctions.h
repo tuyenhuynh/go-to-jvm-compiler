@@ -127,4 +127,5 @@ struct ForPostStmt * CreateForPostStmt(struct  SimpleStmt * _postStmt);
 struct PrintStatement * CreatePrintStmt(struct ExpressionList * _expressionList); 
 
 struct ScanStatement * CreateScanStmt(struct IdentifierList* _identifierList);
+
 #endif //_AST_FUNCTIONS_H_

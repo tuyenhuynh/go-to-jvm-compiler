@@ -197,6 +197,7 @@ struct VarDecl *CreateCompositeVarDecl(struct VarSpecList *_varSpecList) {
 	return Result;
 }
 
+
 struct VarSpec *CreateSimpleVarSpecWType(struct IdentifierListType *_idListType) {
 	struct VarSpec *Result = (struct VarSpec *)malloc(sizeof(struct VarSpec));
 

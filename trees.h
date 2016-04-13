@@ -70,6 +70,7 @@ struct VarSpec {
 	struct IdentifierListType *idListType;
 	struct IdentifierList *idList;
 	struct ExpressionList *exprList;
+	
 	struct VarSpec*  nextVarSpec; 
 };
 

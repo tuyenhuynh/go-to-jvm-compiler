@@ -283,8 +283,9 @@ var_declare:
 	;
 
 var_specification: 
-	identifier_list_type								{$$ = CreateSimpleVarSpecWType($1);}
+	identifier_list_type							{$$ = CreateSimpleVarSpecWType($1);}
 	|	identifier_list_type ASSIGN_OP expression_list	{$$ = CreateCompositeVarSpecWtype($1, $3);}
+	|	identifier_list_type ASSIGN_OP '{' expression_list '}'	{$$ = CreateCompositeVarSpecWtype($1, $4);}
 	|	identifier_list ASSIGN_OP expression_list		{$$ = CreateCompositeVarSpecWOType($1, $3);}
 	;  
 	
