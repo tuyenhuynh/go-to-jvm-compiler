@@ -170,7 +170,6 @@ struct PrimaryExpression
 	struct PrimaryExpression *primaryExpr;
 	struct Expression *expr;
 	struct FunctionCall *funcCall; 
-
 	struct SemanticType* semanticType; 
 };
 
@@ -204,7 +203,7 @@ enum StatementType {
 };
 
 struct Statement {
-	enum StatemenType stmtType;
+	enum StatementType stmtType;
 	struct SimpleStmt *simpleStmt;
 	struct VarDecl *varDecl;
 	struct ConstDecl *constDecl;
@@ -221,10 +220,11 @@ struct Statement {
 struct StatementList {
 	struct Statement *firstStmt;
 	struct Statement *lastStmt;
+	int size;
 };
 
 struct SimpleStmt {
-	enum StatemenType stmtType;
+	enum StatementType stmtType;
 	struct Expression *expr;
 	struct ExpressionList *exprListLeft;
 	struct ExpressionList *exprListRight;
