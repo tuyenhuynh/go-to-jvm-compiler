@@ -21,14 +21,8 @@ struct Identifier {
 };
 
 struct Program {
-	struct Package *pkg;
 	struct DeclarationList *declList;
 };
-
-struct Package {
-	char *packageName;
-};
-
 
 struct DeclarationList {
 	struct Declaration *firstDecl;

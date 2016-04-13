@@ -1,19 +1,10 @@
 #include "trees.h"
 #include "astfunctions.h"
 
-struct Program *CreateProgram(struct Package *_pkg, struct DeclarationList *_declList) {
+struct Program *CreateProgram(struct DeclarationList *_declList) {
 	struct Program *Result = (struct Program *)malloc(sizeof(struct Program));
 
-	Result->pkg = _pkg;
 	Result->declList = _declList;
-
-	return Result;
-}
-
-struct Package *CreatePackage(char *_pkgName) {
-	struct Package *Result = (struct Package *)malloc(sizeof(struct Package));
-
-	Result->packageName = _pkgName;
 
 	return Result;
 }

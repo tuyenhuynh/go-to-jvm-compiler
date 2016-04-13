@@ -49,7 +49,6 @@ DECIMAL		[0-9]+
 "case"          {return CASE;}
 "struct"	    {return STRUCT;}
 "else"          {return ELSE;}
-"package"       {return PACKAGE;}
 "switch"		{return SWITCH;}
 "const"         {return CONST;}
 "if"            {return IF;}

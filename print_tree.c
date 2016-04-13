@@ -13,20 +13,9 @@ void printProgram(char* output) {
 		printf("digraph {\n");
 		int rootId = maxId; 
 		printf("%d[label = root]", rootId);
-		printPackage(rootId, root->pkg); 
 		printDeclarationList(rootId, root->declList);
 		printf("\n}\n");
 		fclose(stdout);
-	}
-}
-
-void printPackage(int parentId, struct Package* package) {
-	if (package != NULL) {
-		maxId++;
-		int id = maxId; 
-		printEdgeWithDestName(parentId, id, "PACKAGE");
-		maxId++; 
-		printEdgeWithDestName(id, maxId, package->packageName);
 	}
 }
 

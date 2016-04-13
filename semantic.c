@@ -316,14 +316,6 @@ bool doSemantic(struct Program* program) {
 	addConstantToConstantsTable(semanticClass->constantsTable, CONSTANT_Class, CLASS_NAME); 
 	//
 	bool isOk = true; 
-	if (program->pkg != NULL) {
-		char* packageName = program->pkg->packageName;
-		if (strcmp(packageName, "main") != 0) {
-			printf("Semantic error. Package name must be main\n");
-			isOk = false;
-		}	
-	}
-
 	struct DeclarationList* declList = program->declList;
 	
 	if (declList != NULL) {

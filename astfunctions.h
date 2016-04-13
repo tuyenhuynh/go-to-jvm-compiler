@@ -4,8 +4,7 @@
 #include "trees.h"
 #include <stdlib.h>
 
-struct Program *CreateProgram(struct Package *_pkg, struct DeclarationList *_declList);
-struct Package *CreatePackage(char *_pkgName);
+struct Program *CreateProgram(struct DeclarationList *_declList);
 struct DeclarationList * CreateDeclarationList(struct Declaration * _decl);
 struct DeclarationList *AppendToDeclarationList(struct DeclarationList *_declList, struct Declaration *_decl);
 struct Declaration * CreateDeclarationFromVarDecl(enum DeclType _declType, struct VarDecl * _varDecl);
