@@ -41,11 +41,12 @@ struct Method {
 	//method name, because class is unique
 	struct Constant* constMethodref;
 	//key: varname, value : LocalVariable
+	enum TypeNames returnType; 
 	HashTable* localVariablesTable; 
 };
 
 struct Class {
-	struct Constant* className; 
+	char* className; 
 	//node of list : struct Constant*
 	List* constantsTable; 
 	//key: char*, value: Field*; 

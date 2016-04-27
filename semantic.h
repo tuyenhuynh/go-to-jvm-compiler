@@ -1,5 +1,6 @@
 #ifndef _SEMANTIC_H_
 #define _SEMANTIC_H_
+
 #include <stdbool.h>
 #include <trees.h>
 #include <stdlib.h>
@@ -7,7 +8,8 @@
 #include <semantic_struct.h>
 #include "list.h"
 
-const char* CLASS_NAME = "GO_CLASS";
+char* CLASS_NAME = "GO_CLASS";
+
 struct  Class* semanticClass; 
 //node of list : struct Constant*
 List* constantsTable;
@@ -22,7 +24,7 @@ struct Constant* constantClass;
 
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method);
 
-struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primaryExpr); 
+struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primaryExpr, struct Method* method); 
 
 bool doSemantic(struct Program* program); 
 bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method);
@@ -32,7 +34,7 @@ bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, struct Method* metho
 bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method ); 
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl);
 bool checkSemanticSignature(struct Signature* signature, struct Method* method);
-bool checkSemanticParamList(struct ParameterList* paramList, struct Method* method); 
+bool checkSemanticParamList(struct ParameterList* paramList, char* functionName); 
 bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* method);
 bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method); 
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* method); 
@@ -47,20 +49,20 @@ bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rig
 bool checkSemanticBlock(struct Block* block, struct Method* method);
 bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, struct Method* method);
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
-struct LocalVariable* getLocalVariableFromTable(char* varName, HashTable* variablesTable);
+struct LocalVariable* getLocalVariableFromTable(HashTable* variablesTable, char* varName);
 
 bool addLocalConstantsToConstantTable(struct VarSpec* varSpec, struct Method* method); 
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 
-bool checkSemanticConstSpec(struct VarSpec* varSpec, struct Method* method);
+bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
 
 
 struct Constant* addUtf8ToConstantsTable(char* utf8);
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
 struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);
-struct Constant* addMethodRefToConstantsTable(char* methodName, enum TypeNames returnType);
+struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDescriptor);
 
-
+char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeStr);
 
 char* convertTypeToString(enum TypeNames type);
 
