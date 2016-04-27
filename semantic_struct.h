@@ -16,19 +16,15 @@ enum ConstantType {
 
 struct Constant {
 	enum ConstantType type;
-	union {
-		int intValue;
-		float floatValue;
-		char* utf8;
-		struct {
-			char* const1; 
-			char* const2; 
-		}ref;
-	}value;
+	int intValue; 
+	float floatValue; 
+	char* utf8; 
 	int id; 
-	 
+	//constant for class name, in case method references or field references
+	struct Constant* const1; 
+	//constant type name and type, in case method references or field references
+	struct Constant* const2;  
 };
-
 
 struct LocalVariable {
 	int id; 
@@ -56,7 +52,6 @@ struct Class {
 	HashTable* fieldsTable; 
 	//key: char*, value: struct Method* ; 
 	HashTable* methodsTable; 
-
 };
 
 

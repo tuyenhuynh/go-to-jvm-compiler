@@ -127,7 +127,9 @@ enum TypeNames {
 	FLOAT32_TYPE_NAME,
 	INT_TYPE_NAME,
 	STRING_TYPE_NAME,
-	BOOL_TYPE_NAME
+	BOOL_TYPE_NAME, 
+	VOID_TYPE_NAME, 
+	UNKNOWN_TYPE
 };
 
 struct Type {
@@ -176,7 +178,6 @@ struct Expression {
 
 struct SemanticType {
 	enum TypeNames typeName;
-
 };
 
 struct PrimaryExpression

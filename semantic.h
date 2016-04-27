@@ -9,51 +9,65 @@
 
 const char* CLASS_NAME = "GO_CLASS";
 struct  Class* semanticClass; 
+//node of list : struct Constant*
+List* constantsTable;
 
-struct SemanticType* checkExpressionType(struct Expression* expr);
+//key: char*, value: Field*; 
+HashTable* fieldsTable;
+
+//key: char*, value: struct Method* ; 
+HashTable* methodsTable;
+
+struct Constant* constantClass; 
+
+struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method);
 
 struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primaryExpr); 
+
 bool doSemantic(struct Program* program); 
-bool checkSemanticIfStmt(struct IfStmt* ifStmt, char* functionName);
-bool checkSemanticElseBlock(struct ElseBlock* elseBlock, char* functionName);
-bool checkSemanticBlock(struct Block* block, char* functionName); 
-bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, char* functionName);
-bool checkSemanticForStmt(struct ForStmt* forStmt, char* functionName ); 
+bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method);
+bool checkSemanticElseBlock(struct ElseBlock* elseBlock, struct Method* method);
+bool checkSemanticBlock(struct Block* block, struct Method* method); 
+bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, struct Method* method);
+bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method ); 
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl);
-bool checkSemanticSignature(struct Signature* signature, char* functionName);
-bool checkSemanticParamList(struct ParameterList* paramList, char* functionName); 
-bool checkSemanticReturnType(struct Result* result, char* functionName); 
-bool checkSemanticPrintStmt(struct PrintStatement* printStmt, char* functionName);
-bool checkSemanticScanStmt(struct ScanStatement* scanStmt, char* functionName); 
-bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, char* functionName); 
-bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, char* functionName);
-bool checkSemanticVarDecl(struct VarDecl* varDecl, char* functionName);
-bool checkSemanticConstDecl(struct ConstDecl* constDecl, char* functionName); 
-bool checkSemanticVarSpec(struct VarSpec* varSpec, char* functionName);
-bool checkSemanticStmt(struct Statement* statement, char* functionName);
-bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, char* functionName);
-bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, char* functionName);
-bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, char* functionName);
-bool checkSemanticBlock(struct Block* block, char* functionName);
-bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, char* functionName);
+bool checkSemanticSignature(struct Signature* signature, struct Method* method);
+bool checkSemanticParamList(struct ParameterList* paramList, struct Method* method); 
+bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* method);
+bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method); 
+bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* method); 
+bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, struct Method* method);
+bool checkSemanticVarDecl(struct VarDecl* varDecl, struct Method* method);
+bool checkSemanticConstDecl(struct ConstDecl* constDecl, struct Method* method); 
+bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method);
+bool checkSemanticStmt(struct Statement* statement, struct Method* method);
+bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* method);
+bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, struct Method* method);
+bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, struct Method* method);
+bool checkSemanticBlock(struct Block* block, struct Method* method);
+bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, struct Method* method);
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
 struct LocalVariable* getLocalVariableFromTable(char* varName, HashTable* variablesTable);
 
 bool addLocalConstantsToConstantTable(struct VarSpec* varSpec, struct Method* method); 
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 
-bool checkSemanticConstSpec(struct VarSpec* varSpec, char* functionName);
-struct Constant* addConstantToConstantsTable(List* constantsTable, enum ConstantType type, void* value);
-struct Constant* addRefConstantToConstantsTable(List* constantsTable, enum ConstantType type, void* const1, void* const2);
-struct Constant* getConstant(List* constantsTable, enum ConstantType type, void* value);
-struct Constant* getRefConstant(List* constantsTable, enum  ConstantType type, char* const1, char* const2);
-struct Constant* getConstantFromLocalConstantTable(char* constName, HashTable* constsTable, struct Method* method);
+bool checkSemanticConstSpec(struct VarSpec* varSpec, struct Method* method);
+
+
+struct Constant* addUtf8ToConstantsTable(char* utf8);
+struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
+struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);
+struct Constant* addMethodRefToConstantsTable(char* methodName, enum TypeNames returnType);
+
+
+
+char* convertTypeToString(enum TypeNames type);
 
 struct Field* getField(struct Class* class, char* fieldName); 
 struct Method* getMethod(struct Class* class, char* methodName); 
 
-
-char* getFunctionReturnType(struct FunctionDecl* functionDecl);
+enum TypeName getFunctionReturnType(struct FunctionDecl* functionDecl);
 
 bool addParamToVariableTable(struct ParameterDeclare* paramDeclare, struct Method* method);
 
