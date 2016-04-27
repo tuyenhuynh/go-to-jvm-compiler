@@ -137,7 +137,7 @@ DECIMAL		[0-9]+
 									return DECIMAL_NUMBER;
 								}
 
-"\n"							{line++; return NEW_LINE;}
+"\n"							{line++;}
 "\t"							{return TAB;}
 [ \a\b\f\r\v\\]+				{}
 .								{printf(".unknown<-: \"%s\", line: %i\n", yytext, line);}
