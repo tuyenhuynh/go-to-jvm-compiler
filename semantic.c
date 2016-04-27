@@ -288,8 +288,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 			}
 			break;
 		}
-		case FUNCTION_CALL:
-		case FUNCTION_CALL_EMPTY: {
+		case FUNCTION_CALL:{
 			//TODO: search the definition of function in constant table to find return type 
 			break;
 		}
@@ -321,14 +320,6 @@ bool doSemantic(struct Program* program) {
 	list_add(constantsTable, constantClass);
 	//
 	bool isOk = true; 
-	if (program->pkg != NULL) {
-		char* packageName = program->pkg->packageName;
-		if (strcmp(packageName, "main") != 0) {
-			printf("Semantic error. Package name must be main\n");
-			isOk = false;
-		}	
-	}
-
 	struct DeclarationList* declList = program->declList;
 	
 	if (declList != NULL) {

@@ -49,7 +49,6 @@ DECIMAL		[0-9]+
 "case"          {return CASE;}
 "struct"	    {return STRUCT;}
 "else"          {return ELSE;}
-"package"       {return PACKAGE;}
 "switch"		{return SWITCH;}
 "const"         {return CONST;}
 "if"            {return IF;}
@@ -99,7 +98,7 @@ DECIMAL		[0-9]+
 "||"						{return OR;}
 ">"							{return GT;}
 "<"							{return LT;}
-">="						{return LTE;}
+">="						{return GTE;}
 "<="						{return LTE;}
 "=="						{return EQU;}
 "!="						{return NE;}

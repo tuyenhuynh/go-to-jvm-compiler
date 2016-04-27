@@ -21,17 +21,7 @@ struct Identifier {
 };
 
 struct Program {
-	struct Package *pkg;
 	struct DeclarationList *declList;
-};
-
-struct Package {
-	char *packageName;
-};
-
-struct Imports {
-	struct Import *firstImport;
-	struct Import *lastImport;
 };
 
 struct DeclarationList {
@@ -39,13 +29,6 @@ struct DeclarationList {
 	struct Declaration *lastDecl;
 	int size; 
 };
-
-struct Import {
-	struct StringNode* lib; 
-	struct StringList* libList; 
-	struct Import* nextImport; 
-};
-
 
 enum DeclType {
 	CONST_DECL,
@@ -70,7 +53,6 @@ struct VarSpec {
 	struct IdentifierListType *idListType;
 	struct IdentifierList *idList;
 	struct ExpressionList *exprList;
-	
 	struct VarSpec*  nextVarSpec; 
 };
 
@@ -80,6 +62,10 @@ struct VarSpecList {
 	int size; 
 };
 
+struct ConstDecl {
+	struct ConstSpec *constSpec;
+	struct ConstSpecList *constSpecList;
+};
 
 struct ConstSpec {
 	struct IdentifierListType *idListType;
@@ -92,11 +78,6 @@ struct ConstSpecList {
 	struct ConstSpec *firstConstSpec;
 	struct ConstSpec *lastConstSpec;
 	int size;
-};
-
-struct ConstDecl {
-	struct ConstSpec *constSpec;
-	struct ConstSpecList *constSpecList;
 };
 
 struct FunctionDecl {
@@ -143,7 +124,6 @@ enum ExpressionType {
 	STRING_EXPR,
 	ID_EXPRESSION,
 	PE_COMPOSITE,
-	FUNCTION_CALL_EMPTY,
 	FUNCTION_CALL, 
 	NOT_UNARY_EXPR,
 	PLUS_UNARY_EXPR,
@@ -191,7 +171,6 @@ struct PrimaryExpression
 	struct PrimaryExpression *primaryExpr;
 	struct Expression *expr;
 	struct FunctionCall *funcCall; 
-
 	struct SemanticType* semanticType; 
 };
 
@@ -225,7 +204,7 @@ enum StatementType {
 };
 
 struct Statement {
-	enum StatemenType stmtType;
+	enum StatementType stmtType;
 	struct SimpleStmt *simpleStmt;
 	struct VarDecl *varDecl;
 	struct ConstDecl *constDecl;
@@ -242,10 +221,11 @@ struct Statement {
 struct StatementList {
 	struct Statement *firstStmt;
 	struct Statement *lastStmt;
+	int size;
 };
 
 struct SimpleStmt {
-	enum StatemenType stmtType;
+	enum StatementType stmtType;
 	struct Expression *expr;
 	struct ExpressionList *exprListLeft;
 	struct ExpressionList *exprListRight;

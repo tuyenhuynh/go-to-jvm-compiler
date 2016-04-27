@@ -1,34 +1,12 @@
 #include "trees.h"
 #include "astfunctions.h"
 
-struct Program *CreateProgram(struct Package *_pkg, struct DeclarationList *_declList) {
+struct Program *CreateProgram(struct DeclarationList *_declList) {
 	struct Program *Result = (struct Program *)malloc(sizeof(struct Program));
 
-	Result->pkg = _pkg;
 	Result->declList = _declList;
 
 	return Result;
-}
-
-struct Package *CreatePackage(char *_pkgName) {
-	struct Package *Result = (struct Package *)malloc(sizeof(struct Package));
-
-	Result->packageName = _pkgName;
-
-	return Result;
-}
-
-struct Imports *AppendToImportsList(struct Imports *_imports, struct Import *_import) {
-	if (_imports == NULL) {
-		_imports = (struct Imports*) malloc(sizeof(struct Imports)); 
-		_imports->firstImport = _import; 
-		_imports->lastImport = _import; 
-	}
-	else {
-		//_imports->lastImport->nextImport = _import; 
-		//_imports->lastImport = _import; 
-	}
-	return _imports; 
 }
 
 struct StringNode* CreateStringNode(char* _string) {
@@ -59,26 +37,6 @@ struct StringList* AppendToStringList(struct StringList* _strList, char* _string
 	}
 	return _strList; 
 }
-
-struct Import *CreateImportFromLib(char *_libName) {
-	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
-	Result->lib = CreateStringNode(_libName); 
-	Result->libList = NULL; 
-	Result->nextImport = NULL;
-
-	return Result;
-}
-
-struct Import *CreateImportFromLibList(struct StringList *libList) {
-	struct Import *Result = (struct Import *)malloc(sizeof(struct Import));
-
-	Result->libList = libList;
-	Result->lib = NULL;
-	Result->nextImport = NULL; 
-
-	return Result;
-}
-
 
 struct DeclarationList *CreateDeclarationList(struct Declaration *_decl) {
 	struct DeclarationList *Result = (struct DeclarationList *)malloc(sizeof(struct DeclarationList));

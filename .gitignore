@@ -241,3 +241,5 @@ dotrun.bat
 parser.dot
 test1.go
 golang-to-jvm.vcxproj.filters
+/golang-to-jvm.vcxproj
+/golang-to-jvm.VC.db

@@ -15,7 +15,6 @@ void printFunctionCall(int parentId, struct FunctionCall* functionCall);
 void printExpressionList(int parentId, struct ExpressionList* expressionList);
 
 void printProgram(char* output);
-void printPackage(int parentId, struct Package* package);
 void printDeclarationList(int parentId, struct DeclarationList* declarationList);
 void printDeclaration(int parentId, struct Declaration* declaration);
 

@@ -55,8 +55,6 @@
 
 	struct Program *ProgramUnion;
 	
-	struct Package *PackageUnion;
-	
 	struct DeclarationList *DeclListUnion;
 	
 	struct Declaration *DeclarationUnion;
@@ -150,7 +148,6 @@
 }
 
 %type<ProgramUnion> program
-%type<PackageUnion> package
 %type<DeclListUnion> declaration_list
 %type<DeclarationUnion> declaration
 %type<VarDeclUnion> var_declare
@@ -213,7 +210,6 @@
 %token<decValue> DECIMAL_NUMBER HEXADECIMAL_NUMBER OCTAL_NUMBER
 %token<floatValue> FLOAT_NUMBER 
 %token<string> STRING_LITERAL 
-%token PACKAGE
 %token INT_TYPE FLOAT32_TYPE STRING_TYPE BOOL_TYPE NIL
 %token<boolValue> TRUE FALSE
 %token PLUS_PLUS MINUS_MINUS
@@ -235,12 +231,8 @@
 %%
 
 program: 
-	package declaration_list					{$$ = root = CreateProgram($1, $2);}
+	declaration_list					{$$ = root = CreateProgram($1);}
 	;	
-
-package:
-	PACKAGE IDENTIFIER 								{$$ = CreatePackage($2);}
-	; 
 
 declaration_list:
 	declaration												{$$ = CreateDeclarationList($1);}
