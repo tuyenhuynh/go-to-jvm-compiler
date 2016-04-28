@@ -384,8 +384,19 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		hashtable_add(methodsTable, functionDecl->identifier, method);
 
 		//add variable to local variables table
-		hashtable_new(&(method->localVariablesTable));
-		//isOk = add()
+		list_new(&(method->localVariablesTable));
+		
+		struct ParameterDeclare* param = paramList->firstParamDecl; 
+		scope = 1; 
+		while (param != NULL && isOk) {
+			isOk = addParamToLocalVarsTable(param, method); 
+			if (isOk) {
+				param = param->nextParamDecl; 
+			}
+			else {
+				printf("Variable with the same name in function %s has been defined\n", functionDecl->identifier);
+			}
+		}
 		
 		//TODO: check semantic of body
 		
@@ -419,6 +430,144 @@ char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeSt
 	ptr += 1; 
 	strcpy(ptr, returnTypeStr); 
 	return result; 
+}
+
+bool checkSemanticParamList(struct ParameterList* paramList, char* functionName) {
+	struct ParameterDeclare* param = paramList->firstParamDecl;
+	bool isOk = true;
+	while (param != NULL && isOk) {
+		//check for existing of param name
+		if (param->identifier == NULL) {
+			printf("Semantic error. Parameter name not given. Function %s\n", functionName);
+			isOk = false;
+		}
+		//check type of param
+		struct Type* type = param->type;
+		if (type->expr == NULL &&
+			(type->typeName == INT_TYPE_NAME ||
+				type->typeName == FLOAT32_TYPE_NAME ||
+				type->typeName == STRING_TYPE_NAME)) {
+			//current param passed
+			param = param->nextParamDecl;
+		}
+		else {
+			printf("Semantic error. Unsupport type name in param list of function %s \n", functionName);
+			isOk = false;
+		}
+	}
+	return isOk;
+}
+
+//return type should be one of the following:	INT, FLOAT, STRING, VOID,// INT[], FLOAT[], STRING[]
+//the format is (), (INT|FLOAT|STRING), INT, FLOAT, STRING
+enum TypeNames  getFunctionReturnType(struct FunctionDecl* functionDecl) {
+	enum TypeNames typeName;
+	if (functionDecl->signature->result != NULL) {
+		struct Result* returnType = functionDecl->signature->result;
+		struct Type* type = NULL;
+		if (returnType != NULL) {
+			type = returnType->type;
+		}
+		else if (returnType->paramInParen != NULL) {
+			//(int),(float), (string)
+			struct ParameterList* paramList = returnType->paramInParen->paramList;
+			//(a int) will not be accepted
+			if (paramList != NULL && paramList->size == 1 && paramList->firstParamDecl->identifier == NULL) {
+				type = paramList->firstParamDecl->type;
+			}
+		}
+		else {
+			typeName = VOID_TYPE_NAME;
+		}
+		if (type != NULL && type->expr == NULL) {
+			typeName = type->typeName;
+		}
+		else {
+			typeName = UNKNOWN_TYPE;
+		}
+	}
+	else {
+		typeName = VOID_TYPE_NAME;
+	}
+	return typeName;
+}
+
+bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method) {
+	bool isOk = true;
+	List* variablesTable = method->localVariablesTable;
+	char* varName = paramDeclare->identifier; 
+	struct Type* type = paramDeclare->type; 
+	struct LocalVariable* localVariable = getLocalVariableFromTable(variablesTable, varName, 1); 
+	if (localVariable == NULL) {
+		//TODO: augment variable with value(expression); 
+		localVariable->name = paramDeclare->identifier;
+		localVariable->type->typeName = type->typeName;
+		localVariable->id = list_size(variablesTable) + 1 ;
+		localVariable->scope = 1;
+		list_add(variablesTable, localVariable);
+	}
+	else {
+		isOk = false; 
+	}
+	return isOk;
+}
+
+
+//TODO: transform the multiple assignment to single assignment
+bool addVariableToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, int scope) {
+	bool isOk = true;
+	//here assumpt that we check semantic for variables first, then add them to local variable table
+	if (checkSemanticVarSpec(varSpec, method)) {
+		//TODO : implement size for variable
+		if (varSpec->idListType != NULL) {
+			struct IdentifierList* idList = varSpec->idListType->identifierList;
+			struct Identifier* id = idList->firstId;
+			struct Type* type = varSpec->idListType->type;
+			while (id != NULL) {
+				if (getLocalVariableFromTable(method->localVariablesTable, id->name, scope) == NULL) {
+					struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+					localVariable->id = list_size(method->localVariablesTable) + 1;
+					localVariable->scope = scope; 
+					localVariable->name = id->name; 
+					struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType));
+					semanticType->typeName = type->typeName;
+					localVariable->type->typeName = semanticType->typeName;
+				    list_add(method->localVariablesTable,  localVariable);
+				}
+				else {
+					isOk = false;
+					printf("Variable with the same name %s exists in the table\n", id->name);
+				}
+				id = id->nextId;
+			}
+		}
+		else {
+			//The compiler currently doesnt support declarations without type 
+			printf("The compiler currently doesnt support declarations without type \n"); 
+			isOk = false;
+		}
+	}
+	else {
+		isOk = false;
+	}
+	return isOk;
+}
+
+struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varName, int scope) {
+	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+	int size = list_size(variablesTable);
+	bool found = false;
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(variablesTable, i, &result);
+		if (result->scope == scope && strcmp(result->name, varName) == 0) {
+			found = true;
+		}
+	}
+
+	if (found) {
+		return result;
+	}
+	return NULL;
 }
 
 bool checkSemanticBlock(struct Block* block, struct Method* method) {
@@ -743,86 +892,6 @@ bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method) {
 	return isOk; 
 }
 
-bool checkSemanticParamList(struct ParameterList* paramList, char* functionName) {
-	struct ParameterDeclare* param = paramList->firstParamDecl; 
-	bool isOk = true; 
-	while (param != NULL && isOk ) {
-		//check for existing of param name
-		if (param->identifier == NULL) {
-			printf("Semantic error. Parameter name not given. Function %s\n", functionName); 
-			isOk = false; 
-		}
-		//check type of param
-		struct Type* type = param->type; 
-		if (type->expr == NULL &&
-			(type->typeName == INT_TYPE_NAME ||
-				type->typeName == FLOAT32_TYPE_NAME ||
-				type->typeName == STRING_TYPE_NAME)) {
-			//current param passed
-			param = param->nextParamDecl;
-		}
-		else {
-			printf("Semantic error. Unsupport type name in param list of function %s \n", functionName);
-			isOk = false;
-		}
-	}
-	return isOk;
-}
-
-//return type should be one of the following:	INT, FLOAT, STRING, VOID,// INT[], FLOAT[], STRING[]
-//the format is (), (INT|FLOAT|STRING), INT, FLOAT, STRING
-enum TypeNames  getFunctionReturnType(struct FunctionDecl* functionDecl) {
-	enum TypeNames typeName;
-	if (functionDecl->signature->result != NULL) {
-		struct Result* returnType = functionDecl->signature->result;
-		struct Type* type = NULL;
-		if (returnType != NULL) {
-			type = returnType->type;
-		}
-		else if (returnType->paramInParen != NULL) {
-			//(int),(float), (string)
-			struct ParameterList* paramList = returnType->paramInParen->paramList;
-			//(a int) will not be accepted
-			if (paramList != NULL && paramList->size == 1 && paramList->firstParamDecl->identifier == NULL) {
-				type = paramList->firstParamDecl->type;
-			}
-		}
-		else {
-			typeName = VOID_TYPE_NAME;
-		}
-		if (type != NULL && type->expr == NULL) {
-			typeName = type->typeName;
-		}
-		else {
-			typeName = UNKNOWN_TYPE;
-		}
-	}
-	else {
-		typeName = VOID_TYPE_NAME;
-	}
-	return typeName;
-}
-
-bool addParamToVariableTable(struct ParameterDeclare* paramDeclare, struct Method* method) {
-	bool isOk = true; 
-	HashTable* hashtable = method->localVariablesTable; 
-	struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable)); 
-	if (hashtable_get(hashtable, paramDeclare->identifier, &localVariable) != CC_OK) {
-		localVariable->name = paramDeclare->identifier;
-		//TODO: expression of local variable
-		localVariable->type->typeName = paramDeclare->type->typeName; 
-		localVariable->id = hashtable_size(hashtable) + 1; 
-		hashtable_add(hashtable, localVariable->name, &localVariable);
-	}
-	else {
-		//TODO: get method name
-		printf("Variable with the same name in function %s has been defined", "method"); 
-		isOk = false; 
-	}
-	return isOk; 
-}
-
-
 
 bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* method) {
 	return true;
@@ -983,55 +1052,6 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 		isOk = false; 
 	}
 	return isOk ;
-}
-
-//TODO: transform the multiple assignment to single assignment
-bool addVariableToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, int scope) {
-	bool isOk = true;
-	//here assumpt that we check semantic for variables first, then add them to local variable table
-	if (checkSemanticVarSpec(varSpec,method)) {
-		//TODO : implement size for variable
-		if (varSpec->idListType != NULL) {
-			struct IdentifierList* idList = varSpec->idListType->identifierList;
-			struct Identifier* id = idList->firstId;
-			struct Type* type = varSpec->idListType->type;
-			while (id != NULL) {
-				if (getLocalVariableFromTable(method->localVariablesTable, id->name) == NULL) {
-					struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
-					localVariable->id = hashtable_size(method->localVariablesTable) + 1;
-					struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType));
-					semanticType->typeName = type->typeName;
-					localVariable->type->typeName = semanticType->typeName;
-					hashtable_add(method->localVariablesTable, id->name, localVariable);
-				}
-				else {
-					isOk = false;
-					printf("Variable with the same name %s exists in the table", id->name);
-				}
-				id = id->nextId;
-			}
-		}
-		else {
-			//The compiler currently doesnt support declarations without type 
-			isOk = false; 
-		}
-	}
-	else {
-		isOk = false; 
-	}
-	return isOk; 
-}
-
-struct LocalVariable* getLocalVariableFromTable( List* variablesTable, char* varName, int scope) {
-	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
-	int size = list_size(variablesTable); 
-	//for (int i = 0; i < )
-
-	if (hashtable_get(variablesTable, varName, &result) == CC_OK) {
-		return result; 
-	}
-	//fail
-	return NULL; 
 }
 
 struct Constant* addUtf8ToConstantsTable(char* utf8) {

@@ -11,6 +11,8 @@
 char* CLASS_NAME = "GO_CLASS";
 
 struct  Class* semanticClass; 
+
+int scope = 0; 
 //node of list : struct Constant*
 List* constantsTable;
 
@@ -51,12 +53,12 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, struct 
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
 struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varName, int scope);
 
-bool addVariableToLocalVarsTable(struct VarSpec* varSpec, struct Method* method);
+bool addVariableToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, int scope);
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 
 bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
 
-bool addParamToVariableTable(struct ParameterDeclare* paramDeclare, struct Method* method);
+bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method);
 
 struct Constant* addUtf8ToConstantsTable(char* utf8);
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
