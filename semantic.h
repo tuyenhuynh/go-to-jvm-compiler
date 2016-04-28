@@ -49,13 +49,14 @@ bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rig
 bool checkSemanticBlock(struct Block* block, struct Method* method);
 bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, struct Method* method);
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
-struct LocalVariable* getLocalVariableFromTable(HashTable* variablesTable, char* varName);
+struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varName, int scope);
 
-bool addLocalConstantsToConstantTable(struct VarSpec* varSpec, struct Method* method); 
+bool addVariableToLocalVarsTable(struct VarSpec* varSpec, struct Method* method);
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 
 bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
 
+bool addParamToVariableTable(struct ParameterDeclare* paramDeclare, struct Method* method);
 
 struct Constant* addUtf8ToConstantsTable(char* utf8);
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
@@ -70,7 +71,5 @@ struct Field* getField(struct Class* class, char* fieldName);
 struct Method* getMethod(struct Class* class, char* methodName); 
 
 enum TypeName getFunctionReturnType(struct FunctionDecl* functionDecl);
-
-bool addParamToVariableTable(struct ParameterDeclare* paramDeclare, struct Method* method);
 
 #endif //_SEMANTIC_H_

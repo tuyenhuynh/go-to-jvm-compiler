@@ -304,9 +304,11 @@ bool doSemantic(struct Program* program) {
 	//Initialize constantsTable
 	list_new(&constantsTable); 
 	semanticClass->constantsTable = constantsTable; 
+	
 	//Initialize fieldsTable
 	hashtable_new(&fieldsTable); 
 	semanticClass->fieldsTable = fieldsTable;
+
 	//Initialize methodsTable 
 	hashtable_new(&methodsTable); 
 	semanticClass->methodsTable = methodsTable; 
@@ -355,6 +357,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		struct ParameterList* paramList = functionDecl->signature->paramInParen->paramList; 
 		isOk = checkSemanticParamList(paramList, functionDecl->identifier);
 		if (!isOk) {
+			printf("Semantic error. Unsupport types in parameter declaration in function %s\n", functionDecl->identifier);
 			return false; 
 		}
 		enum TypeNames typeName = getFunctionReturnType(functionDecl);
@@ -373,13 +376,16 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		//add method ref to constants table
 		struct Constant* constMethodRef = addMethodRefToConstantsTable(functionDecl->identifier, methodDescriptor); 
 		
+		method->constMethodref = constMethodRef; 
+		method->returnType = typeName;
+		
 		/*-----------------*/
 		//add method to methodsTable of class
 		hashtable_add(methodsTable, functionDecl->identifier, method);
 
 		//add variable to local variables table
-		hashtable_new(&method->localVariablesTable);
-		
+		hashtable_new(&(method->localVariablesTable));
+		//isOk = add()
 		
 		//TODO: check semantic of body
 		
@@ -802,10 +808,11 @@ bool addParamToVariableTable(struct ParameterDeclare* paramDeclare, struct Metho
 	HashTable* hashtable = method->localVariablesTable; 
 	struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable)); 
 	if (hashtable_get(hashtable, paramDeclare->identifier, &localVariable) != CC_OK) {
-		localVariable->name = paramDeclare->identifier; 
-		localVariable->type = paramDeclare->type; 
+		localVariable->name = paramDeclare->identifier;
+		//TODO: expression of local variable
+		localVariable->type->typeName = paramDeclare->type->typeName; 
 		localVariable->id = hashtable_size(hashtable) + 1; 
-		hashtable_add(hashtable, paramDeclare->identifier, &localVariable);
+		hashtable_add(hashtable, localVariable->name, &localVariable);
 	}
 	else {
 		//TODO: get method name
@@ -979,7 +986,7 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 }
 
 //TODO: transform the multiple assignment to single assignment
-bool addLocalVariablesToTable(struct VarSpec* varSpec, struct Method* method) {
+bool addVariableToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, int scope) {
 	bool isOk = true;
 	//here assumpt that we check semantic for variables first, then add them to local variable table
 	if (checkSemanticVarSpec(varSpec,method)) {
@@ -1015,8 +1022,10 @@ bool addLocalVariablesToTable(struct VarSpec* varSpec, struct Method* method) {
 	return isOk; 
 }
 
-struct LocalVariable* getLocalVariableFromTable( HashTable* variablesTable, char* varName) {
+struct LocalVariable* getLocalVariableFromTable( List* variablesTable, char* varName, int scope) {
 	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+	int size = list_size(variablesTable); 
+	//for (int i = 0; i < )
 
 	if (hashtable_get(variablesTable, varName, &result) == CC_OK) {
 		return result; 

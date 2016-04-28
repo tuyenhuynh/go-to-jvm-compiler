@@ -30,6 +30,7 @@ struct LocalVariable {
 	int id; 
 	struct Type* type; 
 	char* name; 
+	int scope; 
 };
 
 struct Field {
@@ -42,7 +43,7 @@ struct Method {
 	struct Constant* constMethodref;
 	//key: varname, value : LocalVariable
 	enum TypeNames returnType; 
-	HashTable* localVariablesTable; 
+	List* localVariablesTable; 
 };
 
 struct Class {
