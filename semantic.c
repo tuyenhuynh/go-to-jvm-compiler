@@ -3,6 +3,10 @@
 #include "semantic_struct.h"
 #include "helpers.h"
 
+
+char* CLASS_NAME = "GO_CLASS";
+int scope = 0;
+
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
 	switch (expr->exprType) 
@@ -244,7 +248,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		case BOOL_TRUE_EXPRESSION:
 		case BOOL_FALSE_EXPRESSION: {
 			printf("Boolean primary expressions ar not supported\n");
-			type = NULL; 
+			type ->typeName = UNKNOWN_TYPE; 
 			break;
 		}
 		case DECIMAL_EXPR: {
@@ -260,7 +264,21 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 			break;
 		}
 		case ID_EXPRESSION: {
-			type->typeName = IDENTIFIER_TYPE_NAME;
+			
+			//type->typeName = IDENTIFIER_TYPE_NAME;
+			struct LocalVariable* variable = getLocalVariableFromTable(method->localVariablesTable, primaryExpr->identifier, scope); 
+			if (variable == NULL) {
+				struct Field* field = getField(semanticClass, primaryExpr->identifier); 
+				if (field == NULL) {
+					type ->typeName = UNKNOWN_TYPE; 
+				}
+				else {
+					type->typeName = field->type->typeName; 
+				}
+			}
+			else {
+				type->typeName = variable->type->typeName; 
+			}
 			//add id to table of variable
 			break;
 		}
@@ -336,6 +354,7 @@ bool doSemantic(struct Program* program) {
 			else if (decl->declType == FUNC_DECL) {
 				isOk &= checkSemanticFunctionDecl(decl->funcDecl);
 			}
+			decl = decl->nextDecl; 
 		}
 	}
 	else {
@@ -350,56 +369,60 @@ bool doSemantic(struct Program* program) {
 //check and add function to method table
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 	bool isOk = true;
-	struct Method* method = (struct Method*)malloc(sizeof(struct Method));
+	struct Method* method = NULL; // (struct Method*)malloc(sizeof(struct Method));
 	//check for existing of method reference and add method to methods table + constants table if it does not exist
 	if (hashtable_get(semanticClass->methodsTable, functionDecl, &method) != CC_OK) {
 		//check semantic of parameter list
 		struct ParameterList* paramList = functionDecl->signature->paramInParen->paramList; 
-		isOk = checkSemanticParamList(paramList, functionDecl->identifier);
-		if (!isOk) {
-			printf("Semantic error. Unsupport types in parameter declaration in function %s\n", functionDecl->identifier);
-			return false; 
+		if (paramList != NULL) {
+			isOk = checkSemanticParamList(paramList, functionDecl->identifier);
+			if (!isOk) {
+				printf("Semantic error. Unsupport types in parameter declaration in function %s\n", functionDecl->identifier);
+				return false;
+			}
 		}
+
 		enum TypeNames typeName = getFunctionReturnType(functionDecl);
 		if (typeName == UNKNOWN_TYPE) {
 			printf("Semantic error. Unsupport return type in function %s\n", functionDecl->identifier);
-			return false; 
+			return false;
 		}
+
 		if (functionDecl->block == NULL) {
 			printf("Body of function %s not found", functionDecl->identifier);
-			return false; 
+			return false;
 		}
 
 		//add name and type to constants table 
 		char* returnTypeStr = convertTypeToString(typeName);
-		char* methodDescriptor = createMethodDescriptor(paramList, returnTypeStr); 
+		char* methodDescriptor = createMethodDescriptor(paramList, returnTypeStr);
 		//add method ref to constants table
-		struct Constant* constMethodRef = addMethodRefToConstantsTable(functionDecl->identifier, methodDescriptor); 
-		
-		method->constMethodref = constMethodRef; 
+		struct Constant* constMethodRef = addMethodRefToConstantsTable(functionDecl->identifier, methodDescriptor);
+		//create method
+		method = (struct Method*)malloc(sizeof(struct Method)); 
+		method->constMethodref = constMethodRef;
 		method->returnType = typeName;
-		
+
 		/*-----------------*/
 		//add method to methodsTable of class
 		hashtable_add(methodsTable, functionDecl->identifier, method);
 
 		//add variable to local variables table
 		list_new(&(method->localVariablesTable));
-		
-		struct ParameterDeclare* param = paramList->firstParamDecl; 
-		scope = 1; 
-		while (param != NULL && isOk) {
-			isOk = addParamToLocalVarsTable(param, method); 
-			if (isOk) {
-				param = param->nextParamDecl; 
-			}
-			else {
-				printf("Variable with the same name in function %s has been defined\n", functionDecl->identifier);
+		if (paramList != NULL) {
+			struct ParameterDeclare* param = paramList->firstParamDecl;
+			while (param != NULL && isOk) {
+				isOk = addParamToLocalVarsTable(param, method);
+				if (isOk) {
+					param = param->nextParamDecl;
+				}
+				else {
+					printf("Variable with the same name in function %s has been defined\n", functionDecl->identifier);
+				}
 			}
 		}
-		
 		//TODO: check semantic of body
-		
+		checkSemanticBlock(functionDecl->block, method); 
 	}
 	else {
 		printf("Function with the same name as %s has been define\n", functionDecl->identifier); 
@@ -411,24 +434,28 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 
 //Here, propose that the semantic of  param list has been check
 char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeStr) {
+	char* result = (char*)malloc(100 * sizeof(char));
 	if (paramList == NULL) {
-		return "()"; 
+		strcpy(result, "()"); 
+		strcpy(result + 2, returnTypeStr); 
 	}
-	char* result = (char*)malloc(100*sizeof (char)); 
-	struct ParameterDeclare* param = paramList->firstParamDecl;
-	char* ptr = result; 
-	strcpy(ptr, "("); 
-	ptr += 1; 
-	while (param != NULL) {
-		enum TypeNames typeName = param->type->typeName; 
-		char* typeNameStr = convertTypeToString(typeName); 
-		strcpy(ptr, typeNameStr); 
-		ptr += strlen(typeNameStr); 
-		param = param->nextParamDecl; 
+	else {
+		char* result = (char*)malloc(100 * sizeof(char));
+		struct ParameterDeclare* param = paramList->firstParamDecl;
+		char* ptr = result;
+		strcpy(ptr, "(");
+		ptr += 1;
+		while (param != NULL) {
+			enum TypeNames typeName = param->type->typeName;
+			char* typeNameStr = convertTypeToString(typeName);
+			strcpy(ptr, typeNameStr);
+			ptr += strlen(typeNameStr);
+			param = param->nextParamDecl;
+		}
+		strcpy(ptr, ")");
+		ptr += 1;
+		strcpy(ptr, returnTypeStr);
 	}
-	strcpy(ptr, ")"); 
-	ptr += 1; 
-	strcpy(ptr, returnTypeStr); 
 	return result; 
 }
 
@@ -571,15 +598,19 @@ struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varN
 }
 
 bool checkSemanticBlock(struct Block* block, struct Method* method) {
+	//increase scope
+	scope++; 
 	bool isOk = true; 
 	if (block->stmtList == NULL) {
 		return true; 
 	}
 	struct Statement* stmt = block->stmtList->firstStmt; 
-	while (stmt != NULL) {
+	while (stmt != NULL && isOk ) {
 		isOk &= checkSemanticStmt(stmt,method);
 		stmt = stmt->nextStatement; 
 	}
+	//decrease scope
+	scope--; 
 	return isOk; 
 }
 
@@ -611,6 +642,9 @@ bool checkSemanticStmt(struct Statement* statement, struct Method* method) {
 		}
 		case SCAN_STMT: {
 			return checkSemanticScanStmt(statement->scanStatement, method);
+		}
+		case RETURN_STMT: {
+			return checkSemanticReturnStmt(statement->returnStmt, method); 
 		}
 	}
 	return true; 
@@ -906,8 +940,9 @@ bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* metho
 	//Currently ,only statements which return one expression are implemented
 	if (returnStmt->exprList->size == 1) {
 		struct SemanticType* semanticType = checkExpressionType(returnStmt->exprList->firstExpression, method); 
+		
 		if (semanticType->typeName != method->returnType) {
-			char* methodName = method->constMethodref->const2->utf8; 
+			char* methodName = method->constMethodref->const2->const1->utf8; 
 			printf("Semantic error. Formal return type incompatible with declared return type in method %s\n", methodName); 
 			return false; 
 		}
@@ -1055,7 +1090,7 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 }
 
 struct Constant* addUtf8ToConstantsTable(char* utf8) {
-	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant)); 
+	struct Constant* constant = NULL; 
 	bool found = false; 
 	int size = list_size(constantsTable); 
 	for (int i = 0; !found && i < size; ++i) {
@@ -1065,6 +1100,7 @@ struct Constant* addUtf8ToConstantsTable(char* utf8) {
 		}
 	}
 	if (!found) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant));
 		constant->type = CONSTANT_Utf8; 
 		constant->utf8 = utf8;
 		constant->id = size + 1; 
@@ -1075,7 +1111,7 @@ struct Constant* addUtf8ToConstantsTable(char* utf8) {
 
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type) {
 
-	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant)); 
+	struct Constant* constant = NULL; 
 	struct Constant* nameConst = addUtf8ToConstantsTable(name); 
 	struct Constant* typeConst = addUtf8ToConstantsTable(type); 
 	int size = list_size(constantsTable); 
@@ -1088,6 +1124,7 @@ struct Constant* addNameAndTypeToConstantsTable(char* name, char* type) {
 	}
 	
 	if (!found) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant)); 
 		constant->type = CONSTANT_NameAndType; 
 		constant->const1 = nameConst; 
 		constant->const2 = typeConst; 
@@ -1104,7 +1141,7 @@ struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName) {
 	struct Constant* const2 = addNameAndTypeToConstantsTable(fieldName, typeName);
 	bool found = false; 
 	int size = list_size(constantsTable);
-	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant));
+	struct Constant* constant = NULL; 
 	for (int i = 0; !found && i < size; ++i) {
 		list_get_at(constantsTable, i, &constant); 
 		if (constant->type  == CONSTANT_Fieldref && constant->const1 == const1 && constant->const2 == const2) {
@@ -1112,6 +1149,7 @@ struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName) {
 		}
 	}
 	if (!found) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant));
 		constant->type = CONSTANT_Fieldref; 
 		constant->const1 = const1; 
 		constant->const2 = const2; 
@@ -1122,7 +1160,7 @@ struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName) {
 }
 
 struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDescriptor) {
-	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant)); 
+	struct Constant* constant = NULL; 
 	int size = list_size(constantsTable); 
 	struct Constant* const1 = constantClass; 
 	struct Constant* const2 = addNameAndTypeToConstantsTable(methodName, methodDescriptor);
@@ -1134,6 +1172,7 @@ struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDesc
 		}
 	}
 	if (!found) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant));
 		constant->type = CONSTANT_Methodref; 
 		constant->const1 = const1; 
 		constant->const2 = const2; 
@@ -1159,7 +1198,7 @@ char* convertTypeToString(enum TypeNames type) {
 }
 
 struct Method* getMethod(struct Class* class, char* methodName) {
-	struct Method* method = (struct Method*) malloc(sizeof(struct Method));
+	struct Method* method = NULL; // (struct Method*) malloc(sizeof(struct Method));
 	if (hashtable_get(class->methodsTable, methodName, &method) == CC_OK) {
 		return method; 
 	}
@@ -1167,9 +1206,22 @@ struct Method* getMethod(struct Class* class, char* methodName) {
 }
 
 struct Field* getField(struct Class* class, char* fieldName) {
-	struct Field* field = (struct Field*) malloc(sizeof(struct Field));
+	struct Field* field = NULL; // (struct Field*) malloc(sizeof(struct Field));
 	if (hashtable_get(class->fieldsTable, fieldName, &field) == CC_OK) {
 		return field; 
 	}
 	return NULL; 
 }
+
+void printLocalVariablesTable(struct Method* method) {
+	List* localVariablesTable = method->localVariablesTable;
+	int size = list_size(localVariablesTable);
+	struct LocalVariable* localVariable = NULL; // (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+	for (int i = 0; i < size; ++i) {
+		list_get_at(localVariablesTable, i, &localVariable);
+		printf("Id: %d, name: %s, type: %s ", localVariable->id, localVariable->name, convertTypeToString(localVariable->type->typeName));
+	}
+}
+
+
+

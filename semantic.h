@@ -8,11 +8,9 @@
 #include <semantic_struct.h>
 #include "list.h"
 
-char* CLASS_NAME = "GO_CLASS";
 
 struct  Class* semanticClass; 
 
-int scope = 0; 
 //node of list : struct Constant*
 List* constantsTable;
 
@@ -74,4 +72,5 @@ struct Method* getMethod(struct Class* class, char* methodName);
 
 enum TypeName getFunctionReturnType(struct FunctionDecl* functionDecl);
 
+void printLocalVariablesTable(struct Method* method);
 #endif //_SEMANTIC_H_

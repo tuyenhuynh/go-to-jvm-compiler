@@ -138,7 +138,7 @@ DECIMAL		[0-9]+
 								}
 
 "\n"							{line++;}
-"\t"							{return TAB;}
+"\t"							{}
 [ \a\b\f\r\v\\]+				{}
 .								{printf(".unknown<-: \"%s\", line: %i\n", yytext, line);}
 

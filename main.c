@@ -2,6 +2,7 @@
 #include "scanner.h"
 #include "parser.h"
 #include "print_tree.h"
+#include <semantic.h>
 
 int main(int argc, char *argv[])
 {
@@ -18,7 +19,12 @@ int main(int argc, char *argv[])
 		if (!yyparse()) 
 		{
 			printf("Parsing was successful\n");
-			printProgram(argv[2]); 
+			printProgram(argv[2]);
+			bool semanticResult = doSemantic(root);
+			if (semanticResult) {
+				//printf("Parsing was successful\n");
+				//int t; 
+			}
 		}
 		else 
 		{
