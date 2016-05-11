@@ -178,9 +178,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 			break;
 		}
 		case ID_EXPRESSION: {
-			
-			//type->typeName = IDENTIFIER_TYPE_NAME;
-			struct LocalVariable* variable = getLocalVariableFromTable(method->localVariablesTable, primaryExpr->identifier, scope); 
+			struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, primaryExpr->identifier);
 			if (variable == NULL) {
 				struct Field* field = getField(semanticClass, primaryExpr->identifier); 
 				if (field == NULL) {
@@ -257,7 +255,7 @@ bool doSemantic(struct Program* program) {
 	
 	if (declList != NULL) {
 		struct Declaration* decl = declList->firstDecl;
-		while (decl != NULL) {
+		while (decl != NULL && isOk) {
 			if (decl->declType == CONST_DECL) {
 				isOk &= checkSemanticConstDecl(decl->constDecl, NULL);
 			}
@@ -270,11 +268,9 @@ bool doSemantic(struct Program* program) {
 			decl = decl->nextDecl; 
 		}
 	}
-	else {
-		printf("Semantic error. No declaration found");
-		isOk = false; 
-	}
-	//yield an error if function main not found 
+
+	//TODO: yield an error if function main not found
+	//check semantic main function (function without parameters)
 	return isOk; 
 }
 
@@ -891,34 +887,39 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 	bool isOk = true;
 	char* functionName = "";
 	if (method != NULL) {
-		functionName = method->constMethodref->const2->utf8;
+		functionName = method->constMethodref->const2->const1->utf8;
 	}
 	//check for match of number of variables and number of values 
 	if (varSpec->idListType != 0) {
 		if (varSpec->exprList != 0) {
+			struct Type* type = varSpec->idListType->type; 
 			if (varSpec->idListType->identifierList->size != varSpec->exprList->size) {
 				printf("Variable count and value count mismatch in function %s ", functionName);
 				isOk = false;
 			}
 			else {
 				struct Expression* expr = varSpec->exprList->firstExpression;
+				struct Identifier* id = varSpec->idListType->identifierList->firstId; 
 				while (expr != NULL && isOk) {
-					//TODO: tackle the problem of how to retrieve the type of  expression if expression is an identifier
-					//so in check Expression type, there should be a call to getVariableFromTable
 					struct SemanticType* semanticType = checkExpressionType(expr, method);
 					if (semanticType != NULL) {
-						if (semanticType->typeName != varSpec->idListType->type->typeName) {
-							printf("Types  mismatch in variable declaration in function %s", functionName);
+						if (semanticType->typeName != type->typeName) {
+							printf("Incompatible between declared type and semantic type of variable %s and  in function %s\n",id->name,  functionName);
 							isOk = false;
 						}
 					}
+					else{
+						isOk = false; 
+					}
 					expr = expr->nextExpr;
+					id = id->nextId; 
 				}
 			}
 		}
 	}
 	else {
 		//The compiler not support untyped variables declaration
+		printf("Semantic error. The compiler is currently not support var spec without type\n"); 
 		isOk = false;
 	}
 	return isOk;
@@ -949,7 +950,7 @@ bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Meth
 	List* variablesTable = method->localVariablesTable;
 	char* varName = paramDeclare->identifier;
 	struct Type* type = paramDeclare->type;
-	struct LocalVariable* localVariable = getLocalVariableFromTable(variablesTable, varName, 1);
+	struct LocalVariable* localVariable = findLocalVariableByScope(variablesTable, varName, 1);
 	if (localVariable == NULL) {
 		localVariable = (struct LocalVariable*)malloc(sizeof(struct LocalVariable));
 		//TODO: augment variable with value(expression); 
@@ -970,7 +971,7 @@ bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Meth
 bool addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable) {
 	bool isOk = true;
 	//TODO : implement size for variable
-	if (getLocalVariableFromTable(method->localVariablesTable, id, scope) == NULL) {
+	if (findLocalVariableByScope(method->localVariablesTable, id, scope) == NULL) {
 		struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
 		localVariable->id = list_size(method->localVariablesTable) + 1;
 		localVariable->scope = scope;
@@ -991,7 +992,7 @@ bool addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Metho
 }
 
 
-struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varName, int scope) {
+struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope) {
 	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
 	int size = list_size(variablesTable);
 	bool found = false;
@@ -1008,6 +1009,36 @@ struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varN
 	return NULL;
 }
 
+void cloneVariable(struct LocalVariable* dest, struct LocalVariable* source) {
+	dest->id = source->id; 
+	dest->isActive = source->isActive; 
+	dest->isMutable = source->isMutable; 
+	strcpy(dest->name, source->name); 
+	dest->scope = source->scope; 
+	dest->type = (struct Type*) malloc(sizeof(struct Type));
+	dest->type->typeName = source->type->typeName; 
+	dest->type->expr = source->type->expr; 
+}
+
+struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName) {
+	struct LocalVariable* result = NULL; 
+	struct LocalVariable* variable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+	int size = list_size(variablesTable);
+	bool found = false;
+	int minScope = 0; 
+	for (int i = 0; i < size; ++i) {
+		list_get_at(variablesTable, i, &variable);
+		//this check is strong enough to detect the needed variable
+		if (strcmp(variable->name, varName) == 0 && variable->isActive ) {
+			result = variable; 
+		}
+	}
+
+	return result;
+}
+
+
+
 
 bool checkSemanticConstDecl(struct ConstDecl* constDecl, struct Method* method) {
 	
@@ -1022,12 +1053,10 @@ bool checkSemanticConstDecl(struct ConstDecl* constDecl, struct Method* method) 
 	}
 	else if (constDecl->constSpecList != NULL) {
 		struct ConstSpec* constSpec = constDecl->constSpecList->firstConstSpec;
-		while (constSpec != NULL) {
+		while (constSpec != NULL && isOk) {
 			isOk &= checkSemanticConstSpec(constSpec, method);
 			constSpec = constSpec->nextConstSpec;
 		}
-		//The compiler not support untyped variables declaration
-		isOk = false;
 	}
 	return isOk;
 }
@@ -1073,8 +1102,12 @@ bool checkSemanticConstSpec(struct ConstSpec* constSpec, struct Method* method) 
 			}
 		}
 		else {
-			printf("Missing value in constant declaration   %s", methodName);
+			printf("Missing value in constant declaration in method %s\n", methodName);
 		}
+	}
+	else {
+		printf("Semantic error. The compiler currently not support constant specification without type\n"); 
+		isOk = false; 
 	}
 	return isOk;
 }

@@ -39,7 +39,7 @@ struct Field {
 	struct Constant* constFieldref; 
 	struct SemanticType* type;
 	int id; 
-	
+	bool isMutable; 
 };
 
 struct Method {
