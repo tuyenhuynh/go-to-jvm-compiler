@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <semantic_struct.h>
 #include "list.h"
-
+#include "helpers.h"
 
 struct  Class* semanticClass; 
 
@@ -50,13 +50,13 @@ bool checkSemanticBlock(struct Block* block, struct Method* method);
 bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, struct Method* method);
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
 struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varName, int scope);
-
-bool addVariableToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, int scope);
+bool addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable);
+bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, bool isMutable);
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
-
 bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
-
 bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method);
+bool isContainReturnStatement(struct Block* block); 
+void deactivateLocalVariablesByScope(List* localVariablesTable, int scope);
 
 struct Constant* addUtf8ToConstantsTable(char* utf8);
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
@@ -64,8 +64,6 @@ struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);
 struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDescriptor);
 
 char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeStr);
-
-char* convertTypeToString(enum TypeNames type);
 
 struct Field* getField(struct Class* class, char* fieldName); 
 struct Method* getMethod(struct Class* class, char* methodName); 

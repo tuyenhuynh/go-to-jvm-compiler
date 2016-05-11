@@ -5,4 +5,7 @@
 
 int exprListSize(const struct ExpressionList* exprList);
 
+char* convertTypeToString(enum TypeNames type);
+
+
 #endif HELPERS_H

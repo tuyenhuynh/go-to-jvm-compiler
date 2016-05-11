@@ -3,7 +3,7 @@
 #include "dot.h"
 #include "trees.h"
 #include "astfunctions.h" 
-
+#include "helpers.h"
 extern struct Program *root; 
 
 

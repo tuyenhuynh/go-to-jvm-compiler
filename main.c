@@ -19,11 +19,14 @@ int main(int argc, char *argv[])
 		if (!yyparse()) 
 		{
 			printf("Parsing was successful\n");
-			printProgram(argv[2]);
+			
 			bool semanticResult = doSemantic(root);
 			if (semanticResult) {
-				//printf("Parsing was successful\n");
-				//int t; 
+				printf("Semantic checking successful\n");
+				printProgram(argv[2]);
+			}
+			else {
+				printf("Semantic checking failed\n");
 			}
 		}
 		else 
@@ -39,8 +42,6 @@ int main(int argc, char *argv[])
 	}
 
 	fclose(yyin);
-
-	
 	
 	return 0;
 }

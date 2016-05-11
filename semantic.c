@@ -24,7 +24,7 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 			else
 			{
 				printf("Semantic error. Operand must be bool type \n");
-				type = NULL;
+				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
 		}
@@ -38,7 +38,7 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 			else
 			{
 				printf("Semantic error. Operand must be int or bool type \n");
-				type = NULL;
+				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
 		}
@@ -51,7 +51,7 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 			else
 			{
 				printf("Semantic error. Left and right operands should be bool type \n");
-				type = NULL;
+				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
 		}
@@ -63,7 +63,7 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 			else
 			{
 				printf("Semantic error. Left and right operands should be same type\n");
-				type = NULL;
+				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
 		}
@@ -78,7 +78,7 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
 				{
 					printf("Semantic error. Left and right operands shouldn't be bool type \n");
-					type = NULL;
+					type->typeName = UNKNOWN_TYPE;
 				}
 				else
 				{
@@ -88,155 +88,69 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 			else
 			{
 				printf("Semantic error. Left and right operands should be same type\n");
-				type = NULL;
+				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
 		}
 
 		case PLUS_EXPRESSION:
-		{
-			if(expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
-			{
-				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be bool type \n");
-					type = NULL;
-				}
-				
-				else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
-					type->typeName = FLOAT32_TYPE_NAME;
-				
-				else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
-					type->typeName = INT_TYPE_NAME;
-				
-				else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME)
-					type->typeName = STRING_TYPE_NAME;
-				
-				else
-				{
-					printf("Semantic error. Unknown type \n");
-					type = NULL;
-				}
-			}
-			else
-			{
-				printf("Semantic error. Left and right operands should be same type\n");
-				type = NULL;
-			}
-			break;
-		}
 		case MINUS_EXPRESSION:
 		case MUL_EXPRESSION:
-		{
-			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
-			{
-				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be bool type \n");
-					type = NULL;
-				}
-
-				else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
-					type->typeName = FLOAT32_TYPE_NAME;
-
-				else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
-					type->typeName = INT_TYPE_NAME;
-
-				else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be string type \n");
-					type = NULL;
-				}
-
-				else
-				{
-					printf("Semantic error. Unknown type \n");
-					type = NULL;
-				}
-			}
-			else
-			{
-				printf("Semantic error. Left and right operands should be same type\n");
-				type = NULL;
-			}
-			break;
-		}
-		
 		case DIV_EXPRESSION:
+		case MOD_EXPRESSION:
 		{
-			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
+			struct SemanticType*  leftType = checkExpressionType(expr->leftExpr, method);
+			struct SemanticType* rightType = checkExpressionType(expr->rightExpr, method);
+			if (leftType->typeName == rightType->typeName && leftType->typeName != UNKNOWN_TYPE)
 			{
-				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be bool type \n");
-					type = NULL;
+				if (expr->exprType == PLUS_EXPRESSION) {
+					type->typeName = leftType->typeName; 
 				}
-
-				else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
-					type->typeName = FLOAT32_TYPE_NAME;
-
-				else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
-					type->typeName = FLOAT32_TYPE_NAME;
-
-				else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be string type \n");
-					type = NULL;
+				if (expr->exprType == MINUS_EXPRESSION) {
+					if (leftType->typeName == STRING_TYPE_NAME || rightType->typeName == STRING_TYPE_NAME) {
+						printf("Semantic error. Operands of subtract cannot be string\n");
+						type->typeName = UNKNOWN_TYPE;
+					}
+					else {
+						type->typeName = leftType->typeName;
+					}
 				}
-
-				else
-				{
-					printf("Semantic error. Unknown type \n");
-					type = NULL;
+				else if (expr->exprType == MUL_EXPRESSION) {
+					if (leftType->typeName == STRING_TYPE_NAME || rightType->typeName == STRING_TYPE_NAME) {
+						printf("Semantic error. Operands of multiple cannot be string\n");
+						type->typeName = UNKNOWN_TYPE;
+					}
+					else {
+						type->typeName = leftType->typeName;
+					}
+				}
+				else if (expr->exprType == DIV_EXPRESSION) {
+					if (leftType->typeName == STRING_TYPE_NAME || rightType->typeName == STRING_TYPE_NAME) {
+						printf("Semantic error. Operands of division cannot be string\n");
+						type->typeName = UNKNOWN_TYPE;
+					}
+					else {
+						type->typeName = leftType->typeName;
+					}
+				}
+				else if (expr->exprType == MOD_EXPRESSION) {
+					if (leftType->typeName != INT_TYPE_NAME || rightType->typeName != INT_TYPE_NAME) {
+						printf("Semantic error. Incompatible types of modulo operation\n");
+					}
+					else {
+						type->typeName = INT_TYPE_NAME;
+					}
 				}
 			}
 			else
 			{
 				printf("Semantic error. Left and right operands should be same type\n");
-				type = NULL;
+				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
-		}
-		case MOD_EXPRESSION: 
-		{
-			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
-			{
-				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be bool type \n");
-					type = NULL;
-				}
-
-				else if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be float type \n");
-					type = NULL;
-				}
-
-				else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
-					type->typeName = FLOAT32_TYPE_NAME;
-
-				else if (expr->leftExpr->semanticType->typeName == STRING_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be string type \n");
-					type = NULL;
-				}
-
-				else
-				{
-					printf("Semantic error. Unknown type \n");
-					type = NULL;
-				}
-			}
-			else
-			{
-				printf("Semantic error. Left and right operands should be same type\n");
-				type = NULL;
-			}
-			break;
-		}
+		}				
 	}
-
+	expr->semanticType = type;
 	return type;
 }
 
@@ -279,7 +193,6 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 			else {
 				type->typeName = variable->type->typeName; 
 			}
-			//add id to table of variable
 			break;
 		}
 		case EXPRESSION: {
@@ -368,7 +281,7 @@ bool doSemantic(struct Program* program) {
 
 //check and add function to method table
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
-	bool isOk = true;
+	bool isOk = true; 
 	struct Method* method = NULL; // (struct Method*)malloc(sizeof(struct Method));
 	//check for existing of method reference and add method to methods table + constants table if it does not exist
 	if (hashtable_get(semanticClass->methodsTable, functionDecl, &method) != CC_OK) {
@@ -408,7 +321,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		hashtable_add(methodsTable, functionDecl->identifier, method);
 
 		//add variable to local variables table
-		list_new(&(method->localVariablesTable));
+		list_new(&method->localVariablesTable);
 		if (paramList != NULL) {
 			struct ParameterDeclare* param = paramList->firstParamDecl;
 			while (param != NULL && isOk) {
@@ -421,12 +334,23 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 				}
 			}
 		}
+
 		//TODO: check semantic of body
-		checkSemanticBlock(functionDecl->block, method); 
+		isOk = checkSemanticBlock(functionDecl->block, method); 
+		if (!isOk) {
+			return false; 
+		}
+
+		if (typeName != UNKNOWN_TYPE && typeName != VOID_TYPE_NAME) {
+			isOk = isContainReturnStatement(functionDecl->block); 
+			if (! isOk ){
+				printf("Semantic error. Function %s should return a value\n", functionDecl->identifier); 
+			}
+		}
 	}
 	else {
 		printf("Function with the same name as %s has been define\n", functionDecl->identifier); 
-		bool isOk = false;
+		isOk = false;
 	}
 	//TODO:check for compatible of return type in the body and in signature
 	return isOk; 
@@ -488,29 +412,36 @@ bool checkSemanticParamList(struct ParameterList* paramList, char* functionName)
 //return type should be one of the following:	INT, FLOAT, STRING, VOID,// INT[], FLOAT[], STRING[]
 //the format is (), (INT|FLOAT|STRING), INT, FLOAT, STRING
 enum TypeNames  getFunctionReturnType(struct FunctionDecl* functionDecl) {
-	enum TypeNames typeName;
+	enum TypeNames typeName = UNKNOWN_TYPE;
 	if (functionDecl->signature->result != NULL) {
 		struct Result* returnType = functionDecl->signature->result;
 		struct Type* type = NULL;
-		if (returnType != NULL) {
-			type = returnType->type;
+		if (returnType == NULL) {
+			typeName = VOID_TYPE_NAME; 
 		}
-		else if (returnType->paramInParen != NULL) {
-			//(int),(float), (string)
-			struct ParameterList* paramList = returnType->paramInParen->paramList;
-			//(a int) will not be accepted
-			if (paramList != NULL && paramList->size == 1 && paramList->firstParamDecl->identifier == NULL) {
-				type = paramList->firstParamDecl->type;
+		else {
+			if (returnType->type != NULL) {
+				type = returnType->type; 
+			}
+			else {
+				//returnType->paramInParent != NULL
+				if (returnType->paramInParen->paramList != NULL) {
+					struct ParameterList* paramList = returnType->paramInParen->paramList; 
+					//(int),(float), (string)
+					//(a int) will not be accepted
+					if (paramList->size == 1 && paramList->firstParamDecl->identifier == NULL) {
+						type = paramList->firstParamDecl->type;
+					}
+				}
+				else {
+					//()
+					typeName = VOID_TYPE_NAME;
+				}
 			}
 		}
-		else {
-			typeName = VOID_TYPE_NAME;
-		}
+		//TODO: check this
 		if (type != NULL && type->expr == NULL) {
 			typeName = type->typeName;
-		}
-		else {
-			typeName = UNKNOWN_TYPE;
 		}
 	}
 	else {
@@ -519,83 +450,6 @@ enum TypeNames  getFunctionReturnType(struct FunctionDecl* functionDecl) {
 	return typeName;
 }
 
-bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method) {
-	bool isOk = true;
-	List* variablesTable = method->localVariablesTable;
-	char* varName = paramDeclare->identifier; 
-	struct Type* type = paramDeclare->type; 
-	struct LocalVariable* localVariable = getLocalVariableFromTable(variablesTable, varName, 1); 
-	if (localVariable == NULL) {
-		//TODO: augment variable with value(expression); 
-		localVariable->name = paramDeclare->identifier;
-		localVariable->type->typeName = type->typeName;
-		localVariable->id = list_size(variablesTable) + 1 ;
-		localVariable->scope = 1;
-		list_add(variablesTable, localVariable);
-	}
-	else {
-		isOk = false; 
-	}
-	return isOk;
-}
-
-
-//TODO: transform the multiple assignment to single assignment
-bool addVariableToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, int scope) {
-	bool isOk = true;
-	//here assumpt that we check semantic for variables first, then add them to local variable table
-	if (checkSemanticVarSpec(varSpec, method)) {
-		//TODO : implement size for variable
-		if (varSpec->idListType != NULL) {
-			struct IdentifierList* idList = varSpec->idListType->identifierList;
-			struct Identifier* id = idList->firstId;
-			struct Type* type = varSpec->idListType->type;
-			while (id != NULL) {
-				if (getLocalVariableFromTable(method->localVariablesTable, id->name, scope) == NULL) {
-					struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
-					localVariable->id = list_size(method->localVariablesTable) + 1;
-					localVariable->scope = scope; 
-					localVariable->name = id->name; 
-					struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType));
-					semanticType->typeName = type->typeName;
-					localVariable->type->typeName = semanticType->typeName;
-				    list_add(method->localVariablesTable,  localVariable);
-				}
-				else {
-					isOk = false;
-					printf("Variable with the same name %s exists in the table\n", id->name);
-				}
-				id = id->nextId;
-			}
-		}
-		else {
-			//The compiler currently doesnt support declarations without type 
-			printf("The compiler currently doesnt support declarations without type \n"); 
-			isOk = false;
-		}
-	}
-	else {
-		isOk = false;
-	}
-	return isOk;
-}
-
-struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varName, int scope) {
-	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
-	int size = list_size(variablesTable);
-	bool found = false;
-	for (int i = 0; !found && i < size; ++i) {
-		list_get_at(variablesTable, i, &result);
-		if (result->scope == scope && strcmp(result->name, varName) == 0) {
-			found = true;
-		}
-	}
-
-	if (found) {
-		return result;
-	}
-	return NULL;
-}
 
 bool checkSemanticBlock(struct Block* block, struct Method* method) {
 	//increase scope
@@ -609,9 +463,21 @@ bool checkSemanticBlock(struct Block* block, struct Method* method) {
 		isOk &= checkSemanticStmt(stmt,method);
 		stmt = stmt->nextStatement; 
 	}
+	deactivateLocalVariablesByScope(method->localVariablesTable, scope); 
 	//decrease scope
 	scope--; 
 	return isOk; 
+}
+
+void deactivateLocalVariablesByScope(List* localVariablesTable, int scope) {
+	struct LocalVariable* variable = NULL; 
+	int size = list_size(localVariablesTable); 
+	for (int i = 0; i < size; ++i) {
+		list_get_at(localVariablesTable, i, &variable); 
+		if (variable->scope == scope && variable->isActive) {
+			variable->isActive = false; 
+		}
+	}
 }
 
 bool checkSemanticStmt(struct Statement* statement, struct Method* method) {
@@ -676,7 +542,7 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 		{
 			if (simpleStmt->exprListLeft != NULL && simpleStmt->exprListRight != NULL)
 			{
-				return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, NULL);
+				return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, method);
 			}
 			//add error msg
 			return false;
@@ -689,7 +555,7 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 			{
 				if(exprListSize(simpleStmt->exprListLeft) == 1 && exprListSize(simpleStmt->exprListRight) == 1)
 				{
-					return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, NULL);
+					return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, method);
 				}
 				// add error msg
 				return false;
@@ -711,7 +577,7 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 		//Dont need to check for isOk
 		while(leftExpr != NULL && isOk != false)
 		{
-			isOk = checkSemanticAssignStmt(leftExpr, rightExpr, NULL);
+			isOk = checkSemanticAssignStmt(leftExpr, rightExpr, method);
 			leftExpr = leftExpr->nextExpr;
 			rightExpr = rightExpr->nextExpr;
 		}
@@ -727,9 +593,24 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 
 bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, struct Method* method)
 {
-	if (leftExpr->semanticType->typeName != rightExpr->semanticType->typeName)
-		return false;
-	return true;
+	bool isOk = true; 
+	if (leftExpr->exprType != PRIMARY || leftExpr->primaryExpr->exprType != ID_EXPRESSION) {
+		isOk = false; 
+	}
+	else {
+		struct SemanticType* leftType = checkExpressionType(leftExpr, method); 
+		struct SemanticType* rightType = checkExpressionType(rightExpr, method); 
+		if (leftType->typeName == rightType->typeName && leftType->typeName != UNKNOWN_TYPE) {
+			isOk = true; 
+		}
+		else {
+			isOk = false; 
+		}
+	}
+	if (!isOk) {
+		printf("Assignment statement failed in function %s\n", method->constMethodref->const2->const1); 
+	}
+	return isOk;
 }
 
 bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method) {
@@ -923,6 +804,10 @@ bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method) {
 			}
 		}
 	}
+	//check semantic block
+	if (isOk) {
+		isOk = checkSemanticBlock(forStmt->block, method); 
+	}
 	return isOk; 
 }
 
@@ -938,6 +823,7 @@ bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* method)
 {
 	//Currently ,only statements which return one expression are implemented
+	char* methodName = method->constMethodref->const2->const1->utf8;
 	if (returnStmt->exprList->size == 1) {
 		struct SemanticType* semanticType = checkExpressionType(returnStmt->exprList->firstExpression, method); 
 		
@@ -949,7 +835,7 @@ bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* metho
 		return true;
 	}
 	else {
-		printf("Too many expressions in return statement\n"); 
+		printf("Too many expressions in return statement of function $s\n", methodName); 
 		return false; 
 	}
 }
@@ -979,11 +865,152 @@ bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct Parameter
 
 bool checkSemanticVarDecl(struct VarDecl* varDecl, struct Method* method) {
 	bool isOk = true; 
+	if (varDecl->varSpec != NULL) {
+		isOk = checkSemanticVarSpec(varDecl->varSpec, method);
+		if (isOk) {
+			isOk = addVarSpecToLocalVarsTable(varDecl->varSpec, method, true);
+		} 
+	}
+	else {
+		struct VarSpec * varSpec = varDecl->varSpecList->firstVarSpec; 
+		while (varSpec != NULL && isOk) {
+			isOk = checkSemanticVarSpec(varSpec, method); 
+			if (isOk) {
+				isOk = addVarSpecToLocalVarsTable(varSpec, method, true);
+				varSpec = varSpec->nextVarSpec;
+			}
+		}
+	}
 	//if(varDecl)
-	return true;
+	return isOk;
 }
 
+
+bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
+{
+	bool isOk = true;
+	char* functionName = "";
+	if (method != NULL) {
+		functionName = method->constMethodref->const2->utf8;
+	}
+	//check for match of number of variables and number of values 
+	if (varSpec->idListType != 0) {
+		if (varSpec->exprList != 0) {
+			if (varSpec->idListType->identifierList->size != varSpec->exprList->size) {
+				printf("Variable count and value count mismatch in function %s ", functionName);
+				isOk = false;
+			}
+			else {
+				struct Expression* expr = varSpec->exprList->firstExpression;
+				while (expr != NULL && isOk) {
+					//TODO: tackle the problem of how to retrieve the type of  expression if expression is an identifier
+					//so in check Expression type, there should be a call to getVariableFromTable
+					struct SemanticType* semanticType = checkExpressionType(expr, method);
+					if (semanticType != NULL) {
+						if (semanticType->typeName != varSpec->idListType->type->typeName) {
+							printf("Types  mismatch in variable declaration in function %s", functionName);
+							isOk = false;
+						}
+					}
+					expr = expr->nextExpr;
+				}
+			}
+		}
+	}
+	else {
+		//The compiler not support untyped variables declaration
+		isOk = false;
+	}
+	return isOk;
+}
+
+bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, bool isMutable) {
+	bool isOk = true;
+	if (varSpec->idListType != NULL) {
+		struct IdentifierList* idList = varSpec->idListType->identifierList;
+		struct Identifier* id = idList->firstId;
+		enum  TypeNames typeName = varSpec->idListType->type->typeName;
+		while (id != NULL && isOk) {
+			isOk = addVariableToLocalVarsTable(id->name, typeName, method, isMutable);
+			id = id->nextId;
+		}
+	}
+	else {
+		//The compiler currently doesnt support var/const declarations without type 
+		printf("The compiler currently doesnt support declarations without type \n");
+		isOk = false;
+	}
+	
+	return isOk; 
+}
+
+bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method) {
+	bool isOk = true;
+	List* variablesTable = method->localVariablesTable;
+	char* varName = paramDeclare->identifier;
+	struct Type* type = paramDeclare->type;
+	struct LocalVariable* localVariable = getLocalVariableFromTable(variablesTable, varName, 1);
+	if (localVariable == NULL) {
+		localVariable = (struct LocalVariable*)malloc(sizeof(struct LocalVariable));
+		//TODO: augment variable with value(expression); 
+		localVariable->name = paramDeclare->identifier;
+		localVariable->type = (struct Type*)malloc(sizeof(struct Type));
+		localVariable->type->typeName = type->typeName;
+		localVariable->id = list_size(variablesTable) + 1;
+		localVariable->scope = 1;
+		list_add(variablesTable, localVariable);
+	}
+	else {
+		isOk = false;
+	}
+	return isOk;
+}
+
+//TODO: transform the multiple assignment to single assignment
+bool addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable) {
+	bool isOk = true;
+	//TODO : implement size for variable
+	if (getLocalVariableFromTable(method->localVariablesTable, id, scope) == NULL) {
+		struct LocalVariable* localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+		localVariable->id = list_size(method->localVariablesTable) + 1;
+		localVariable->scope = scope;
+		localVariable->name = id;
+		localVariable->isActive = true; 
+		localVariable->isMutable = isMutable; 
+		struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType));
+		semanticType->typeName = typeName;
+		localVariable->type = (struct Type*)malloc(sizeof(struct Type));
+		localVariable->type->typeName = semanticType->typeName;
+		list_add(method->localVariablesTable, localVariable);
+	}
+	else {
+		isOk = false;
+		printf("Variable with the same name %s exists in the table\n", id);
+	}
+	return isOk;
+}
+
+
+struct LocalVariable* getLocalVariableFromTable(List* variablesTable, char* varName, int scope) {
+	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+	int size = list_size(variablesTable);
+	bool found = false;
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(variablesTable, i, &result);
+		if (result->scope == scope && strcmp(result->name, varName) == 0 && result->isActive) {
+			found = true;
+		}
+	}
+
+	if (found) {
+		return result;
+	}
+	return NULL;
+}
+
+
 bool checkSemanticConstDecl(struct ConstDecl* constDecl, struct Method* method) {
+	
 	bool isOk = true;
 	char* functionName = ""; 
 	if (method != NULL) {
@@ -1050,43 +1077,6 @@ bool checkSemanticConstSpec(struct ConstSpec* constSpec, struct Method* method) 
 		}
 	}
 	return isOk;
-}
-
-bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
-{	
-	bool isOk = true; 
-	char* functionName = "";
-	if (method != NULL) {
-		functionName = method->constMethodref->const2->utf8; 
-	}
-	//check for match of number of variables and number of values 
-	if (varSpec->idListType != 0) {
-		if (varSpec->exprList != 0) {
-			if (varSpec->idListType->identifierList->size != varSpec->exprList->size) {
-				printf("Variable count and value count mismatch in function %s ", functionName);
-				isOk = false; 
-			}
-			else {
-				struct Expression* expr = varSpec->exprList->firstExpression; 
-				while (expr != NULL) {
-					//TODO: tackle the problem of how to retrieve the type of  expression if expression is an identifier
-					//so in check Expression type, there should be a call to getVariableFromTable
-					struct SemanticType* semanticType =checkExpressionType(expr, method); 
-					if (semanticType != NULL) {
-						if (semanticType->typeName != varSpec->idListType->type->typeName) {
-							printf("Types  mismatch in variable declaration in function %s", functionName);
-							isOk = false; 
-						}
-					}
-				}
-			}
-		}
-	}
-	else {
-		//The compiler not support untyped variables declaration
-		isOk = false; 
-	}
-	return isOk ;
 }
 
 struct Constant* addUtf8ToConstantsTable(char* utf8) {
@@ -1182,20 +1172,6 @@ struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDesc
 	return constant; 
 }
 
-char* convertTypeToString(enum TypeNames type) {
-	switch (type) {
-		case STRING_TYPE_NAME:
-			return "Ljava/lang/String;"; 
-		case INT_TYPE_NAME:
-			return "I";
-		case FLOAT32_TYPE_NAME:
-			return "F"; 
-		case VOID_TYPE_NAME:
-			return "V"; 
-		default:
-			return "UNKNOWN"; 
-	}
-}
 
 struct Method* getMethod(struct Class* class, char* methodName) {
 	struct Method* method = NULL; // (struct Method*) malloc(sizeof(struct Method));
@@ -1223,5 +1199,20 @@ void printLocalVariablesTable(struct Method* method) {
 	}
 }
 
-
+bool isContainReturnStatement(struct Block* block) {
+	bool found = false; 
+	if (block->stmtList == NULL) {
+		return false; 
+	}
+	else {
+		struct Statement* stmt = block->stmtList->firstStmt; 
+		while (stmt != NULL && !found) {
+			if (stmt->stmtType == RETURN_STMT) {
+				found = true; 
+			}
+			stmt = stmt->nextStatement; 
+		}
+	}
+	return found; 
+}
 

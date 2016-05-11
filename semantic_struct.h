@@ -31,11 +31,15 @@ struct LocalVariable {
 	struct Type* type; 
 	char* name; 
 	int scope; 
+	bool isActive; 
+	bool isMutable; 
 };
 
 struct Field {
 	struct Constant* constFieldref; 
-	struct SemanticType* type; 
+	struct SemanticType* type;
+	int id; 
+	
 };
 
 struct Method {

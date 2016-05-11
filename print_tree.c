@@ -31,6 +31,12 @@ void printExpression(int parentId, struct Expression* expression) {
 	if (expression != NULL) {
 		maxId++;
 		int id = maxId; 
+		//char* typeNameStr = convertTypeToString(expression->semanticType->typeName);
+		//char* exprTypeStr = (char*)malloc(20 * sizeof(char)); 
+		//strcpy(exprTypeStr, "\"EXPR\\n");
+		//strcpy(exprTypeStr + 7, typeNameStr);
+		//int length = strlen(exprTypeStr); 
+		//strcpy(exprTypeStr + length, "\""); 
 		printEdgeWithDestName(parentId, id, "EXPR"); 
 		switch (expression->exprType) {
 			case DECIMAL_EXPR: {
