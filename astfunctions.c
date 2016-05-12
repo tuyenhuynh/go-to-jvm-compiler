@@ -226,8 +226,6 @@ struct ConstSpec *CreateCompositeConstSpecWtype(struct IdentifierListType *_idLi
 	Result->exprList = _exprList;
 	Result->idList = NULL;
 
-	Result->exprList = NULL;
-
 	Result->nextConstSpec = NULL;
 	return Result; 
 

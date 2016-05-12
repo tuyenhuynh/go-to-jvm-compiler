@@ -45,12 +45,15 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		case AND_EXPRESSION:
 		case OR_EXPRESSION:
 		{
-			if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME &&
-				expr->rightExpr->semanticType->typeName == BOOL_TYPE_NAME)
+			struct SemanticType* leftType = checkExpressionType(expr->leftExpr, method); 
+			struct SemanticType* rightType = checkExpressionType(expr->rightExpr, method); 
+			
+			if (leftType->typeName == BOOL_TYPE_NAME &&
+				rightType->typeName == BOOL_TYPE_NAME)
 				type->typeName = BOOL_TYPE_NAME;
 			else
 			{
-				printf("Semantic error. Left and right operands should be bool type \n");
+				printf("Semantic error. Left and right operands of logical operator should be bool type \n");
 				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
@@ -58,38 +61,36 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		case EQU_EXPRESSION:
 		case NE_EXPRESSION:
 		{
-			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
-				type->typeName = BOOL_TYPE_NAME;
-			else
+			struct SemanticType* leftType = checkExpressionType(expr->leftExpr, method);
+			struct SemanticType* rightType = checkExpressionType(expr->rightExpr, method);
+			
+			if (leftType->typeName != rightType->typeName || leftType->typeName == UNKNOWN_TYPE)
 			{
-				printf("Semantic error. Left and right operands should be same type\n");
+				printf("Semantic error. Left and right operands of comparation should be same type\n");
 				type->typeName = UNKNOWN_TYPE;
+			}
+			else {
+				type->typeName = BOOL_TYPE_NAME;				
 			}
 			break;
 		}
-
 		case GT_EXPRESSION:
 		case GTE_EXPRESSION:
 		case LT_EXPRESSION:
 		case LTE_EXPRESSION:
 		{
-			if (expr->leftExpr->semanticType->typeName == expr->rightExpr->semanticType->typeName)
-			{
-				if (expr->leftExpr->semanticType->typeName == BOOL_TYPE_NAME)
-				{
-					printf("Semantic error. Left and right operands shouldn't be bool type \n");
-					type->typeName = UNKNOWN_TYPE;
-				}
-				else
-				{
-					type->typeName = BOOL_TYPE_NAME;
-				}
+			struct SemanticType* leftType = checkExpressionType(expr->leftExpr, method); 
+			struct SemanticType* rightType = checkExpressionType(expr->rightExpr, method);
+
+			if (leftType->typeName == INT_TYPE_NAME && rightType->typeName == INT_TYPE_NAME ||
+				leftType->typeName == FLOAT32_TYPE_NAME && rightType->typeName == FLOAT32_TYPE_NAME) {
+				type->typeName = BOOL_TYPE_NAME;
 			}
-			else
-			{
-				printf("Semantic error. Left and right operands should be same type\n");
-				type->typeName = UNKNOWN_TYPE;
+			else {
+				printf("Semantic error. Left and right operands of comparation should be same type\n");
+				type->typeName = UNKNOWN_TYPE; 
 			}
+			
 			break;
 		}
 
@@ -257,13 +258,13 @@ bool doSemantic(struct Program* program) {
 		struct Declaration* decl = declList->firstDecl;
 		while (decl != NULL && isOk) {
 			if (decl->declType == CONST_DECL) {
-				isOk &= checkSemanticConstDecl(decl->constDecl, NULL);
+				isOk = checkSemanticConstDecl(decl->constDecl, NULL);
 			}
 			else if (decl->declType == VAR_DECL) {
-				isOk &= checkSemanticVarDecl(decl->varDecl, NULL);
+				isOk = checkSemanticVarDecl(decl->varDecl, NULL);
 			}
 			else if (decl->declType == FUNC_DECL) {
-				isOk &= checkSemanticFunctionDecl(decl->funcDecl);
+				isOk = checkSemanticFunctionDecl(decl->funcDecl);
 			}
 			decl = decl->nextDecl; 
 		}
@@ -456,8 +457,10 @@ bool checkSemanticBlock(struct Block* block, struct Method* method) {
 	}
 	struct Statement* stmt = block->stmtList->firstStmt; 
 	while (stmt != NULL && isOk ) {
-		isOk &= checkSemanticStmt(stmt,method);
-		stmt = stmt->nextStatement; 
+		isOk = checkSemanticStmt(stmt,method);
+		if (isOk) {
+			stmt = stmt->nextStatement;
+		}
 	}
 	deactivateLocalVariablesByScope(method->localVariablesTable, scope); 
 	//decrease scope
@@ -517,52 +520,50 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 	{
 		case EXPR_SIMPLE_STMT:
 		{
-			if (checkExpressionType(simpleStmt->expr, method) == NULL)
-				return false;
-			return true;
+			printf("Semantic error. Expression evaluated but not used\n");
+			return false; 
 		}
 		case INC_SIMPLE_STMT:
 		case DEC_SIMPLE_STMT:
 		{
-			struct SemanticType * type = checkExpressionType(simpleStmt->expr, method);
-			if (type != NULL) {
-				if (type->typeName != FLOAT32_TYPE_NAME && type->typeName != INT_TYPE_NAME) {
-					return false;
+			if (simpleStmt->expr->exprType == PRIMARY) {
+				struct SemanticType * semanticType = checkExpressionType(simpleStmt->expr, method);
+				if (semanticType->typeName != FLOAT32_TYPE_NAME && semanticType->typeName != INT_TYPE_NAME) {
+					printf("Semantic error. Increase or decrease statement can only perform in numeric variable\n"); 
+					return false; 
 				}
 			}
-			//add error msg
-			return false;
+			else {
+				printf("Semantic error. Increase or decrease statement can only perform on variable\n"); 
+				return false; 
+			}
+			return true; 
+			
 		}
 
 		case ASSIGN_STMT:
 		{
-			if (simpleStmt->exprListLeft != NULL && simpleStmt->exprListRight != NULL)
-			{
-				return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, method);
-			}
-			//add error msg
-			return false;
+			return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, method);
 		}
 		case PLUS_ASSIGN_STMT:
 		case MINUS_ASSIGN_STMT:
 		case MUL_ASSIGN_STMT:
 		case DIV_ASSIGN_STMT: {
-			if (simpleStmt->exprListLeft != NULL && simpleStmt->exprListRight != NULL)
+			if (exprListSize(simpleStmt->exprListLeft) == 1 && exprListSize(simpleStmt->exprListRight) == 1)
 			{
-				if(exprListSize(simpleStmt->exprListLeft) == 1 && exprListSize(simpleStmt->exprListRight) == 1)
-				{
-					return checkSemanticAssignStmtList(simpleStmt->exprListLeft, simpleStmt->exprListRight, method);
-				}
-				// add error msg
+				return checkSemanticAssignStmt(simpleStmt->exprListLeft->firstExpression, simpleStmt->exprListRight->firstExpression, method);
+			}
+			else {
+				printf("Semantic error. Multiple arithmetic assign is not supported. \n"); 
 				return false;
 			}
-			// add error msg
-			return false;
 		}
+		default:
+			return true; 
 	}
-	return true;
 }
 
+//not supported
 bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, struct Method* method)
 {
 	bool isOk = true;
@@ -571,13 +572,14 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 		struct Expression *leftExpr = leftExprList->firstExpression;
 		struct Expression *rightExpr = rightExprList->firstExpression;
 		//Dont need to check for isOk
-		while(leftExpr != NULL && isOk != false)
+		while(leftExpr != NULL && isOk)
 		{
 			isOk = checkSemanticAssignStmt(leftExpr, rightExpr, method);
-			leftExpr = leftExpr->nextExpr;
-			rightExpr = rightExpr->nextExpr;
+			if (isOk) {
+				leftExpr = leftExpr->nextExpr;
+				rightExpr = rightExpr->nextExpr;
+			}
 		}
-		//add error msg if !isOk
 	}
 	else
 	{
@@ -591,76 +593,58 @@ bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rig
 {
 	bool isOk = true; 
 	if (leftExpr->exprType != PRIMARY || leftExpr->primaryExpr->exprType != ID_EXPRESSION) {
+		printf("Semantic error. Left expression of assign statement must be identifier\n"); 
 		isOk = false; 
 	}
 	else {
-		struct SemanticType* leftType = checkExpressionType(leftExpr, method); 
-		struct SemanticType* rightType = checkExpressionType(rightExpr, method); 
-		if (leftType->typeName == rightType->typeName && leftType->typeName != UNKNOWN_TYPE) {
-			isOk = true; 
-		}
-		else {
+		struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, leftExpr->primaryExpr->identifier); 
+		if (variable == NULL) {
+			printf("Semantic error. Identifier %s not declared \n", leftExpr->primaryExpr->identifier);
 			isOk = false; 
 		}
-	}
-	if (!isOk) {
-		printf("Assignment statement failed in function %s\n", method->constMethodref->const2->const1); 
+		else {
+			if (rightExpr->exprType == PRIMARY && rightExpr->primaryExpr->exprType == ID_EXPRESSION) {
+				struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, rightExpr->primaryExpr->identifier); 
+				if (variable == NULL) {
+					printf("Semantic error. Identifier %s not declare\n", rightExpr->primaryExpr->identifier); 
+					isOk = false; 
+				}
+			}
+		}
+		if (isOk) {
+			struct SemanticType* leftType = checkExpressionType(leftExpr, method);
+			struct SemanticType* rightType = checkExpressionType(rightExpr, method);
+			isOk = (leftType->typeName == rightType->typeName && leftType->typeName != UNKNOWN_TYPE);
+			if (!isOk) {
+				printf("Semantic error. Type mismatch in assign statement of variable %s\n", leftExpr->primaryExpr->identifier); 
+			}
+		}
 	}
 	return isOk;
 }
 
 bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method) {
 	bool isOk = true;
-	
-	if(ifStmt->ifStmtExpr == NULL)
-	{
-		// add error message
-		isOk = false;
+	if (ifStmt->ifStmtExpr->simpleStmt != NULL) {
+		printf("Semantic error. Simple statement before expression of if is not accepted. \n"); 
+		isOk = false; 
 	}
-	else
-	{
-		if (ifStmt->ifStmtExpr->expr == NULL)
-		{
-			// add error message
-			isOk = false;
-		}
-		else
-		{
-			if (ifStmt->ifStmtExpr->simpleStmt != NULL)
-				isOk &= checkSemanticSimpleStmt(ifStmt->ifStmtExpr->simpleStmt, NULL);
-			
-			struct SemanticType *type = checkExpressionType(ifStmt->ifStmtExpr->expr, method);
-
-			if (type != NULL){
-				if (type->typeName != BOOL_TYPE_NAME)
-				{
-					// add error message
-					isOk &= false;
-				}
+	else {
+		struct SemanticType* semanticType = checkExpressionType(ifStmt->ifStmtExpr->expr, method);
+		if (semanticType->typeName != BOOL_TYPE_NAME) {
+			if (semanticType->typeName != UNKNOWN_TYPE) {
+				printf("Semantic error. Non bool used as if condition\n");
 			}
-			else
-			{
-				// adde error message
-				isOk &= false;
+			isOk = false; 
+		}
+		else {
+			isOk = checkSemanticBlock(ifStmt->block, method);
+			if (isOk && ifStmt->elseBlock != NULL) {
+				isOk = checkSemanticElseBlock(ifStmt->elseBlock, method); 
 			}
 		}
 	}
 	
-	if(ifStmt->block == NULL)
-	{
-		// add error message
-		isOk = false;
-	}
-	else
-	{
-		isOk &= checkSemanticBlock(ifStmt->block, NULL);
-	}
-
-	if(ifStmt->elseBlock != NULL)
-	{
-		isOk &= checkSemanticElseBlock(ifStmt->elseBlock, NULL);
-	}
-
 	return isOk;
 }
 
@@ -669,17 +653,10 @@ bool checkSemanticElseBlock(struct ElseBlock* elseBlock, struct Method* method) 
 
 	if(elseBlock->ifStmt != NULL)
 	{
-		isOk = checkSemanticIfStmt(elseBlock->ifStmt, NULL);
+		isOk = checkSemanticIfStmt(elseBlock->ifStmt, method);
 	}
-
-	if(elseBlock->block != NULL)
-	{
-		isOk &= checkSemanticBlock(elseBlock->block, NULL);
-	}
-	else
-	{
-		// add error message 
-		isOk &= false;
+	else {
+		isOk = checkSemanticBlock(elseBlock->block, method); 
 	}
 
 	return isOk;
@@ -925,24 +902,42 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 	return isOk;
 }
 
-bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, bool isMutable) {
+bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method) {
 	bool isOk = true;
 	if (varSpec->idListType != NULL) {
 		struct IdentifierList* idList = varSpec->idListType->identifierList;
 		struct Identifier* id = idList->firstId;
 		enum  TypeNames typeName = varSpec->idListType->type->typeName;
 		while (id != NULL && isOk) {
-			isOk = addVariableToLocalVarsTable(id->name, typeName, method, isMutable);
+			isOk = addVariableToLocalVarsTable(id->name, typeName, method, true);
 			id = id->nextId;
 		}
 	}
 	else {
 		//The compiler currently doesnt support var/const declarations without type 
-		printf("The compiler currently doesnt support declarations without type \n");
+		printf("Semantic error. The compiler currently doesnt support declarations without type \n");
 		isOk = false;
 	}
 	
 	return isOk; 
+}
+
+bool addConstSpecToLocalVarsTable(struct ConstSpec* constSpec, struct Method* method) {
+	bool isOk = true; 
+	if (constSpec->idListType != NULL) {
+		struct IdentifierList* idList = constSpec->idListType->identifierList; 
+		struct Identifier* id = idList->firstId; 
+		enum TypeNmes typeName = constSpec->idListType->type->typeName; 
+		while (id != NULL && isOk) {
+			isOk = addVariableToLocalVarsTable(id->name, typeName, method, false);
+			id = id->nextId; 
+		}
+	}
+	else {
+		//The compiler currently doesnt support var/const declarations without type 
+		printf("Semantic error. The compiler currently doesnt support declarations without type \n");
+		isOk = false;
+	}
 }
 
 bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method) {
@@ -1022,7 +1017,7 @@ void cloneVariable(struct LocalVariable* dest, struct LocalVariable* source) {
 
 struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName) {
 	struct LocalVariable* result = NULL; 
-	struct LocalVariable* variable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+	struct LocalVariable* variable = NULL; 
 	int size = list_size(variablesTable);
 	bool found = false;
 	int minScope = 0; 
@@ -1037,11 +1032,7 @@ struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* va
 	return result;
 }
 
-
-
-
 bool checkSemanticConstDecl(struct ConstDecl* constDecl, struct Method* method) {
-	
 	bool isOk = true;
 	char* functionName = ""; 
 	if (method != NULL) {
@@ -1049,13 +1040,19 @@ bool checkSemanticConstDecl(struct ConstDecl* constDecl, struct Method* method) 
 	}
 	if (constDecl->constSpec != NULL) {
 		struct ConstSpec* constSpec = constDecl->constSpec; 
-		isOk = checkSemanticConstSpec(constSpec, method); 
+		isOk = checkSemanticConstSpec(constSpec, method);
+		if (isOk) {
+			isOk = addConstSpecToLocalVarsTable(constSpec, method); 
+		}
 	}
 	else if (constDecl->constSpecList != NULL) {
 		struct ConstSpec* constSpec = constDecl->constSpecList->firstConstSpec;
 		while (constSpec != NULL && isOk) {
-			isOk &= checkSemanticConstSpec(constSpec, method);
-			constSpec = constSpec->nextConstSpec;
+			isOk = checkSemanticConstSpec(constSpec, method);
+			if (isOk) {
+				isOk = addConstSpecToLocalVarsTable(constSpec, method); 
+				constSpec = constSpec->nextConstSpec;
+			}
 		}
 	}
 	return isOk;
@@ -1066,38 +1063,54 @@ bool checkSemanticConstSpec(struct ConstSpec* constSpec, struct Method* method) 
 	bool isOk = true;
 	char* methodName = ""; 
 	if (method != NULL) {
-		methodName = method->constMethodref->const2->utf8;
+		methodName = method->constMethodref->const2->const1->utf8;
 	}
 	//check for match of number of variables and number of values 
 	if (constSpec->idListType != 0) {
 		if (constSpec->exprList != 0) {
 			if (constSpec->idListType->identifierList->size != constSpec->exprList->size) {
-				printf("Variable count and value count mismatch in function %s ", methodName);
+				printf("Variable count and value count mismatch in function %s \n", methodName);
 				isOk = false;
 			}
 			else {
 				struct Identifier* id = constSpec->idListType->identifierList->firstId;
 				struct Expression* expr = constSpec->exprList->firstExpression;
-				while (expr != NULL) {
-					//TODO: tackle the problem of how to retrieve the type of  expression if expression is an identifier
-					//so in check Expression type, there should be a call to getVariableFromTable
-					if (expr->exprType != INT_TYPE_NAME
-						&& expr->exprType != FLOAT32_TYPE_NAME
-						&& expr->exprType != STRING_TYPE_NAME
-						&& expr->exprType != BOOL_TYPE_NAME) {
-						//TODO: support const a int = 5 ; const b int = a ; 
-						printf("Constant initializer %s is not a constant %s", id->name, methodName);
-						isOk = false;
-					}
-					struct SemanticType* semanticType = checkExpressionType(expr, method);
-					if (semanticType != NULL) {
-						if (semanticType->typeName != constSpec->idListType->type->typeName) {
-							printf("Types  mismatch in variable declaration in function %s", methodName);
-							isOk = false;
+				enum TypeNames typeName = constSpec->idListType->type->typeName; 
+				
+				while (expr != NULL && isOk) {
+					//primary or unary primary or 
+					enum ExpressionType exprType = expr->exprType; 
+					if (exprType == PRIMARY || exprType == PLUS_UNARY_EXPR || exprType == MINUS_UNARY_EXPR) {
+						struct PrimaryExpression* primaryExpr = expr->primaryExpr;
+						if (primaryExpr->exprType == DECIMAL_EXPR ||
+							primaryExpr->exprType == FLOAT_EXPR ||
+							primaryExpr->exprType == STRING_EXPR ||
+							primaryExpr->exprType == ID_EXPRESSION) {
+							struct SemanticType* semanticType = checkPrimaryExpressionType(primaryExpr, method);
+							if (semanticType->typeName != typeName) {
+								printf("Value of constant %s is different from declared type in method %s\n", id->name, methodName);
+								isOk = false;
+							}
+							else {
+								if (primaryExpr->exprType == ID_EXPRESSION) {
+									struct LocalVariable* variable =
+										findActiveLocalVariableById(method->localVariablesTable, primaryExpr->identifier);
+									if (variable->isMutable) {
+										printf("Value of constant %s cannot be a variable\n", id->name);
+										isOk = false;
+									}
+								}
+							}
+
+							id = id->nextId;
+							expr = expr->nextExpr;
 						}
 					}
-					id = id->nextId;
-					expr = expr->nextExpr;
+					else {
+						//support const a int = 5 ; const b int = a ; 
+						printf("Constant initializer %s is not a constant %s\n", id->name, methodName);
+						isOk = false;
+					}
 				}
 			}
 		}
