@@ -17,7 +17,9 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		}
 		case NOT_UNARY_EXPR:
 		{
-			if (expr->primaryExpr->semanticType->typeName == BOOL_TYPE_NAME)
+			struct SemanticType* semanticType = checkPrimaryExpressionType(expr->primaryExpr, method); 
+			
+			if (semanticType->typeName == BOOL_TYPE_NAME)
 			{
 				type->typeName = BOOL_TYPE_NAME;
 			}
@@ -31,6 +33,7 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		case PLUS_UNARY_EXPR:
 		case MINUS_UNARY_EXPR:
 		{
+			
 			if (expr->primaryExpr->semanticType->typeName == INT_TYPE_NAME)
 				type->typeName = INT_TYPE_NAME;
 			else if (expr->primaryExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
@@ -223,6 +226,19 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		}
 		case FUNCTION_CALL:{
 			//TODO: search the definition of function in constant table to find return type 
+			struct FunctionCall* functionCall = primaryExpr->funcCall;
+			char* methodName = functionCall->primaryExpr->identifier; 
+			struct Method* calledMethod = getMethod(semanticClass, methodName); 
+			if (calledMethod != NULL) {
+				bool isOk = checkSemanticFunctionCall(functionCall->exprList, calledMethod->paramList, method);
+				if (isOk) {
+					type->typeName = calledMethod->returnType;
+				}
+			}
+			else {
+				printf("Semantic error. Method %s not declared\n", methodName);
+				type->typeName = UNKNOWN_TYPE; 
+			}
 			break;
 		}
 	}
@@ -315,6 +331,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		method = (struct Method*)malloc(sizeof(struct Method)); 
 		method->constMethodref = constMethodRef;
 		method->returnType = typeName;
+		method->paramList = paramList; 
 
 		/*-----------------*/
 		//add method to methodsTable of class
@@ -523,8 +540,27 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 	{
 		case EXPR_SIMPLE_STMT:
 		{
-			printf("Semantic error. Expression evaluated but not used\n");
-			return false; 
+			if (simpleStmt->expr != NULL && simpleStmt->expr->primaryExpr != NULL && simpleStmt->expr->primaryExpr->funcCall != NULL) {
+				struct FunctionCall* functionCall = simpleStmt->expr->primaryExpr->funcCall;
+				char* methodName = functionCall->primaryExpr->identifier;
+				struct Method* method = getMethod(semanticClass, methodName); 
+				
+				if (method != NULL) {
+					if (method->returnType != VOID_TYPE_NAME) {
+						printf("Semantic error. Expression evaluated but not used\n");
+						return false;
+					}
+				}
+				else {
+					printf("Semantic error. Method %s not declared\n", methodName);
+					return false; 
+				}
+			}
+			else {
+				printf("Semantic error. Expression evaluated but not used\n");
+				return false;
+			}
+			return true; 
 		}
 		case INC_SIMPLE_STMT:
 		case DEC_SIMPLE_STMT:
@@ -841,20 +877,23 @@ bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct Parameter
 {
 	bool isOk = true; 
 	if (exprList->size != paramList->size) {
-		printf("Formal parameter count and parameter count mismatch\n"); 
+		printf("Semantic error. Formal parameter count and parameter count mismatch\n"); 
 		isOk = false; 
 	}
 	else {
 		struct Expression* expr = exprList->firstExpression; 
 		struct ParameterDeclare* param = paramList->firstParamDecl; 
-		while (expr != NULL) {
+		while (expr != NULL&& isOk) {
 			//call check expression type to define type
-			checkExpressionType(expr, method);
-			if (expr->semanticType->typeName != param->type->typeName) {
-				printf("Formal paramter's type and parameter's type mismatch\n"); 
+			struct SemanticType* semanticType = checkExpressionType(expr, method);
+			if (semanticType->typeName != param->type->typeName) {
+				printf("Semantic error. Formal paramter's type and declared parameter's type of %s mismatch\n", param->identifier); 
 				isOk = false; 
 			}
-			expr = expr->nextExpr; 
+			if (isOk) {
+				expr = expr->nextExpr;
+				param = param->nextParamDecl; 
+			}
 		}
 	}
 	return isOk;
@@ -904,8 +943,8 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 				while (expr != NULL && isOk) {
 					struct SemanticType* semanticType = checkExpressionType(expr, method);
 					if (semanticType != NULL) {
-						if (semanticType->typeName != type->typeName) {
-							printf("Incompatible between declared type and semantic type of variable %s and  in function %s\n",id->name,  functionName);
+						if (semanticType->typeName != type->typeName && semanticType->typeName != UNKNOWN_TYPE) {
+							printf("Semantic error. Incompatible between declared type and semantic type of variable %s and  in function %s\n",id->name,  functionName);
 							isOk = false;
 						}
 					}

@@ -48,6 +48,7 @@ struct Method {
 	//key: varname, value : LocalVariable
 	enum TypeNames returnType; 
 	List* localVariablesTable; 
+	struct ParameterList* paramList; 
 };
 
 struct Class {
