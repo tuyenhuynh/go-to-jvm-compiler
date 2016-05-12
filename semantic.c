@@ -17,13 +17,9 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		}
 		case NOT_UNARY_EXPR:
 		{
-			struct SemanticType* semanticType = checkPrimaryExpressionType(expr->primaryExpr, method); 
+			type = checkPrimaryExpressionType(expr->primaryExpr, method); 
 			
-			if (semanticType->typeName == BOOL_TYPE_NAME)
-			{
-				type->typeName = BOOL_TYPE_NAME;
-			}
-			else
+			if (type->typeName != BOOL_TYPE_NAME)
 			{
 				printf("Semantic error. Operand must be bool type \n");
 				type->typeName = UNKNOWN_TYPE;
@@ -33,14 +29,10 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		case PLUS_UNARY_EXPR:
 		case MINUS_UNARY_EXPR:
 		{
-			
-			if (expr->primaryExpr->semanticType->typeName == INT_TYPE_NAME)
-				type->typeName = INT_TYPE_NAME;
-			else if (expr->primaryExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
-				type->typeName = FLOAT32_TYPE_NAME;
-			else
-			{
-				printf("Semantic error. Operand must be int or bool type \n");
+		
+			type = checkPrimaryExpressionType(expr->primaryExpr, method); 
+			if(type->typeName != FLOAT32_TYPE_NAME && type->typeName != INT_TYPE_NAME){
+				printf("Semantic error. Type of plus/minus unary expression should be int or float \n");
 				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
