@@ -87,7 +87,9 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 				type->typeName = BOOL_TYPE_NAME;
 			}
 			else {
-				printf("Semantic error. Left and right operands of comparation should be same type\n");
+				if (leftType->typeName != UNKNOWN_TYPE && rightType->typeName != UNKNOWN_TYPE) {
+					printf("Semantic error. Left and right operands of comparation should be same type\n");
+				}
 				type->typeName = UNKNOWN_TYPE; 
 			}
 			
@@ -183,6 +185,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 			if (variable == NULL) {
 				struct Field* field = getField(semanticClass, primaryExpr->identifier); 
 				if (field == NULL) {
+					printf("Semantic error. Identifier %s not declared\n", primaryExpr->identifier);
 					type ->typeName = UNKNOWN_TYPE; 
 				}
 				else {
@@ -752,31 +755,47 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, struct 
 
 bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method) {
 	bool isOk = true; 
+	//for statement with for-clause (for a = 5 ; a < 8 ;a++ {...})
 	if (forStmt->forClause != NULL) {
 		struct ForInitStmt* forInit = forStmt->forClause->forInitStmt; 
 		struct ForCondition* forCondition = forStmt->forClause->forCondition; 
 		struct ForPostStmt* forPostStmt = forStmt->forClause->forPostStmt; 
-		if (forInit != NULL) {
+		if (forInit->initStmt != NULL) {
 			if (forInit->initStmt->stmtType == EXPR_SIMPLE_STMT) {
-				printf("Initial statment of for expression cannot be an expression\n"); 
+				printf("Semantic error. Initial statement of for expression cannot be an expression\n"); 
 				isOk = false; 
 			}
 		}
-		//check for expression type of for-condition
-		if (forCondition != NULL) {
-			checkExpressionType(forCondition->expression, method);
-			if (forCondition->expression->semanticType->typeName != BOOL_TYPE_NAME) {
-				printf("Condition of for statment must be boolean type\n"); 
+		if (forCondition->expression != NULL) {
+			//check semantic type of for-condition
+			struct SemanticType * semanticType =  checkExpressionType(forCondition->expression, method);
+			if (semanticType->typeName != BOOL_TYPE_NAME) {
+				if (semanticType->typeName == UNKNOWN_TYPE) {
+					printf("Semantic error. Non bool value used as for condition\n");
+				}
 				isOk = false; 
 			}
 		}
-		if (forPostStmt != NULL) {
+		if (forPostStmt->postStmt != NULL) {
 			if (forPostStmt->postStmt->stmtType == EXPR_SIMPLE_STMT) {
-				printf("Post statment of for expression cannot be an expression\n");
+				printf("Semantic error. Post statement of for expression cannot be an expression\n");
 				isOk = false; 
 			}
 		}
 	}
+	else if (forStmt->expr != NULL) {
+		//for statement with for condition ( for 1 < 2 {...})
+		//check semantic type of for-condition
+		struct SemanticType * semanticType = checkExpressionType(forStmt->expr, method);
+		if (semanticType->typeName != BOOL_TYPE_NAME) {
+			if (semanticType->typeName != UNKNOWN_TYPE) {
+				printf("Semantic error. Non bool value used as for condition\n");
+			}
+			isOk = false;
+		}
+	}
+	//for statement without for condition and for-clause for {...} -> nothing to do with this
+	
 	//check semantic block
 	if (isOk) {
 		isOk = checkSemanticBlock(forStmt->block, method); 
