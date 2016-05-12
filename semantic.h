@@ -31,6 +31,7 @@ bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method);
 bool checkSemanticElseBlock(struct ElseBlock* elseBlock, struct Method* method);
 bool checkSemanticBlock(struct Block* block, struct Method* method); 
 bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, struct Method* method);
+bool checkSemanticSwitchbody(struct SwitchBody* switchBody, struct Method* method); 
 bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method ); 
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl);
 bool checkSemanticSignature(struct Signature* signature, struct Method* method);
@@ -47,7 +48,7 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct ExpressionList* rightExprList, struct Method* method);
 bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, struct Method* method);
 bool checkSemanticBlock(struct Block* block, struct Method* method);
-bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, struct Method* method);
+bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum TypeNames identifierType,  struct Method* method);
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
 struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope);
 //
