@@ -44,11 +44,11 @@ void printExpressionCaseClauseList(int parentId, struct ExpressionCaseClauseList
 void printExpressionCaseClause(int parentId, struct ExpressionCaseClause* ecc);
 void printExpressionSwitchCase(int parentId, struct ExpressionSwitchCase* expressionSwitchCase);
 void printForClause(int parentId, struct ForClause* ForClause);
-void printSignature(int parentId, struct Signature* signature);
-void printParamInParen(int parentId, struct ParamInParen* paramInParen);
-void printParamList(int parentId, struct ParameterList* paramList);
-void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare);
-void printResult(int parentId, struct Result* result);
+void printSignature(int parentId, struct Signature* signature, struct Method*  method);
+void printParamInParen(int parentId, struct ParamInParen* paramInParen, struct Method* method);
+void printParamList(int parentId, struct ParameterList* paramList, struct Method* method);
+void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare, struct Method* method);
+void printResult(int parentId, struct Result* result, struct Method* method);
 void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr);
 void printFunctionCall(int parentId, struct FunctionCall* functionCall);
 void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpression* switchInitialAndExpression);
@@ -57,5 +57,5 @@ void printForCondition(int parentId, struct ForCondition* forCondition);
 void printForPostStmt(int parentId, struct ForPostStmt* forPostStmt);
 void printPrintStmt(int parentId, struct PrintStatement* printStmt);
 void printScanStmt(int parentId, struct ScanStatement* scanStmt);
-
+char* convertTypeNameToString(enum TypeNames type);
 #endif //_PRINT_TREE_

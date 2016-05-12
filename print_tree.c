@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "semantic.h"
 
 int maxId = 0;
 
@@ -142,7 +143,19 @@ void printPrimaryExpression(int parentId, struct PrimaryExpression* primaryExpr)
 				break;
 			}
 			case ID_EXPRESSION: {
+				struct SemanticType* semanticType = primaryExpr->semanticType; 
+				//print id's name
 				printPrimitiveExpression(parentId, "ID", primaryExpr->identifier);
+				char idBuffer[10]; 
+				int id = maxId - 1;
+				itoa(semanticType->idNum, idBuffer, 10);
+				//print id number
+				maxId++; 
+				printEdgeWithDestName(id, maxId, idBuffer); 
+				//print id type
+				maxId++;
+				char* typeNameStr = convertTypeNameToString(semanticType->typeName); 		
+				printEdgeWithDestName(id, maxId, typeNameStr);
 				break;
 			}
 			case EXPRESSION: {
@@ -248,7 +261,10 @@ void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl){
 		//print function name
 		printPrimitiveExpression(id, "ID", functionDecl->identifier);
 		//print function signature
-		printSignature(id, functionDecl->signature); 
+		struct Method* method = getMethod(semanticClass, functionDecl->identifier); 
+		
+		printSignature(id, functionDecl->signature,method);
+		
 		//print function body
 		if (functionDecl->block != NULL) {
 			printBlock(id, functionDecl->block); 
@@ -500,42 +516,43 @@ void printStmtList(int parentId, struct StatementList* stmtList){
 	}
 }
 
-void printSignature(int parentId, struct Signature* signature){
+void printSignature(int parentId, struct Signature* signature, struct Method* method){
+
 	if (signature != NULL) {
 		maxId++;
 		int id = maxId; 
 		printEdgeWithDestName(parentId, id, "Signature");
 		if (signature->paramInParen != NULL) {
-			printParamInParen(id, signature->paramInParen);
+			printParamInParen(id, signature->paramInParen, method);
 		}
 		if (signature->result != NULL) {
-			printResult(id, signature->result);
+			printResult(id, signature->result, method);
 		}
 	}
 }
 
-void printParamInParen(int parentId, struct ParamInParen* paramInParen){
+void printParamInParen(int parentId, struct ParamInParen* paramInParen, struct Method* method){
 	if (paramInParen != NULL) {
 		if (paramInParen->paramList != NULL) {
-			printParamList(parentId, paramInParen->paramList);
+			printParamList(parentId, paramInParen->paramList, method);
 		}
 	}
 }
 
-void printParamList(int parentId, struct ParameterList* paramList){
+void printParamList(int parentId, struct ParameterList* paramList, struct Method* method){
 	if (paramList != NULL) {
 		maxId++;
 		int id = maxId;
 		printEdgeWithDestName(parentId, id, "ParamList");
 		struct ParameterDeclare* paramDecl = paramList->firstParamDecl; 
 		while (paramDecl != NULL) {
-			printParamDeclare(id, paramDecl); 
+			printParamDeclare(id, paramDecl, method); 
 			paramDecl = paramDecl->nextParamDecl; 
 		}
 	}
 }
 
-void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare){
+void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare, struct Method* method){
 	if (paramDeclare != NULL) {
 		maxId++; 
 		int id = maxId; 
@@ -545,11 +562,18 @@ void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare){
 		}
 		if (paramDeclare->identifier != NULL) {
 			printPrimitiveExpression(id, "ID", paramDeclare->identifier); 
+			struct LocalVariable* param = findLocalVariableByScope(method->localVariablesTable, paramDeclare->identifier, 1);
+			int paramId = param->id;
+			int sourceId = maxId - 1; 
+			maxId++; 
+			char* paramIdBuffer[10]; 
+			itoa(paramId, paramIdBuffer, 10); 
+			printEdgeWithDestName(sourceId, maxId, paramIdBuffer); 
 		}
 	}
 }
 
-void printResult(int parentId, struct Result* result){
+void printResult(int parentId, struct Result* result, struct Method* method){
 	if (result != NULL) {
 		int id = ++maxId; 
 		printEdgeWithDestName(parentId, id, "ReturnType"); 
@@ -557,7 +581,7 @@ void printResult(int parentId, struct Result* result){
 			printTypeName(id, result->type); 
 		}
 		if (result->paramInParen != NULL) {
-			printParamInParen(id, result->paramInParen);
+			printParamInParen(id, result->paramInParen, method);
 		}
 	}
 }
@@ -857,5 +881,20 @@ void printSwitchInitialExpression(int parentId, struct SwitchInitialAndExpressio
 	if (switchInitialAndExpression != NULL) {
 		printSimpleStmt(parentId, switchInitialAndExpression->initialStmt);
 		printExpression(parentId, switchInitialAndExpression->expression);
+	}
+}
+
+char* convertTypeNameToString(enum TypeNames type) {
+	switch (type) {
+	case STRING_TYPE_NAME:
+		return "STRING";
+	case INT_TYPE_NAME:
+		return "INT";
+	case FLOAT32_TYPE_NAME:
+		return "FLOAT";
+	case VOID_TYPE_NAME:
+		return "VOID";
+	default:
+		return "UNKNOWN";
 	}
 }

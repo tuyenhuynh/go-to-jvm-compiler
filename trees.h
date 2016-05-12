@@ -158,6 +158,8 @@ struct Expression {
 
 struct SemanticType {
 	enum TypeNames typeName;
+	int idNum; 
+
 };
 
 struct PrimaryExpression

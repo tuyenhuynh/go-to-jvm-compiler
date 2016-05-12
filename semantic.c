@@ -185,10 +185,12 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 				}
 				else {
 					type->typeName = field->type->typeName; 
+					type->idNum = field->id; 
 				}
 			}
 			else {
 				type->typeName = variable->type->typeName; 
+				type->idNum = variable->id; 
 			}
 			break;
 		}
