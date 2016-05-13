@@ -54,7 +54,7 @@ struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varNa
 //
 struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName);
 
-bool addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable);
+struct LocalVariable* addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable);
 bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, bool isMutable);
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
@@ -66,7 +66,7 @@ struct Constant* addUtf8ToConstantsTable(char* utf8);
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
 struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);
 struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDescriptor);
-
+struct Constant* addClassToConstantsTable(char* className);
 char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeStr);
 
 struct Field* getField(struct Class* class, char* fieldName); 
@@ -75,4 +75,7 @@ struct Method* getMethod(struct Class* class, char* methodName);
 enum TypeName getFunctionReturnType(struct FunctionDecl* functionDecl);
 
 void printLocalVariablesTable(struct Method* method);
+
+void printConstantsTable(); 
+void printConstant(struct Constant* constant);
 #endif //_SEMANTIC_H_

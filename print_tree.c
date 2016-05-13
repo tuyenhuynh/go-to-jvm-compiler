@@ -32,13 +32,12 @@ void printExpression(int parentId, struct Expression* expression) {
 	if (expression != NULL) {
 		maxId++;
 		int id = maxId; 
-		//char* typeNameStr = convertTypeToString(expression->semanticType->typeName);
-		//char* exprTypeStr = (char*)malloc(20 * sizeof(char)); 
-		//strcpy(exprTypeStr, "\"EXPR\\n");
-		//strcpy(exprTypeStr + 7, typeNameStr);
-		//int length = strlen(exprTypeStr); 
-		//strcpy(exprTypeStr + length, "\""); 
-		printEdgeWithDestName(parentId, id, "EXPR"); 
+		
+		char* exprTypeName = convertTypeNameToString(expression->semanticType->typeName); 
+		char exprNodeInfo[20];
+		strcpy(exprNodeInfo, "EXPR__"); 
+		strcpy(exprNodeInfo + 6, exprTypeName); 
+		printEdgeWithDestName(parentId, id, exprNodeInfo); 
 		switch (expression->exprType) {
 			case DECIMAL_EXPR: {
 				char buffer[10];
@@ -562,7 +561,8 @@ void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare, stru
 		}
 		if (paramDeclare->identifier != NULL) {
 			printPrimitiveExpression(id, "ID", paramDeclare->identifier); 
-			struct LocalVariable* param = findLocalVariableByScope(method->localVariablesTable, paramDeclare->identifier, 1);
+			struct LocalVariable* param = findLocalVariableByScope1(method->localVariablesTable, paramDeclare->identifier, 1);
+				
 			int paramId = param->id;
 			int sourceId = maxId - 1; 
 			maxId++; 
@@ -753,7 +753,7 @@ void expressionTypeToString(enum ExpressionType exprType, char* result) {
 		break;
 	default: {
 		printf("Unknown expression type\n");
-	}
+		}
 	}
 }
 
@@ -763,9 +763,16 @@ void printIdentifierList(int parentId, struct IdentifierList * identifierList){
 		int id = maxId;
 		printEdgeWithDestName(parentId, id, "ID_LIST"); 
 		struct Identifier* identifier = identifierList->firstId; 
+		
 		while (identifier != NULL) {
 			printPrimitiveExpression(id, "ID", identifier->name);
+			int tmpId  = maxId - 1;
+			maxId++;
+			char idNumBuffer[10]; 
+			itoa(identifier->idNum, idNumBuffer, 10); 
+			printEdgeWithDestName(tmpId, maxId, idNumBuffer); 
 			identifier = identifier->nextId; 
+			//maxId++; 
 		}
 	}
 }
@@ -894,6 +901,8 @@ char* convertTypeNameToString(enum TypeNames type) {
 		return "FLOAT";
 	case VOID_TYPE_NAME:
 		return "VOID";
+	case BOOL_TYPE_NAME:
+		return "BOOL";
 	default:
 		return "UNKNOWN";
 	}

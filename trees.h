@@ -18,6 +18,7 @@ struct StringList {
 struct Identifier {
 	char* name; 
 	struct Identifier* nextId; 
+	int idNum; 
 };
 
 struct Program {

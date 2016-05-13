@@ -13,7 +13,6 @@ int exprListSize(const struct ExpressionList* exprList)
 	return len;
 }
 
-
 char* convertTypeToString(enum TypeNames type) {
 	switch (type) {
 	case STRING_TYPE_NAME:
