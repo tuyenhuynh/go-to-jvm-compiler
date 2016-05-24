@@ -39,8 +39,8 @@ bool checkSemanticParamList(struct ParameterList* paramList, char* functionName)
 bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* method);
 bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method); 
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* method); 
-bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, struct Method* method);
-bool checkSemanticVarDecl(struct VarDecl* varDecl, struct Method* method);
+bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList,  struct Method* method);
+bool checkSemanticVarDecl(struct VarSpec* varSpec, struct Method* method);
 bool checkSemanticConstDecl(struct ConstDecl* constDecl, struct Method* method); 
 bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method);
 bool checkSemanticStmt(struct Statement* statement, struct Method* method);
@@ -51,9 +51,7 @@ bool checkSemanticBlock(struct Block* block, struct Method* method);
 bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum TypeNames identifierType,  struct Method* method);
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
 struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope);
-//
 struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName);
-
 struct LocalVariable* addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable);
 bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, bool isMutable);
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
@@ -61,7 +59,8 @@ bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
 bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method);
 bool isContainReturnStatement(struct Block* block); 
 void deactivateLocalVariablesByScope(List* localVariablesTable, int scope);
-
+bool isContainBreak(struct StmtList* stmtList); 
+bool isContainFor(struct StmtList* stmtList); 
 struct Constant* addUtf8ToConstantsTable(char* utf8);
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
 struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);

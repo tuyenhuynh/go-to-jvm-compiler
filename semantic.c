@@ -225,9 +225,10 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 			char* methodName = functionCall->primaryExpr->identifier; 
 			struct Method* calledMethod = getMethod(semanticClass, methodName); 
 			if (calledMethod != NULL) {
-				bool isOk = checkSemanticFunctionCall(functionCall->exprList, calledMethod->paramList, method);
+				bool isOk = checkSemanticFunctionCall(functionCall->exprList, calledMethod->paramList,  method);
 				if (isOk) {
 					type->typeName = calledMethod->returnType;
+					method->returnType; 
 				}
 			}
 			else {
@@ -379,7 +380,6 @@ char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeSt
 		strcpy(result + 2, returnTypeStr); 
 	}
 	else {
-		char* result = (char*)malloc(100 * sizeof(char));
 		struct ParameterDeclare* param = paramList->firstParamDecl;
 		char* ptr = result;
 		strcpy(ptr, "(");
@@ -395,9 +395,8 @@ char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeSt
 		ptr += 1;
 		strcpy(ptr, returnTypeStr);
 		//strcpy(result, ptr); // = ptr;
-		return result;
 	}
-	
+	return result;
 }
 
 bool checkSemanticParamList(struct ParameterList* paramList, char* functionName) {
@@ -543,14 +542,23 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 			if (simpleStmt->expr != NULL && simpleStmt->expr->primaryExpr != NULL && simpleStmt->expr->primaryExpr->funcCall != NULL) {
 				struct FunctionCall* functionCall = simpleStmt->expr->primaryExpr->funcCall;
 				char* methodName = functionCall->primaryExpr->identifier;
-				struct Method* method = getMethod(semanticClass, methodName); 
+				struct Method* calledMethod = getMethod(semanticClass, methodName); 
 				
-				if (method != NULL) {
-					if (method->returnType != VOID_TYPE_NAME) {
-						printf("Semantic error. Expression evaluated but not used\n");
-						return false;
+				if (calledMethod != NULL) {
+					if (checkSemanticFunctionCall(functionCall->exprList, calledMethod->paramList, method)) {
+						if (method->returnType != VOID_TYPE_NAME) {
+							printf("Semantic error. Expression evaluated but not used\n");
+							return false;
+						}
+						else {
+							struct SemanticType* semanticType = (struct SemanticType*)malloc(sizeof(struct SemanticType)); 
+							semanticType->typeName = VOID_TYPE_NAME; 
+							simpleStmt->expr->semanticType = semanticType; 
+						}
 					}
-					
+					else {
+						return false; 
+					}
 				}
 				else {
 					printf("Semantic error. Method %s not declared\n", methodName);
@@ -880,26 +888,31 @@ bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* metho
 	}
 }
 
-bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList, struct Method* method)
+bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList,  struct Method* method)
 {
 	bool isOk = true; 
-	if (exprList->size != paramList->size) {
-		printf("Semantic error. Formal parameter count and parameter count mismatch\n"); 
+	if (exprList != NULL && paramList == NULL || exprList == NULL && paramList != NULL) {
 		isOk = false; 
 	}
-	else {
-		struct Expression* expr = exprList->firstExpression; 
-		struct ParameterDeclare* param = paramList->firstParamDecl; 
-		while (expr != NULL&& isOk) {
-			//call check expression type to define type
-			struct SemanticType* semanticType = checkExpressionType(expr, method);
-			if (semanticType->typeName != param->type->typeName) {
-				printf("Semantic error. Formal paramter's type and declared parameter's type of %s mismatch\n", param->identifier); 
-				isOk = false; 
-			}
-			if (isOk) {
-				expr = expr->nextExpr;
-				param = param->nextParamDecl; 
+	else if (exprList != NULL && paramList != NULL) {
+		if (exprList->size != paramList->size) {
+			printf("Semantic error. Formal parameter count and parameter count mismatch\n");
+			isOk = false;
+		}
+		else {
+			struct Expression* expr = exprList->firstExpression;
+			struct ParameterDeclare* param = paramList->firstParamDecl;
+			while (expr != NULL&& isOk) {
+				//call check expression type to define type
+				struct SemanticType* semanticType = checkExpressionType(expr, method);
+				if (semanticType->typeName != param->type->typeName) {
+					printf("Semantic error. Formal paramter's type and declared parameter's type of %s mismatch\n", param->identifier);
+					isOk = false;
+				}
+				if (isOk) {
+					expr = expr->nextExpr;
+					param = param->nextParamDecl;
+				}
 			}
 		}
 	}
@@ -1022,6 +1035,7 @@ bool addConstSpecToLocalVarsTable(struct ConstSpec* constSpec, struct Method* me
 		printf("Semantic error. The compiler currently doesnt support declarations without type \n");
 		isOk = false;
 	}
+	return isOk; 
 }
 
 bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method) {
