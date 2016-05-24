@@ -50,7 +50,8 @@ bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rig
 bool checkSemanticBlock(struct Block* block, struct Method* method);
 bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum TypeNames identifierType,  struct Method* method);
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
-struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope);
+struct LocalVariable* findActiveLocalVariableByScope(List* variablesTable, char* varName, int scope);
+struct LocalVariable* findLocalVariableByScope1(List* variablesTable, char* varName, int scope);
 struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName);
 struct LocalVariable* addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable);
 bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, bool isMutable);

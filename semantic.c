@@ -160,7 +160,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 	switch (primaryExpr->exprType) {
 		case BOOL_TRUE_EXPRESSION:
 		case BOOL_FALSE_EXPRESSION: {
-			printf("Boolean primary expressions ar not supported\n");
+			printf("Boolean primary expressions are not supported\n");
 			type ->typeName = UNKNOWN_TYPE; 
 			break;
 		}
@@ -890,11 +890,38 @@ bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method) {
 
 
 bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* method) {
-	return true;
+	struct ExpressionList* exprList = printStmt->expressionList; 
+	struct Expression* expr = exprList->firstExpression; 
+	bool isOk = true; 
+	while (expr != NULL&& isOk) {
+		struct SemanticType*  semanticType = checkExpressionType(expr, method); 
+		if (semanticType->typeName != STRING_TYPE_NAME &&
+			semanticType->typeName != FLOAT32_TYPE_NAME
+			&& semanticType->typeName != INT_TYPE_NAME) {
+			printf("Semantic error. Invalid argument in print statement in function %s", method->constMethodref->const2->const1->utf8); 
+			isOk = false; 
+		}
+		else {
+			expr = expr->nextExpr; 
+		}
+	}
+	return isOk;
 }
 
 bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method) {
-	return true; 
+	struct IdentifierList* idList = scanStmt->identifierList;
+	struct Identifier* id = idList->firstId; 
+	bool isOk = true;
+	while (id != NULL&& isOk) {
+		if (findLocalVariableByScope1(method->localVariablesTable, id->name, scope) == NULL) {
+			printf("Semantic error. Unknown identifier %s in scan statement id method %s\n", id->name, method->constMethodref->const2->const1->utf8);
+			isOk = false;
+		}
+		else {
+			id = id->nextId; 
+		}
+	}
+	return isOk; 
 }
 
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* method)
@@ -992,15 +1019,14 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 				struct Identifier* id = varSpec->idListType->identifierList->firstId; 
 				while (expr != NULL && isOk) {
 					struct SemanticType* semanticType = checkExpressionType(expr, method);
-					if (semanticType != NULL) {
-						if (semanticType->typeName != type->typeName && semanticType->typeName != UNKNOWN_TYPE) {
-							printf("Semantic error. Incompatible between declared type and semantic type of variable %s and  in function %s\n",id->name,  functionName);
-							isOk = false;
-						}
-					}
-					else{
+					if (semanticType->typeName == UNKNOWN_TYPE) {
 						isOk = false; 
 					}
+					else if (semanticType->typeName != type->typeName) {
+						printf("Semantic error. Incompatible between declared type and semantic type of variable %s and  in function %s\n", id->name, functionName);
+						isOk = false;
+					}
+					
 					expr = expr->nextExpr;
 					id = id->nextId; 
 				}
@@ -1072,7 +1098,7 @@ bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Meth
 	List* variablesTable = method->localVariablesTable;
 	char* varName = paramDeclare->identifier;
 	struct Type* type = paramDeclare->type;
-	struct LocalVariable* localVariable = findLocalVariableByScope(variablesTable, varName, 1);
+	struct LocalVariable* localVariable = findActiveLocalVariableByScope(variablesTable, varName, 1);
 	if (localVariable == NULL) {
 		localVariable = (struct LocalVariable*)malloc(sizeof(struct LocalVariable));
 		//TODO: augment variable with value(expression); 
@@ -1093,7 +1119,7 @@ bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Meth
 struct LocalVariable* addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable) {
 	struct LocalVariable* localVariable = NULL;  
 	//TODO : implement size for variable
-	if (findLocalVariableByScope(method->localVariablesTable, id, scope) == NULL) {
+	if (findActiveLocalVariableByScope(method->localVariablesTable, id, scope) == NULL) {
 		localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable)); 
 		localVariable->id = list_size(method->localVariablesTable) + 1;
 		localVariable->scope = scope;
@@ -1113,7 +1139,7 @@ struct LocalVariable* addVariableToLocalVarsTable(char* id, enum TypeNames typeN
 }
 
 
-struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope) {
+struct LocalVariable* findActiveLocalVariableByScope(List* variablesTable, char* varName, int scope) {
 	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
 	int size = list_size(variablesTable);
 	bool found = false;

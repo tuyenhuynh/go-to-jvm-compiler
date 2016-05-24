@@ -566,7 +566,7 @@ void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare, stru
 			int paramId = param->id;
 			int sourceId = maxId - 1; 
 			maxId++; 
-			char* paramIdBuffer[10]; 
+			char* paramIdBuffer = (char*)malloc(10 * sizeof(char)); 
 			itoa(paramId, paramIdBuffer, 10); 
 			printEdgeWithDestName(sourceId, maxId, paramIdBuffer); 
 		}
@@ -768,7 +768,7 @@ void printIdentifierList(int parentId, struct IdentifierList * identifierList){
 			printPrimitiveExpression(id, "ID", identifier->name);
 			int tmpId  = maxId - 1;
 			maxId++;
-			char idNumBuffer[10]; 
+			char* idNumBuffer = (char*)malloc(40 * sizeof(char)); 
 			itoa(identifier->idNum, idNumBuffer, 10); 
 			printEdgeWithDestName(tmpId, maxId, idNumBuffer); 
 			identifier = identifier->nextId; 
