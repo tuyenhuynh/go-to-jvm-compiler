@@ -561,7 +561,7 @@ void printParamDeclare(int parentId, struct ParameterDeclare* paramDeclare, stru
 		}
 		if (paramDeclare->identifier != NULL) {
 			printPrimitiveExpression(id, "ID", paramDeclare->identifier); 
-			struct LocalVariable* param = findLocalVariableByScope1(method->localVariablesTable, paramDeclare->identifier, 1);
+			struct LocalVariable* param = findLocalVariableByScope(method->localVariablesTable, paramDeclare->identifier, 1);
 				
 			int paramId = param->id;
 			int sourceId = maxId - 1; 

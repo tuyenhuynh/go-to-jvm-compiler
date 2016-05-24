@@ -913,7 +913,7 @@ bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method
 	struct Identifier* id = idList->firstId; 
 	bool isOk = true;
 	while (id != NULL&& isOk) {
-		if (findLocalVariableByScope1(method->localVariablesTable, id->name, scope) == NULL) {
+		if (findLocalVariableByScope(method->localVariablesTable, id->name, scope) == NULL) {
 			printf("Semantic error. Unknown identifier %s in scan statement id method %s\n", id->name, method->constMethodref->const2->const1->utf8);
 			isOk = false;
 		}
@@ -1156,7 +1156,7 @@ struct LocalVariable* findActiveLocalVariableByScope(List* variablesTable, char*
 	return NULL;
 }
 
-struct LocalVariable* findLocalVariableByScope1(List* variablesTable, char* varName, int scope) {
+struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope) {
 	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
 	int size = list_size(variablesTable);
 	bool found = false;
