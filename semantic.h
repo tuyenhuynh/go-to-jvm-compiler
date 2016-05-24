@@ -51,10 +51,11 @@ bool checkSemanticBlock(struct Block* block, struct Method* method);
 bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum TypeNames identifierType,  struct Method* method);
 bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
 struct LocalVariable* findActiveLocalVariableByScope(List* variablesTable, char* varName, int scope);
+//for tree printing purpose
 struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope);
 struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName);
 struct LocalVariable* addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable);
-bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, bool isMutable);
+bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method);
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
 bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method);
@@ -75,7 +76,7 @@ struct Method* getMethod(struct Class* class, char* methodName);
 enum TypeName getFunctionReturnType(struct FunctionDecl* functionDecl);
 
 void printLocalVariablesTable(struct Method* method);
-
-void printConstantsTable(); 
+void printConstantsTable();
+void printMethodsTable(); 
 void printConstant(struct Constant* constant);
 #endif //_SEMANTIC_H_

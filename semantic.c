@@ -294,7 +294,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 	bool isOk = true; 
 	struct Method* method = NULL; // (struct Method*)malloc(sizeof(struct Method));
 	//check for existing of method reference and add method to methods table + constants table if it does not exist
-	if (hashtable_get(semanticClass->methodsTable, functionDecl, &method) != CC_OK) {
+	if (hashtable_get(semanticClass->methodsTable, functionDecl->identifier, &method) != CC_OK) {
 		//check semantic of parameter list
 		struct ParameterList* paramList = functionDecl->signature->paramInParen->paramList; 
 		if (paramList != NULL) {
@@ -332,6 +332,12 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		//add method to methodsTable of class
 		hashtable_add(methodsTable, functionDecl->identifier, method);
 
+		Array* out; 
+		array_new(&out); 
+		hashtable_get_keys(methodsTable, &out); 
+
+		int size = hashtable_size(methodsTable); 
+		
 		//add variable to local variables table
 		list_new(&method->localVariablesTable);
 		if (paramList != NULL) {
@@ -980,8 +986,7 @@ bool checkSemanticVarDecl(struct VarDecl* varDecl, struct Method* method) {
 	if (varDecl->varSpec != NULL) {
 		isOk = checkSemanticVarSpec(varDecl->varSpec, method);
 		if (isOk) {
-
-			isOk = addVarSpecToLocalVarsTable(varDecl->varSpec, method, true);
+			isOk = addVarSpecToLocalVarsTable(varDecl->varSpec, method);
 		} 
 	}
 	else {
@@ -989,7 +994,7 @@ bool checkSemanticVarDecl(struct VarDecl* varDecl, struct Method* method) {
 		while (varSpec != NULL && isOk) {
 			isOk = checkSemanticVarSpec(varSpec, method); 
 			if (isOk) {
-				isOk = addVarSpecToLocalVarsTable(varSpec, method, true);
+				isOk = addVarSpecToLocalVarsTable(varSpec, method);
 				varSpec = varSpec->nextVarSpec;
 			}
 		}
@@ -1057,7 +1062,6 @@ bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method) 
 				id->idNum = variable->id; 
 				id = id->nextId;
 			}
-			
 		}
 	}
 	else {
@@ -1156,6 +1160,7 @@ struct LocalVariable* findActiveLocalVariableByScope(List* variablesTable, char*
 	return NULL;
 }
 
+//for tree printing purpose
 struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope) {
 	struct LocalVariable* result = (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
 	int size = list_size(variablesTable);
@@ -1427,38 +1432,41 @@ struct Field* getField(struct Class* class, char* fieldName) {
 }
 
 void printLocalVariablesTable(struct Method* method) {
+	printf("\t\t\t\tMethod %s \n", method->constMethodref->const2->const1->utf8); 
 	List* localVariablesTable = method->localVariablesTable;
 	int size = list_size(localVariablesTable);
-	struct LocalVariable* localVariable = NULL; // (struct LocalVariable*) malloc(sizeof(struct LocalVariable));
+	struct LocalVariable* localVariable = NULL;
+	printf("ID\tNAME\t\tTYPE\n");
 	for (int i = 0; i < size; ++i) {
 		list_get_at(localVariablesTable, i, &localVariable);
-		printf("Id: %d, name: %s, type: %s ", localVariable->id, localVariable->name, convertTypeToString(localVariable->type->typeName));
+		printf("%d\t%s\t\t\t%s\n", localVariable->id, localVariable->name, convertTypeToString(localVariable->type->typeName));
 	}
+	printf("\n"); 
 }
 
 
 void printConstant(struct Constant* constant) {
 	switch (constant->type) {
 	case CONSTANT_Integer:
-		printf("%d  INT %d\n",constant->id, constant->intValue );
+		printf("%d\tINT\t\t%d\n",constant->id, constant->intValue );
 		break; 
 	case CONSTANT_Float:
-		printf("%d FLOAT %f\n", constant->id, constant->floatValue);
+		printf("%d\tFLOAT\t\t%f\n", constant->id, constant->floatValue);
 		break; 
 	case CONSTANT_Utf8:
-		printf("%d UTF-8 %s\n", constant->id, constant->utf8); 
+		printf("%d\tUTF-8\t\t%s\n", constant->id, constant->utf8); 
 		break;
 	case CONSTANT_NameAndType:
-		printf("%d Name&Type %d,%d\n", constant->id, constant->const1->id, constant->const2->id); 
+		printf("%d\tName&Type\t%d,%d\n", constant->id, constant->const1->id, constant->const2->id); 
 		break;
 	case CONSTANT_Class:
-		printf("%d Class %d\n", constant->id, constant->const1->id); 
+		printf("%d\tClass\t\t%d\n", constant->id, constant->const1->id); 
 		break; 
 	case CONSTANT_Fieldref:
-		printf("%d FieldRef %d,%d\n", constant->id, constant->const1->id, constant->const2->id); 
+		printf("%d\tFieldRef\t%d,%d\n", constant->id, constant->const1->id, constant->const2->id); 
 		break;
 	case CONSTANT_Methodref:
-		printf("%d MethodRef %d,%d\n", constant->id, constant->const1->id, constant->const2->id);
+		printf("%d\tMethodRef\t%d,%d\n", constant->id, constant->const1->id, constant->const2->id);
 		break;
 	case CONSTANT_String:
 		//what the hell to do with this ?
@@ -1469,6 +1477,7 @@ void printConstant(struct Constant* constant) {
 void printConstantsTable() {
 	FILE* file = freopen("constants.txt", "w", stdout);
 	int size = list_size(constantsTable); 
+	printf("					CONSTANTS TABLE\n"); 
 	for (int i = 0; i < size; ++i) {
 		struct Constant* constant = NULL; 
 		list_get_at(constantsTable, i, &constant);
@@ -1478,7 +1487,25 @@ void printConstantsTable() {
 		}
 		printConstant(constant); 
 	}
+
+	printMethodsTable(); 
+
 	fclose(stdout);
+}
+
+void printMethodsTable() {
+
+
+	printf("\n\n/*****************************************************************/\n");
+	printf("					METHODS TABLE\n\n");
+	HashTableIter i;
+	hashtable_iter_init(&i, methodsTable);
+	while (hashtable_iter_has_next(&i)) {
+		TableEntry *e;
+		hashtable_iter_next(&i, &e);
+		struct Method* method = (struct Method*)e->value;
+		printLocalVariablesTable(method);
+	}
 }
 
 bool isContainStatementType(struct StatementList* stmtList, enum StatementType type) {

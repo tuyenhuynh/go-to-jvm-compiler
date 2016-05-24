@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 			if (semanticResult) {
 				printf("Semantic checking successful\n");
 				printProgram(argv[2]);
-				//printConstantsTable(); 
+				printConstantsTable(); 
 			}
 			else {
 				printf("Semantic checking failed\n");
