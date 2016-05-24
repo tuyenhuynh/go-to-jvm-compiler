@@ -352,13 +352,22 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		}
 
 		//TODO: check semantic of body
+		if (isContainStatementType(functionDecl->block->stmtList, BREAK_STMT)) {
+			printf("Semantic Error. Invalid break statement in function definition\n");
+			return false; 
+		}
+		else if (isContainStatementType(functionDecl->block->stmtList, CONTINUE_STMT)) {
+			printf("Semantic Error. Invalid continue statement in function definition\n");
+			return false;
+		}
+
 		isOk = checkSemanticBlock(functionDecl->block, method); 
 		if (!isOk) {
 			return false; 
 		}
 
 		if (typeName != UNKNOWN_TYPE && typeName != VOID_TYPE_NAME) {
-			isOk = isContainReturnStatement(functionDecl->block); 
+			isOk = isContainStatementType(functionDecl->block->stmtList, RETURN_STMT);
 			if (! isOk ){
 				printf("Semantic error. Function %s should return a value\n", functionDecl->identifier); 
 			}
@@ -686,25 +695,42 @@ bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method) {
 			isOk = false; 
 		}
 		else {
-			isOk = checkSemanticBlock(ifStmt->block, method);
-			if (isOk && ifStmt->elseBlock != NULL) {
-				isOk = checkSemanticElseBlock(ifStmt->elseBlock, method); 
+			if (isContainStatementType(ifStmt->block->stmtList, BREAK_STMT)) {
+				printf("Semantic Error. Invalid break statement inside if statement\n");
+				isOk = false;
+			}
+			else if (isContainStatementType(ifStmt->block->stmtList, CONTINUE_STMT)) {
+				printf("Semantic Error. Invalid continue statement inside if statement\n");
+				isOk = false;
+			}
+			if (isOk) {
+				isOk = checkSemanticBlock(ifStmt->block, method);
+				if (isOk && ifStmt->elseBlock != NULL) {
+					isOk = checkSemanticElseBlock(ifStmt->elseBlock, method);
+				}
 			}
 		}
-	}
-	
+	}	
 	return isOk;
 }
 
 bool checkSemanticElseBlock(struct ElseBlock* elseBlock, struct Method* method) {
 	bool isOk = true;
-
-	if(elseBlock->ifStmt != NULL)
-	{
+	if(elseBlock->ifStmt != NULL){
 		isOk = checkSemanticIfStmt(elseBlock->ifStmt, method);
 	}
 	else {
-		isOk = checkSemanticBlock(elseBlock->block, method); 
+		if (isContainStatementType(elseBlock->block->stmtList, BREAK_STMT)) {
+			printf("Semantic Error. Invalid break statement inside else statement\n");
+			return false;
+		}
+		else if (isContainStatementType(elseBlock->block->stmtList, CONTINUE_STMT)) {
+			printf("Semantic Error. Invalid continue statement inside else statement\n");
+			return false;
+		}
+		if (isOk) {
+			isOk = checkSemanticBlock(elseBlock->block, method);
+		}
 	}
 	return isOk;
 }
@@ -791,7 +817,11 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum Ty
 	}
 	if (isOk) {
 		//check semantic body of case 
-		struct Statement* stmt = ecc->stmtList->firstStmt; 
+		struct Statement* stmt = ecc->stmtList->firstStmt;
+		if (isContainStatementType(ecc->stmtList, CONTINUE_STMT)) {
+			printf("Semantic error. Invalid continue statement in body of switch statement\n"); 
+			isOk = false; 
+		}
 		while (stmt != NULL && isOk) {
 			isOk = checkSemanticStmt(stmt, method);
 			if (isOk) {
@@ -799,7 +829,6 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum Ty
 			}
 		}
 	}
-
 	return isOk;
 }
 
@@ -1381,22 +1410,6 @@ void printLocalVariablesTable(struct Method* method) {
 	}
 }
 
-bool isContainReturnStatement(struct Block* block) {
-	bool found = false; 
-	if (block->stmtList == NULL) {
-		return false; 
-	}
-	else {
-		struct Statement* stmt = block->stmtList->firstStmt; 
-		while (stmt != NULL && !found) {
-			if (stmt->stmtType == RETURN_STMT) {
-				found = true; 
-			}
-			stmt = stmt->nextStatement; 
-		}
-	}
-	return found; 
-}
 
 void printConstant(struct Constant* constant) {
 	switch (constant->type) {
@@ -1440,4 +1453,20 @@ void printConstantsTable() {
 		printConstant(constant); 
 	}
 	fclose(stdout);
+}
+
+bool isContainStatementType(struct StatementList* stmtList, enum StatementType type) {
+	bool isContain = false;
+	if (stmtList != NULL) {
+		struct Statement* stmt = stmtList->firstStmt;
+		while (!isContain && stmt != NULL) {
+			if (stmt->stmtType == type) {
+				isContain = true;
+			}
+			else {
+				stmt = stmt->nextStatement;
+			}
+		}
+	}
+	return isContain;
 }

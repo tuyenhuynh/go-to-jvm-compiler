@@ -40,7 +40,7 @@ bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* met
 bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method); 
 bool checkSemanticReturnStmt(struct ReturnStmt* returnStmt, struct Method* method); 
 bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct ParameterList* paramList,  struct Method* method);
-bool checkSemanticVarDecl(struct VarSpec* varSpec, struct Method* method);
+bool checkSemanticVarDecl(struct VarDecl* varDecl, struct Method* method);
 bool checkSemanticConstDecl(struct ConstDecl* constDecl, struct Method* method); 
 bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method);
 bool checkSemanticStmt(struct Statement* statement, struct Method* method);
@@ -57,10 +57,10 @@ bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method, 
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
 bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method);
-bool isContainReturnStatement(struct Block* block); 
 void deactivateLocalVariablesByScope(List* localVariablesTable, int scope);
-bool isContainBreak(struct StmtList* stmtList); 
-bool isContainFor(struct StmtList* stmtList); 
+bool isContainStatementType(struct StatementList* stmtList, enum StatementType stmtType); 
+bool detectBreakOrContainue(struct StatementList* stmtList);
+
 struct Constant* addUtf8ToConstantsTable(char* utf8);
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
 struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);
