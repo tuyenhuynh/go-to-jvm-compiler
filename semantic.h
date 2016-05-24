@@ -64,6 +64,8 @@ bool isContainStatementType(struct StatementList* stmtList, enum StatementType s
 bool detectBreakOrContainue(struct StatementList* stmtList);
 
 struct Constant* addUtf8ToConstantsTable(char* utf8);
+struct Constant* addIntegerToConstantsTable(int value);
+struct Constant* addFloatToConstantsTable(float value);
 struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
 struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);
 struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDescriptor);

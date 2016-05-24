@@ -166,10 +166,12 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		}
 		case DECIMAL_EXPR: {
 			type->typeName = INT_TYPE_NAME;
+			addIntegerToConstantsTable(primaryExpr->decNumber);
 			break;
 		}
 		case FLOAT_EXPR: {
 			type->typeName = FLOAT32_TYPE_NAME;
+			addFloatToConstantsTable(primaryExpr->floatNumber);
 			break;
 		}
 		case STRING_EXPR: {
@@ -178,6 +180,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		}
 		case ID_EXPRESSION: {
 			struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, primaryExpr->identifier);
+			addUtf8ToConstantsTable(primaryExpr->identifier);
 			if (variable == NULL) {
 				struct Field* field = getField(semanticClass, primaryExpr->identifier); 
 				if (field == NULL) {
@@ -1056,7 +1059,7 @@ bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method) 
 		addUtf8ToConstantsTable(typenameStr); 
 		while (id != NULL && isOk) {
 			struct LocalVariable* variable = addVariableToLocalVarsTable(id->name, typeName, method, true);
-			addUtf8ToConstantsTable(id->name);
+			//addUtf8ToConstantsTable(id->name);
 			isOk = variable != NULL; 
 			if (isOk) {
 				id->idNum = variable->id; 
@@ -1322,6 +1325,47 @@ struct Constant* addUtf8ToConstantsTable(char* utf8) {
 	return constant; 
 }
 
+struct Constant* addIntegerToConstantsTable(int value) {
+	struct Constant* constant = NULL;
+	bool found = false;
+	int size = list_size(constantsTable);
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(constantsTable, i, &constant);
+		if (constant->type == CONSTANT_Integer && constant->intValue == value) {
+			found = true;
+		}
+	}
+	if (!found) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant));
+		constant->type = CONSTANT_Integer;
+		constant->intValue = value;
+		constant->id = size + 1;
+		list_add(constantsTable, constant);
+	}
+	return constant;
+}
+
+struct Constant* addFloatToConstantsTable(float value) {
+	struct Constant* constant = NULL;
+	bool found = false;
+	int size = list_size(constantsTable);
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(constantsTable, i, &constant);
+		if (constant->type == CONSTANT_Float && constant->floatValue == value) {
+			found = true;
+		}
+	}
+	if (!found) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant));
+		constant->type = CONSTANT_Float;
+		constant->floatValue = value;
+		constant->id = size + 1;
+		list_add(constantsTable, constant);
+	}
+	return constant;
+}
+
+
 struct Constant* addClassToConstantsTable(char* className) {
 	struct Constant* constant = NULL;
 	struct Constant* classNameConst = addUtf8ToConstantsTable(className);
@@ -1448,7 +1492,7 @@ void printLocalVariablesTable(struct Method* method) {
 void printConstant(struct Constant* constant) {
 	switch (constant->type) {
 	case CONSTANT_Integer:
-		printf("%d\tINT\t\t%d\n",constant->id, constant->intValue );
+		printf("%d\tINT\t\t\t%d\n",constant->id, constant->intValue );
 		break; 
 	case CONSTANT_Float:
 		printf("%d\tFLOAT\t\t%f\n", constant->id, constant->floatValue);
@@ -1477,7 +1521,9 @@ void printConstant(struct Constant* constant) {
 void printConstantsTable() {
 	FILE* file = freopen("constants.txt", "w", stdout);
 	int size = list_size(constantsTable); 
+
 	printf("					CONSTANTS TABLE\n"); 
+	printf("ID\tTYPE\t\tVALUE\n\n"); 
 	for (int i = 0; i < size; ++i) {
 		struct Constant* constant = NULL; 
 		list_get_at(constantsTable, i, &constant);
