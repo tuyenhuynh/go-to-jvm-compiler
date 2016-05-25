@@ -830,6 +830,12 @@ void printTypeName(int parentId, struct Type* type){
 					break;
 				}
 			}
+			int currentMaxId = maxId; 
+			maxId++; 
+			int size = type->expr->primaryExpr->decNumber; 
+			char buffer[10];
+			sprintf(buffer, "SIZE_%d", size); 
+			printEdgeWithDestName(currentMaxId, maxId, buffer); 
 		}
 	}
 }
