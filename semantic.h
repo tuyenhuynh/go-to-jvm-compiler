@@ -54,11 +54,11 @@ struct LocalVariable* findActiveLocalVariableByScope(List* variablesTable, char*
 //for tree printing purpose
 struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope);
 struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName);
-struct LocalVariable* addVariableToLocalVarsTable(char* id, enum TypeNames typeName, struct Method* method, bool isMutable);
+struct LocalVariable* addVariableToLocalVarsTable(char* id, struct SemanticType* type, struct Method* method, bool isMutable);
 bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method);
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
 bool checkSemanticConstSpec(struct ConstSpec* varSpec, struct Method* method);
-bool addParamToLocalVarsTable(struct ParameterDeclare* paramDeclare, struct Method* method);
+bool addParamToLocalVarsTable(char* paramName, struct SemanticType* type,  struct Method* method);
 void deactivateLocalVariablesByScope(List* localVariablesTable, int scope);
 bool isContainStatementType(struct StatementList* stmtList, enum StatementType stmtType); 
 bool detectBreakOrContainue(struct StatementList* stmtList);
@@ -72,10 +72,12 @@ struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDesc
 struct Constant* addClassToConstantsTable(char* className);
 char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeStr);
 
+char* convertTypeToString(struct SemanticType* type);
+
 struct Field* getField(struct Class* class, char* fieldName); 
 struct Method* getMethod(struct Class* class, char* methodName); 
 
-enum TypeName getFunctionReturnType(struct FunctionDecl* functionDecl);
+struct SemanticType* getFunctionReturnType(struct FunctionDecl* functionDecl);
 
 void printLocalVariablesTable(struct Method* method);
 void printConstantsTable();

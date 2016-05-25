@@ -810,8 +810,6 @@ void printTypeName(int parentId, struct Type* type){
 		else {
 			switch (type->typeName) {
 				case IDENTIFIER_TYPE_NAME: {
-					char buffer[30]; 
-					strcpy(buffer, "ARR_"); 
 					printEdgeWithDestName(id, maxId, "ARR_CUSTOM");
 					break;
 				}

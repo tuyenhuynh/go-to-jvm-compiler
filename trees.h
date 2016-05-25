@@ -157,10 +157,16 @@ struct Expression {
 	struct SemanticType* semanticType;
 };
 
+enum ArrayType {
+	NONE_ARRAY, 
+	ARRAY
+};
+
 struct SemanticType {
 	enum TypeNames typeName;
 	int idNum; 
-
+	enum ArrayType arrayType;
+	int arraySize; 
 };
 
 struct PrimaryExpression

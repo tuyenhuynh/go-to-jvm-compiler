@@ -28,7 +28,7 @@ struct Constant {
 
 struct LocalVariable {
 	int id; 
-	struct Type* type; 
+	struct SemanticType* semanticType; 
 	char* name; 
 	int scope; 
 	bool isActive; 
@@ -46,7 +46,7 @@ struct Method {
 	//method name, because class is unique
 	struct Constant* constMethodref;
 	//key: varname, value : LocalVariable
-	enum TypeNames returnType; 
+	struct SemanticType* returnType; 
 	List* localVariablesTable; 
 	struct ParameterList* paramList; 
 };
