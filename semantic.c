@@ -733,72 +733,13 @@ bool checkSemanticAssignStmtList(struct ExpressionList* leftExprList, struct Exp
 	return isOk;
 }
 
-bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, struct Method* method)
-{
+bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rightExpr, struct Method* method){
 	bool isOk = true; 
-	if (leftExpr->exprType == PRIMARY) {
-		//check left expression
-		if (leftExpr->primaryExpr->exprType == IDENTIFIER_TYPE_NAME) {
-			struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, leftExpr->primaryExpr->identifier);
-			if (variable == NULL) {
-				printf("Semantic error. Identifier %s not declared \n", leftExpr->primaryExpr->identifier);
-				isOk = false;
-			}
-		}
-		else if (leftExpr->primaryExpr->exprType == PE_COMPOSITE) {
-			struct PrimaryExpression* arrayAccessExpr = leftExpr->primaryExpr;
-			if (arrayAccessExpr->primaryExpr->exprType != IDENTIFIER_TYPE_NAME) {
-				printf("Semantic error. Unknown array name in array access in method %s\n", method->constMethodref->const2->const1->utf8);
-				isOk = false;
-			}else if (arrayAccessExpr->expr->exprType != PRIMARY) {
-				printf("Semantic error. Invalid array index in function %s\n", method->constMethodref->const2->const1->utf8);
-				isOk = false;
-			}else {
-				struct SemanticType* semanticType = checkExpressionType(arrayAccessExpr->expr, method);
-				if (semanticType->typeName != INT_TYPE_NAME) {
-					printf("Semantic error.Non integer used as array index in method %s\n", method->constMethodref->const2->const1->utf8);
-					isOk = false;
-				}
-			}
-			if (isOk) {
-				struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, arrayAccessExpr->primaryExpr->identifier);
-				if (variable == NULL) {
-					printf("Semantic error. Identifier %s not declared \n", arrayAccessExpr->primaryExpr->identifier);
-					isOk = false;
-				}
-			}
-		}
-		else {
-			printf("Semantic error. Left expression of assign statement must be identifier or array element\n");
-			isOk = false;
-		}
-		//check semantic right expression
-		if (isOk) {
-			if (rightExpr->exprType == PRIMARY && rightExpr->primaryExpr->exprType == ID_EXPRESSION) {
-				struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, rightExpr->primaryExpr->identifier);
-				if (variable == NULL) {
-					printf("Semantic error. Identifier %s not declare\n", rightExpr->primaryExpr->identifier);
-					isOk = false;
-				}
-			}
-		}
-	}
-	else {
-		printf("Semantic error. Left expression of assign statement must be identifier or array element\n");
-		isOk = false;
-	}
-	
-	{
-		
-		
-		if (isOk) {
-			struct SemanticType* leftType = checkExpressionType(leftExpr, method);
-			struct SemanticType* rightType = checkExpressionType(rightExpr, method);
-			isOk = (leftType->typeName == rightType->typeName && leftType->typeName != UNKNOWN_TYPE);
-			if (!isOk) {
-				printf("Semantic error. Type mismatch in assign statement of variable %s\n", leftExpr->primaryExpr->identifier); 
-			}
-		}
+	struct SemanticType* leftType = checkExpressionType(leftExpr, method);
+	struct SemanticType* rightType = checkExpressionType(rightExpr, method);
+	isOk = (leftType->typeName == rightType->typeName && leftType->typeName != UNKNOWN_TYPE);
+	if (!isOk) {
+		printf("Semantic error. Type mismatch in assign statement\n");
 	}
 	return isOk;
 }
