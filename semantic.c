@@ -479,10 +479,12 @@ bool checkSemanticParamList(struct ParameterList* paramList, char* functionName)
 			//primitive type
 			if (type->typeName == INT_TYPE_NAME || type->typeName == FLOAT32_TYPE_NAME || type->typeName == STRING_TYPE_NAME) {
 				if (type->expr->exprType != PRIMARY || type->expr->primaryExpr->exprType != DECIMAL_EXPR) {
+					
 					printf("Semantic error. Array index should be integer type %s \n", functionName);
 					isOk = false;
 				}
 				else {
+					addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 					param = param->nextParamDecl;
 				}
 			}
@@ -643,7 +645,7 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 				
 				if (calledMethod != NULL) {
 					if (checkSemanticFunctionCall(functionCall->exprList, calledMethod->paramList, method)) {
-						if (method->returnType->typeName != VOID_TYPE_NAME) {
+						if (calledMethod->returnType->typeName != VOID_TYPE_NAME) {
 							printf("Semantic error. Expression evaluated but not used\n");
 							return false;
 						}
@@ -1013,6 +1015,7 @@ bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct Parameter
 {
 	bool isOk = true; 
 	if (exprList != NULL && paramList == NULL || exprList == NULL && paramList != NULL) {
+		printf("Semantic error. Formal parameter count and parameter count mismatch\n");
 		isOk = false; 
 	}
 	else if (exprList != NULL && paramList != NULL) {
@@ -1082,6 +1085,7 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 			}
 			//check id and values 
 			if (isOk && varSpec->exprList != 0) {
+				addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 				struct Type* type = varSpec->idListType->type;
 				if (varSpec->idListType->identifierList->size != 1) {
 					printf("Semantic error. Array initialization should contain 1 array\n");
@@ -1147,6 +1151,7 @@ bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method) 
 		struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType));
 		semanticType->typeName = type->typeName;
 		if (type->expr != NULL) {
+			addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 			semanticType->arrayType = ARRAY; 
 			semanticType->arraySize = type->expr->primaryExpr->decNumber; 
 		}
@@ -1186,6 +1191,7 @@ bool addConstSpecToLocalVarsTable(struct ConstSpec* constSpec, struct Method* me
 		struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType)); 
 		semanticType->typeName = type->typeName; 
 		if (type->expr != NULL) {
+			addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 			semanticType->arrayType = ARRAY; 
 		}
 		else {
