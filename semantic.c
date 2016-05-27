@@ -197,6 +197,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		case STRING_EXPR: {
 			type->typeName = STRING_TYPE_NAME;
 			type->arrayType = NONE_ARRAY; 
+			addStringToConstantsTable(primaryExpr->stringLiteral); 
 			break;
 		}
 		case ID_EXPRESSION: {
@@ -477,7 +478,7 @@ bool checkSemanticParamList(struct ParameterList* paramList, char* functionName)
 		if (type->expr != NULL) {
 			//primitive type
 			if (type->typeName == INT_TYPE_NAME || type->typeName == FLOAT32_TYPE_NAME || type->typeName == STRING_TYPE_NAME) {
-				if (type->expr->exprType != DECIMAL_EXPR) {
+				if (type->expr->exprType != PRIMARY || type->expr->primaryExpr->exprType != DECIMAL_EXPR) {
 					printf("Semantic error. Array index should be integer type %s \n", functionName);
 					isOk = false;
 				}
@@ -1154,9 +1155,11 @@ bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method) 
 		}
 		char* typenameStr = convertTypeToString(semanticType); 
 		addUtf8ToConstantsTable(typenameStr); 
+		
 		while (id != NULL && isOk) {
 			struct LocalVariable* variable = addVariableToLocalVarsTable(id->name, semanticType, method, true);
 			//addUtf8ToConstantsTable(id->name);
+
 			isOk = variable != NULL; 
 			if (isOk) {
 				id->idNum = variable->id; 
@@ -1455,6 +1458,27 @@ struct Constant* addUtf8ToConstantsTable(char* utf8) {
 	return constant; 
 }
 
+struct Constant* addStringToConstantsTable(char* string) {
+	struct Constant* constant = NULL; 
+	bool found = false; 
+	struct Constant* constUtf8 = addUtf8ToConstantsTable(string);
+	int size = list_size(constantsTable);
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(constantsTable, i, &constant);
+		if (constant->type == CONSTANT_String && constant->const1 == constUtf8) {
+			found = true;
+		}
+	}
+	if (!found) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant)); 
+		constant->type = CONSTANT_String; 
+		constant->const1 = constUtf8; 
+		constant->id = size + 1; 
+		list_add(constantsTable, constant); 
+	}
+	return constant; 
+}
+
 struct Constant* addIntegerToConstantsTable(int value) {
 	struct Constant* constant = NULL;
 	bool found = false;
@@ -1643,7 +1667,7 @@ void printConstant(struct Constant* constant) {
 		printf("%d\tMethodRef\t%d,%d\n", constant->id, constant->const1->id, constant->const2->id);
 		break;
 	case CONSTANT_String:
-		//what the hell to do with this ?
+		printf("%d\tString\t\t%d\n", constant->id, constant->const1->id); 
 		break; 
 	}
 }
