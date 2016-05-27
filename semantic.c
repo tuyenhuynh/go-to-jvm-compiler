@@ -478,7 +478,7 @@ bool checkSemanticParamList(struct ParameterList* paramList, char* functionName)
 			//primitive type
 			if (type->typeName == INT_TYPE_NAME || type->typeName == FLOAT32_TYPE_NAME || type->typeName == STRING_TYPE_NAME) {
 				if (type->expr->exprType != DECIMAL_EXPR) {
-					printf("Semantic error. Invalid array-type parameter of function %s \n", functionName);
+					printf("Semantic error. Array index should be integer type %s \n", functionName);
 					isOk = false;
 				}
 				else {
@@ -1567,9 +1567,9 @@ struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName) {
 
 struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDescriptor) {
 	struct Constant* constant = NULL; 
-	int size = list_size(constantsTable); 
 	struct Constant* const1 = constantClass; 
 	struct Constant* const2 = addNameAndTypeToConstantsTable(methodName, methodDescriptor);
+	int size = list_size(constantsTable);
 	bool found = false; 
 	for (int i = 0; !found && i < size; ++i) {
 		list_get_at(constantsTable, i, &constant); 
@@ -1657,10 +1657,7 @@ void printConstantsTable() {
 	for (int i = 0; i < size; ++i) {
 		struct Constant* constant = NULL; 
 		list_get_at(constantsTable, i, &constant);
-		if (constant->type == CONSTANT_Class) {
-			int t = 0; 
-			t+=1;
-		}
+		//printf("%d\n", constant->id); 
 		printConstant(constant); 
 	}
 
