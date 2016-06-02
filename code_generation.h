@@ -14,7 +14,7 @@ static int objectClass = 0;
 
 static unsigned short
 ACC_SUPER = 0x02,
-ACC_PUBLIC = 0x01; 
+ACC_PUBLIC = 0x01;
 
 
 
@@ -29,9 +29,21 @@ float sf4;
 
 int fh; 
 
-void Write(void* data, int count); 
 
+void Write(void* data, int count);
+void writeU1(); 
+void writeU2(); 
+void writeU4(); 
+void writeS2(); 
+void writeS4(); 
+void writeSf4(); 
+void writeConstantsTable(); 
+void writeClassMetadata(); 
+void writeFieldsTable(); 
+void writeMethodsTable(); 
 void generateCode(struct Program* root); 
+void writeConstant(struct Constant* constant); 
+void writeField(struct Field* field); 
 void generateCodeForMethod(struct Method* method, struct StatementList* stmtList); 
 void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl); 
 void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec); 
