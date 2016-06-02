@@ -1589,9 +1589,9 @@ struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDesc
 }
 
 
-struct Method* getMethod(struct Class* class, char* methodName) {
+struct Method* getMethod( char* methodName) {
 	struct Method* method = NULL; // (struct Method*) malloc(sizeof(struct Method));
-	if (hashtable_get(class->methodsTable, methodName, &method) == CC_OK) {
+	if (hashtable_get(methodsTable, methodName, &method) == CC_OK) {
 		return method; 
 	}
 	return NULL; 

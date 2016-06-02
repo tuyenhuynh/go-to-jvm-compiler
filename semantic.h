@@ -23,9 +23,7 @@ HashTable* methodsTable;
 struct Constant* constantClass; 
 
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method);
-
 struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primaryExpr, struct Method* method); 
-
 bool doSemantic(struct Program* program); 
 bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method);
 bool checkSemanticElseBlock(struct ElseBlock* elseBlock, struct Method* method);
@@ -62,7 +60,6 @@ bool addParamToLocalVarsTable(char* paramName, struct SemanticType* type,  struc
 void deactivateLocalVariablesByScope(List* localVariablesTable, int scope);
 bool isContainStatementType(struct StatementList* stmtList, enum StatementType stmtType); 
 bool detectBreakOrContainue(struct StatementList* stmtList);
-
 struct Constant* addUtf8ToConstantsTable(char* utf8);
 struct Constant* addIntegerToConstantsTable(int value);
 struct Constant* addFloatToConstantsTable(float value);
@@ -71,14 +68,10 @@ struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);
 struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDescriptor);
 struct Constant* addClassToConstantsTable(char* className);
 char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeStr);
-
 char* convertTypeToString(struct SemanticType* type);
-
 struct Field* getField(struct Class* class, char* fieldName); 
-struct Method* getMethod(struct Class* class, char* methodName); 
-
+struct Method* getMethod(char* methodName);
 struct SemanticType* getFunctionReturnType(struct FunctionDecl* functionDecl);
-
 void printLocalVariablesTable(struct Method* method);
 void printConstantsTable();
 void printMethodsTable(); 
