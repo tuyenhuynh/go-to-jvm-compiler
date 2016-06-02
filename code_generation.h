@@ -3,14 +3,40 @@
 #include "semantic.h"
 #include "astfunctions.h"
 #include "trees.h"
-//what need to generate code ????
-//constants table
-//class table -> methods table
-void generateCodeForFunction(struct FunctionDecl* functionDecl); 
-void generateCodeForVarDecl(struct VarDecl* varDecl); 
-void generateCodeForVarSpec(struct VarSpec* varSpec); 
-void generateCodeForConstDecl(struct ConstDecl* constDecl); 
-void generateCodeForConstSpec(struct ConstSpec* constSpec); 
-void generateCodeForStatementList(struct StatementList* stmtList); 
-void generateCodeForStatement(struct Statement* stmt); 
+#include <fcntl.h>
+#include <io.h>
+
+char* classFileName = "Go.class"; 
+
+int fd;
+unsigned char u1;
+unsigned short int u2;
+unsigned int u4;
+short int s2;
+int s4;
+float sf4;
+
+int fh; 
+
+void _write(void* data, int count); 
+
+void generateCode(struct Program* root); 
+void generateCodeForMethod(struct Method* method, struct StatementList* stmtList); 
+void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl); 
+void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec); 
+void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl); 
+void generateCodeForConstSpec(struct Method* method,struct ConstSpec* constSpec); 
+void generateCodeForStatementList(struct Method* method, struct StatementList* stmtList);
+void generateCodeForStatement(struct Method* method, struct Statement* stmt);
+void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt); 
+void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt); 
+void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt); 
+void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt); 
+void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt); 
+void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt); 
+void generateCodeForExpression(struct Method* method, struct Expression* expr); 
+void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr); 
+
+
+
 #endif //_CODE_GENERATION_H_
