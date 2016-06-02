@@ -68,6 +68,7 @@ struct Constant* addNameAndTypeToConstantsTable(char* name, char* type);
 struct Constant* addFieldRefToConstantsTable(char* fieldName, char* typeName);
 struct Constant* addMethodRefToConstantsTable(char* methodName, char* methodDescriptor);
 struct Constant* addClassToConstantsTable(char* className);
+struct Constant* getConstantUtf8(char* utf8); 
 char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeStr);
 char* convertTypeToString(struct SemanticType* type);
 struct Field* getField(struct Class* class, char* fieldName); 

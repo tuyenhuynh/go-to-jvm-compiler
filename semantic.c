@@ -1759,3 +1759,16 @@ char* convertTypeToString(struct SemanticType* type) {
 		}
 	}
 }
+
+struct Constant* getConstantUtf8(char* utf8) {
+	struct Constant* constant = NULL; 
+	int size = list_size(constantsTable); 
+	bool found = false; 
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(constantsTable, i, &constant); 
+		if (constant->type == CONSTANT_Utf8 && !strcmp(utf8, constant->utf8)) {
+			found = true; 
+		}
+	}
+	return constant; 
+}
