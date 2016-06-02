@@ -197,6 +197,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		case STRING_EXPR: {
 			type->typeName = STRING_TYPE_NAME;
 			type->arrayType = NONE_ARRAY; 
+			addStringToConstantsTable(primaryExpr->stringLiteral); 
 			break;
 		}
 		case ID_EXPRESSION: {
@@ -477,11 +478,13 @@ bool checkSemanticParamList(struct ParameterList* paramList, char* functionName)
 		if (type->expr != NULL) {
 			//primitive type
 			if (type->typeName == INT_TYPE_NAME || type->typeName == FLOAT32_TYPE_NAME || type->typeName == STRING_TYPE_NAME) {
-				if (type->expr->exprType != DECIMAL_EXPR) {
+				if (type->expr->exprType != PRIMARY || type->expr->primaryExpr->exprType != DECIMAL_EXPR) {
+					
 					printf("Semantic error. Array index should be integer type %s \n", functionName);
 					isOk = false;
 				}
 				else {
+					addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 					param = param->nextParamDecl;
 				}
 			}
@@ -642,7 +645,7 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 				
 				if (calledMethod != NULL) {
 					if (checkSemanticFunctionCall(functionCall->exprList, calledMethod->paramList, method)) {
-						if (method->returnType->typeName != VOID_TYPE_NAME) {
+						if (calledMethod->returnType->typeName != VOID_TYPE_NAME) {
 							printf("Semantic error. Expression evaluated but not used\n");
 							return false;
 						}
@@ -1012,6 +1015,7 @@ bool checkSemanticFunctionCall(struct ExpressionList* exprList, struct Parameter
 {
 	bool isOk = true; 
 	if (exprList != NULL && paramList == NULL || exprList == NULL && paramList != NULL) {
+		printf("Semantic error. Formal parameter count and parameter count mismatch\n");
 		isOk = false; 
 	}
 	else if (exprList != NULL && paramList != NULL) {
@@ -1081,6 +1085,7 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 			}
 			//check id and values 
 			if (isOk && varSpec->exprList != 0) {
+				addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 				struct Type* type = varSpec->idListType->type;
 				if (varSpec->idListType->identifierList->size != 1) {
 					printf("Semantic error. Array initialization should contain 1 array\n");
@@ -1146,6 +1151,7 @@ bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method) 
 		struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType));
 		semanticType->typeName = type->typeName;
 		if (type->expr != NULL) {
+			addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 			semanticType->arrayType = ARRAY; 
 			semanticType->arraySize = type->expr->primaryExpr->decNumber; 
 		}
@@ -1154,9 +1160,11 @@ bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method) 
 		}
 		char* typenameStr = convertTypeToString(semanticType); 
 		addUtf8ToConstantsTable(typenameStr); 
+		
 		while (id != NULL && isOk) {
 			struct LocalVariable* variable = addVariableToLocalVarsTable(id->name, semanticType, method, true);
 			//addUtf8ToConstantsTable(id->name);
+
 			isOk = variable != NULL; 
 			if (isOk) {
 				id->idNum = variable->id; 
@@ -1183,6 +1191,7 @@ bool addConstSpecToLocalVarsTable(struct ConstSpec* constSpec, struct Method* me
 		struct SemanticType* semanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType)); 
 		semanticType->typeName = type->typeName; 
 		if (type->expr != NULL) {
+			addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 			semanticType->arrayType = ARRAY; 
 		}
 		else {
@@ -1455,6 +1464,27 @@ struct Constant* addUtf8ToConstantsTable(char* utf8) {
 	return constant; 
 }
 
+struct Constant* addStringToConstantsTable(char* string) {
+	struct Constant* constant = NULL; 
+	bool found = false; 
+	struct Constant* constUtf8 = addUtf8ToConstantsTable(string);
+	int size = list_size(constantsTable);
+	for (int i = 0; !found && i < size; ++i) {
+		list_get_at(constantsTable, i, &constant);
+		if (constant->type == CONSTANT_String && constant->const1 == constUtf8) {
+			found = true;
+		}
+	}
+	if (!found) {
+		constant = (struct Constant*) malloc(sizeof(struct Constant)); 
+		constant->type = CONSTANT_String; 
+		constant->const1 = constUtf8; 
+		constant->id = size + 1; 
+		list_add(constantsTable, constant); 
+	}
+	return constant; 
+}
+
 struct Constant* addIntegerToConstantsTable(int value) {
 	struct Constant* constant = NULL;
 	bool found = false;
@@ -1643,7 +1673,7 @@ void printConstant(struct Constant* constant) {
 		printf("%d\tMethodRef\t%d,%d\n", constant->id, constant->const1->id, constant->const2->id);
 		break;
 	case CONSTANT_String:
-		//what the hell to do with this ?
+		printf("%d\tString\t\t%d\n", constant->id, constant->const1->id); 
 		break; 
 	}
 }
