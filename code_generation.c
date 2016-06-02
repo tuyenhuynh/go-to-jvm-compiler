@@ -9,28 +9,41 @@ void generateCode(struct Program* root){
 		return; 
 	}
 	else {
-
-
 		//magic number
 		u4 = htonl(0xCAFEBABE);
-		_write((void*)&u4, 4); 
+		Write((void*)&u4, 4); 
 
 		//minor version
 		u2 = htons(0); 
-		_write((void*)&u2, 2);
+		Write((void*)&u2, 2);
 
 		//major version
 		u2 = htons(53);
-		_write((void*)&u2, 2); 
+		Write((void*)&u2, 2); 
 
+		//constant's size +1
 		int constantCount = list_size(constantsTable); 
 		u2 = htons(constantCount +1 );
-		_write((void*)&u2, 2); 
+		Write((void*)&u2, 2); 
 
+		//constants
 		struct Constant* constant = NULL; 
 		for (int i = 0; i < constantCount; ++i) {
-			
+			list_get_at(constantsTable, i, &constant); 
+			writeConstant(constant); 
 		}
+
+		//access flags 
+		u2 = htons(ACC_SUPER);
+		Write((void*)&u2, 2); 
+		
+		//write constants class
+		u2 = htons(constantClass->id);
+		Write((void*)&u2, 2); 
+
+		//write parent class(Object); 
+
+
 
 		struct DeclarationList* declList = root->declList; 
 		struct Declaration* decl = declList->firstDecl; 
@@ -47,44 +60,44 @@ void generateCode(struct Program* root){
 
 void writeConstant(struct Constant* constant) {
 	u1 = constant->type; 
-	_write((void*)&u1, 1); 
+	Write((void*)&u1, 1); 
 	int length; 
 	switch (constant->type) {
 	case CONSTANT_Utf8:
 		length = strlen(constant->utf8);
 		u2 = htons(length);
 		//length
-		_write((void*)&u2, 2);
+		Write((void*)&u2, 2);
 		//data
-		_write((void*)constant->utf8, length);
+		Write((void*)constant->utf8, length);
 		break; 
 	case CONSTANT_Integer:
 		s4 = htonl(constant->intValue);
-		_write((void*)&s4, 4);
+		Write((void*)&s4, 4);
 		break;
 	case CONSTANT_Float:
 		sf4 = htonl(constant->floatValue); 
-		_write((void*)&sf4, 4); 
+		Write((void*)&sf4, 4); 
 		break; 
 	case CONSTANT_String: 
 	case CONSTANT_Class:
 		u2 = htons(constant->const1->id); 
-		_write((void*)&u2, 2); 
+		Write((void*)&u2, 2); 
 		break; 
 	case CONSTANT_Fieldref:
 	case CONSTANT_Methodref:
 	case CONSTANT_NameAndType:
 		//first constant's id
 		u2 = htons(constant->const1->id); 
-		_write((void*)&u2, 2); 
+		Write((void*)&u2, 2); 
 		//second constant's id
 		u2 = htons(constant->const2->id);
-		_write((void*)&u2, 2); 
+		Write((void*)&u2, 2); 
 		break; 
 	}
 }
 
-void _write(void* data, int count) {
+void Write(void* data, int count) {
 	int result = write(fh, data, count); 
 	if (result < 0) {
 		printf("Failed to write data to file\n"); 

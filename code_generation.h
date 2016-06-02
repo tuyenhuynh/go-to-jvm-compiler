@@ -5,8 +5,19 @@
 #include "trees.h"
 #include <fcntl.h>
 #include <io.h>
+#include <Winsock2.h>
+#pragma comment(lib, "Ws2_32.lib")
 
-char* classFileName = "Go.class"; 
+static char* classFileName = "Go.class"; 
+
+static int objectClass = 0; 
+
+static unsigned short
+ACC_SUPER = 0x02,
+ACC_PUBLIC = 0x01; 
+
+
+
 
 int fd;
 unsigned char u1;
@@ -18,7 +29,7 @@ float sf4;
 
 int fh; 
 
-void _write(void* data, int count); 
+void Write(void* data, int count); 
 
 void generateCode(struct Program* root); 
 void generateCodeForMethod(struct Method* method, struct StatementList* stmtList); 
