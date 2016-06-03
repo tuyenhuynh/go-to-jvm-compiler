@@ -28,7 +28,7 @@ int s4;
 float sf4;
 
 int fh; 
-
+struct Constant* constantCode; 
 
 void Write(void* data, int count);
 void writeU1(); 
@@ -41,6 +41,7 @@ void writeConstantsTable();
 void writeClassMetadata(); 
 void writeFieldsTable(); 
 void writeMethodsTable(); 
+void writeMethod(struct Method* method); 
 void generateCode(struct Program* root); 
 void writeConstant(struct Constant* constant); 
 void writeField(struct Field* field); 

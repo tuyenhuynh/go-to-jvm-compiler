@@ -104,7 +104,7 @@ void writeField(struct Field* field) {
 
 	//write numbef of CONSTANT_utf8, which contains field's description (aka field's type)
 	char* fieldDescription = field->constFieldref->const2->const2->utf8; 
-	struct Constant* constant = getConstantUtf8(fieldDescription); 
+	constant = getConstantUtf8(fieldDescription); 
 	u2 = htons(constant->id); 
 	writeU2(); 
 
@@ -117,10 +117,89 @@ void writeField(struct Field* field) {
 }
 
 void writeMethodsTable() {
+	int methodCount = hashtable_size(methodsTable);
+	u2 = htons(methodCount);
+	writeU2();
 	
+	//add Code constants table
+	constantCode = addUtf8ToConstantsTable("Code"); 
+	
+	
+	//write methods
+	HashTableIter i;
+	hashtable_iter_init(&i, methodsTable);
+	while (hashtable_iter_has_next(&i)) {
+		TableEntry *e;
+		hashtable_iter_next(&i, &e);
+		struct Method* method = (struct Method*) e; 
+		writeMethod(method);
+	}
+
+	/*
+	struct DeclarationList* declList = root->declList;
+	struct Declaration* decl = declList->firstDecl;
+	while (decl != NULL) {
+		if (decl->declType == FUNC_DECL) {
+			struct Method* method = getMethod(decl->funcDecl->identifier);
+			generateCodeForMethod(method, decl->funcDecl->block->stmtList);
+		}
+		decl = decl->nextDecl;
+	}*/
+
+}
+
+void writeMethod(struct Method* method) {
+	u2 = htons(ACC_PUBLIC);
+	writeU2(); 
+
+	//write id of  constant utf8, which contains method's name
+	struct Constant* constant = getConstantUtf8(method->constMethodref->const2->const1->utf8); 
+	u2 = htons(constant->id);
+	writeU2(); 
+
+	//write id of constant utf8, which contains method's description 
+	constant = getConstantUtf8(method->constMethodref->const2->const2->utf8); 
+	u2 = htons(constant->id); 
+	writeU2(); 
+
+	//method's attribute count
+	u2 = htons(1); 
+	writeU2(); 
+
+	//write method's attribute table
+	//constant utf8's id
+	u2 = htons(constantCode->id); 
+	writeU2(); 
+	//attribute's length
+	//TODO: find the value of u4
+	u4 = htons(0); 
+	writeU4(); 
+	//stack's size
+	u2 = 1000; 
+	writeU2(); 
+	//local variable count
+	int localVarsCount = list_size(method->localVariablesTable); 
+	u2 = htons(localVarsCount); 
+	writeU2(); 
+	//TODO: define method's bytecode size
+	u4 = htons(0); 
+	writeU4();
+	//TODO: generate and write method's bytecode 
+
+	//write number of exception
+	u2 = htons(0); 
+	writeU2(); 
+	//write exception table(no exception)
+
+	//write number of attribute's attribute
+	u2 = htons(0); 
+	writeU2(); 
 	
 }
 
+void writeString(char* str) {
+	Write((void*)str, strlen(str)); 
+}
 
 void writeU1() {
 	Write((void*)&u1, 1); 
