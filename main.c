@@ -2,7 +2,8 @@
 #include "scanner.h"
 #include "parser.h"
 #include "print_tree.h"
-#include <semantic.h>
+#include "code_generation.h"
+#include "semantic.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +26,7 @@ int main(int argc, char *argv[])
 				printf("Semantic checking successful\n");
 				printProgram(argv[2]);
 				printConstantsTable(); 
+				generateCode(root);
 			}
 			else {
 				printf("Semantic checking failed\n");

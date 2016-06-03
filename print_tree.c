@@ -260,7 +260,7 @@ void printFunctionDecl(int parentId, struct FunctionDecl* functionDecl){
 		//print function name
 		printPrimitiveExpression(id, "ID", functionDecl->identifier);
 		//print function signature
-		struct Method* method = getMethod(semanticClass, functionDecl->identifier); 
+		struct Method* method = getMethod(functionDecl->identifier);
 		
 		printSignature(id, functionDecl->signature,method);
 		
