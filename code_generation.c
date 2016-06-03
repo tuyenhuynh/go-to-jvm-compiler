@@ -2,8 +2,8 @@
 
 
 void generateCode(struct Program* root){
-	fh = open(classFileName, O_BINARY | O_WRONLY | O_TRUNC | O_CREAT); 
-	if (fh < 0) {
+	// 0200 user can only write file
+	if ((fh = open(classFileName, O_BINARY | O_WRONLY | O_TRUNC | O_CREAT, 0200)) == -1) {
 		freopen("CON", "w", stdout); 
 		printf("Failed to open class file\n"); 
 		return; 
@@ -35,6 +35,7 @@ void generateCode(struct Program* root){
 		//write class's attributes(nothing to do)
 		
 	}
+	close(fh);
 	
 }
 
