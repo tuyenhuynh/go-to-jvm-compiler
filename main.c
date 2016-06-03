@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
 	if (argc != 3)
 	{
-		printf("Program should take 3 arguments (path to source code file)\n");
+		printf("Program should take 2 arguments: path to source code file, path to dot file for AST\n");
 		return 1;
 	}
 
