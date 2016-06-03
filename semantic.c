@@ -1772,3 +1772,19 @@ struct Constant* getConstantUtf8(char* utf8) {
 	}
 	return constant; 
 }
+
+struct FunctionDecl* findFuncionDeclByName(struct Program* program, char* functionName) {
+	struct FunctionDecl* functionDecl = NULL; 
+	struct Declaration* decl = program->declList->firstDecl; 
+	bool found = false; 
+	while (!found && decl != NULL) {
+		if (decl->declType == FUNC_DECL && !strcmp(decl->funcDecl->identifier, functionName)) {
+			functionDecl = decl->funcDecl; 
+			found = true; 
+		}
+		else {
+			decl = decl->nextDecl; 
+		}
+	}
+	return functionDecl; 
+}

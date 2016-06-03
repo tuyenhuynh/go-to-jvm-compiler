@@ -1,5 +1,5 @@
 #include "code_generation.h"
-
+struct Program* program; 
 
 void generateCode(struct Program* root){
 	fh = open(classFileName, O_BINARY | O_WRONLY | O_TRUNC | O_CREAT); 
@@ -35,7 +35,7 @@ void generateCode(struct Program* root){
 		//write class's attributes(nothing to do)
 		
 	}
-	
+	program = root; 
 }
 
 void writeConstantsTable() {
@@ -181,10 +181,15 @@ void writeMethod(struct Method* method) {
 	int localVarsCount = list_size(method->localVariablesTable); 
 	u2 = htons(localVarsCount); 
 	writeU2(); 
-	//TODO: define method's bytecode size
-	u4 = htons(0); 
+	
+	//generate and write method's bytecode 
+	struct FunctionDecl* functionDecl = findFuncionDeclByName(program, method->constMethodref->const2->const1->utf8); 
+	char* code = generateCodeForMethod(method, functionDecl->block->stmtList); 
+	//define method's bytecode size
+	u4 = htons(strlen(code));
 	writeU4();
-	//TODO: generate and write method's bytecode 
+	//write bytecode of method
+	writeString(code); 
 
 	//write number of exception
 	u2 = htons(0); 
@@ -272,34 +277,41 @@ void Write(void* data, int count) {
 }
 
 
-void generateCodeForMethod(struct Method* method, struct StatementList* stmtList){
+char* generateCodeForMethod(struct Method* method, struct StatementList* stmtList){
+	char* code = (char*)malloc(1000 * sizeof(char)); 
+	struct Statement* stmt = stmtList->firstStmt; 
+	while (stmt != NULL) {
+		generateCodeForStmt(method, stmt, code); 
+		stmt = stmt->nextStatement; 
+	}
+	return code; 
 }
-void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl){
+void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code){
 }
-void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec){
+void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code){
 }
-void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl){
+void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code){
 }
-void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec){
+void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec, char* code){
 }
-void generateCodeForStatementList(struct Method* method, struct StatementList* stmtList){
+void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, char* code){
 }
-void generateCodeForStatement(struct Method* method, struct Statement* stmt){
+void generateCodeForStatement(struct Method* method, struct Statement* stmt, char* code){
 }
-void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt){
+void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code){
 }
-void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt){
+void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code){
 }
-void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt){
+void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code){
 }
-void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt){
+void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code){
 }
-void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt){
+void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, char* code){
 }
-void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt){
+void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code){
 }
-void generateCodeForExpression(struct Method* method, struct Expression* expr){
+void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code){
 }
-void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr){
+void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code){
 }
 

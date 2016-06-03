@@ -78,4 +78,5 @@ void printLocalVariablesTable(struct Method* method);
 void printConstantsTable();
 void printMethodsTable(); 
 void printConstant(struct Constant* constant);
+struct FunctionDecl* findFuncionDeclByName(struct Program* program, char* functionName); 
 #endif //_SEMANTIC_H_
