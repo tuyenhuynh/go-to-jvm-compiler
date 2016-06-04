@@ -258,7 +258,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 			//search the definition of function in constant table to find return type 
 			struct FunctionCall* functionCall = primaryExpr->funcCall;
 			char* methodName = functionCall->primaryExpr->identifier; 
-			struct Method* calledMethod = getMethod(semanticClass, methodName); 
+			struct Method* calledMethod = getMethod(methodName); 
 			if (calledMethod != NULL) {
 				bool isOk = checkSemanticFunctionCall(functionCall->exprList, calledMethod->paramList,  method);
 				if (isOk) {
@@ -268,7 +268,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 				}
 			}
 			else {
-				printf("Semantic error. Method %s not declared\n", methodName);
+				printf("Semantic error. Method is %s not declared\n", methodName);
 				type->typeName = UNKNOWN_TYPE; 
 			}
 			break;
@@ -641,7 +641,7 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 			if (simpleStmt->expr != NULL && simpleStmt->expr->primaryExpr != NULL && simpleStmt->expr->primaryExpr->funcCall != NULL) {
 				struct FunctionCall* functionCall = simpleStmt->expr->primaryExpr->funcCall;
 				char* methodName = functionCall->primaryExpr->identifier;
-				struct Method* calledMethod = getMethod(semanticClass, methodName); 
+				struct Method* calledMethod = getMethod(methodName); 
 				
 				if (calledMethod != NULL) {
 					if (checkSemanticFunctionCall(functionCall->exprList, calledMethod->paramList, method)) {

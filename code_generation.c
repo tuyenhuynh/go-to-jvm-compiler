@@ -25,9 +25,9 @@ void generateCode(struct Program* root){
 
 		writeClassMetadata(); 
 		
-		writeFieldsTable(); 
+		//writeFieldsTable(); TODO
 
-		writeMethodsTable(); 
+		//writeMethodsTable(); TODO
 
 		//write number of class's attributes(usally 0)
 		u2 = 0; 
@@ -290,6 +290,32 @@ void generateCodeForStatement(struct Method* method, struct Statement* stmt){
 void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt){
 }
 void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt){
+
+	if (ifStmt->ifStmtExpr->simpleStmt != NULL)
+	{
+		generateCodeForSimpleStmt(method, ifStmt->ifStmtExpr->simpleStmt);
+		
+	}
+	else if(ifStmt->ifStmtExpr->expr != NULL)
+	{
+		generateCodeForExpression(method, ifStmt->ifStmtExpr->expr);
+	}
+	
+	generateCodeForBlock(method, ifStmt->block);
+
+	if (ifStmt->elseBlock != NULL)
+	{
+		if (ifStmt->elseBlock->ifStmt != NULL)
+		{
+			generateCodeForIfStmt(method, ifStmt->elseBlock->ifStmt);
+		}
+		generateCodeForBlock(ifStmt->elseBlock->block);
+	}
+
+}
+
+void generateCodeForBlock(struct Method* method, struct Block* block){
+
 }
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt){
 }

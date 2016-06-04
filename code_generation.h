@@ -60,7 +60,7 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt
 void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt); 
 void generateCodeForExpression(struct Method* method, struct Expression* expr); 
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr); 
-
+void generateCodeForBlock(struct Method* method, struct Block* block);
 
 
 #endif //_CODE_GENERATION_H_
