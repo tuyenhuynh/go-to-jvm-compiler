@@ -744,6 +744,10 @@ bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rig
 	if (!isOk) {
 		printf("Semantic error. Type mismatch in assign statement\n");
 	}
+	if (leftExpr->exprType != IDENTIFIER_TYPE_NAME) {
+		printf("Semantic error. Left expression of assignment statement must be an identifier\n");
+		isOk = false; 
+	}
 	return isOk;
 }
 
