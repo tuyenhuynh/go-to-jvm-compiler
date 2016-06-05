@@ -1,5 +1,7 @@
 #include "code_generation.h"
-struct Program* program; 
+
+// ===== JVM OPCODES
+
 unsigned short
 ICONST_M1 = 0x2, // REMOVE THIS (SIGNED) 
 ICONST_0 = 0x3,
@@ -20,9 +22,13 @@ POP = 0x57,
 DUP = 0x58,
 DUP2 = 0x5C,
 IADD = 0x60,
+FADD = 0x62,
 IMUL = 0x64,
+FMUL = 0x6A,
 ISUB = 0x68,
+FSUB = 0x66,
 IDIV = 0x6C,
+FDIV = 0x6e,
 IINC = 0x84,
 IF_ICMPEQ = 0x9F,
 IF_ICMPNE = 0xA0,
@@ -66,12 +72,9 @@ INVOKESTATIC = 0xB8,
 IRETURN = 0xAC,
 ARETURN = 0xB0,
 RETURN = 0xB1
-; 
+;
 
 
-
-
-; 
 void generateCode(struct Program* root){
 	// 0200 user can only write file
 	if ((fh = open(classFileName, O_BINARY | O_WRONLY | O_TRUNC | O_CREAT, 0200)) == -1) {
@@ -576,19 +579,59 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break;
 		}
 		case PLUS_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code); // load left expr to stack
+			generateCodeForExpression(method, expr->rightExpr, code); // load right expr to stack
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR) // perform operations
+			{
+				u1 = FADD;
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IADD;
+			}
+			writeU1();
 			break;
 		}
 		case MINUS_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code);
+			generateCodeForExpression(method, expr->rightExpr, code);
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				u1 = FSUB;
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = ISUB;
+			}
+			writeU1();
 			break;
 		}
 		case MUL_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code);
+			generateCodeForExpression(method, expr->rightExpr, code);
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				u1 = FMUL;
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IMUL;
+			}
+			writeU1();
 			break;
 		}
 		case DIV_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code);
+			generateCodeForExpression(method, expr->rightExpr, code);
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				u1 = FDIV;
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IDIV;
+			}
+			writeU1();
 			break;
 		}
 		default: {
