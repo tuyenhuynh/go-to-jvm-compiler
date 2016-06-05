@@ -392,7 +392,58 @@ void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec
 void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, char* code){
 }
 void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* code){
-	
+	switch (stmt->stmtType) {
+		case SIMPLE_STMT: {
+			generateCodeForSimpleStmt(method, stmt->simpleStmt, code); 
+			break; 
+		}
+		case VAR_DECL_STMT: {
+			generateCodeForVarDecl(method, stmt->varDecl, code); 
+			break; 
+		}
+		case CONST_DECL_STMT: {
+			generateCodeForConstDecl(method, stmt->constDecl, code); 
+			break; 
+		}
+		case RETURN_STMT: {
+			struct ReturnStmt* returnStmt = stmt->returnStmt; 
+			//TODO: generate code for this statement
+			break; 
+		}
+		case BREAK_STMT: {
+			//TODO: implement this
+			break; 
+		}
+		case CONTINUE_STMT: {
+			//TODO: implement this
+			break; 
+		}
+		case BLOCK: {
+			//generate code for stmt list
+			generateCodeForStmtList(method, stmt->block->stmtList, code); 
+			break; 
+		}
+		case IF_STMT: {
+			generateCodeForIfStmt(method, stmt->ifStmt, method); 
+			break; 
+		}
+		case SWITCH_STMT: {
+			generateCodeForSwitchStmt(method, stmt->switchStmt, method); 
+			break; 
+		}
+		case FOR_STMT: {
+			generateCodeForForStmt(method, stmt->forStmt, method); 
+			break; 
+		}
+		case PRINT_STMT: {
+			generateCodeForPrintStmt(method, stmt->printStatement, method); 
+			break; 
+		}
+		case SCAN_STMT: {
+			generateCodeForScanStmt(method, stmt->scanStatement, method); 
+			break; 
+		}			  
+	}
 }
 void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code){
 	switch (simpleStmt->stmtType) {
