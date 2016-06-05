@@ -533,8 +533,68 @@ void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char
 void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, char* code){
 }
 void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code){
+	
 }
+
+//totally 13 types of expression supported 
 void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code){
+	switch (expr->exprType) {
+		case PRIMARY: {
+			generateCodeForPrimaryExpression(method, expr->primaryExpr, code);
+			break; 
+		}
+		case PLUS_UNARY_EXPR: {
+			//TODO: implement this
+			break; 
+		}
+		case MINUS_UNARY_EXPR : {
+			//TODO: implement this
+			break; 
+		}
+		case EQU_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case NE_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case GT_EXPRESSION: {
+			//TODO: implement this
+			break; 
+		}
+		case GTE_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case LT_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case LTE_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case PLUS_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case MINUS_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case MUL_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case DIV_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		default: {
+			//some expressions are currently unsupported
+		}
+	}
 	
 }
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code){
