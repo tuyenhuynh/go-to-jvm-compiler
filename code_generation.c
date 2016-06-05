@@ -364,7 +364,25 @@ void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char
 }
 
 void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code){
-	
+	//array declaration
+	if (varSpec->idListType->type->expr != NULL) {
+		struct SemanticType* semanticType = varSpec->idListType->type->expr->semanticType; 
+		//TODO: implement this
+
+
+	}
+	else { //none array declaration
+		struct IdentifierList* idList = varSpec->idListType->identifierList; 
+		struct ExpressionList* exprList = varSpec->exprList; 
+		if (exprList != NULL) {//declare and assign values to local variables
+			struct Identifier* id = idList->firstId; 
+			struct Expression* expr = exprList->firstExpression; 
+			while (id != NULL) {
+				
+				id = id->nextId; 
+			}
+		}
+	}
 }
 void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code){
 }
@@ -377,6 +395,30 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* co
 }
 void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code){
 	
+}
+
+
+void generateCodeForAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code) {
+	//generate code for right expression
+	//INCLUDE LOADING value to stack ???
+	generateCodeForExpression(method, expr, code); 
+	
+	//load value on top of stack to local variable
+	//TODO: generate code id is field, not local variable
+	switch (expr->semanticType->typeName) {
+		case INT_TYPE_NAME:
+		case FLOAT32_TYPE_NAME:{
+			u1 = ISTORE; 
+			writeU1(); 
+			u1 = id->idNum; 
+			writeU1(); 
+			break; 
+		}
+		case STRING_TYPE_NAME: {
+			//TODO: impelement this	
+			break; 
+		}
+	}
 }
 
 void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code){
