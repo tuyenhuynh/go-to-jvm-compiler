@@ -640,7 +640,42 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 	}
 	
 }
-void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code){
 
+void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code){
+	switch (primaryExpr->exprType) {
+		case DECIMAL_EXPR: {
+			//TODO: implement this
+			break; 
+		}
+		case FLOAT_EXPR: {
+			//TODO: implement this
+			break;
+		}
+		case STRING_EXPR: {
+			//TODO: implement this
+			break;
+		}
+		case ID_EXPRESSION: {
+			//TODO: implement this
+			break;
+		}
+		case PE_COMPOSITE: {
+			//ARRAY ACCESS
+			//TODO: implement this
+			break;
+		}
+		case FUNCTION_CALL: {
+			//TODO: implement this
+			break;
+		}
+		case EXPRESSION: {
+			//nested expression (by parenthesies)
+			//TODO: implement this
+			break;
+		}
+		default: {
+			//true/false expressions not supported
+		}
+	}
 }
 
