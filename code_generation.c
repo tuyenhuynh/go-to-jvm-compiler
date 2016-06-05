@@ -412,6 +412,7 @@ void generateCodeForStmtList(struct Method* method, struct StatementList* stmtLi
 		stmt = stmt->nextStatement; 
 	}
 }
+
 void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* code){
 	switch (stmt->stmtType) {
 		case SIMPLE_STMT: {
@@ -473,15 +474,30 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 			break; 
 		}
 		case INC_SIMPLE_STMT: {
-			//TODO: implement this
+			//TODO: implement situation when operand of this operation is class's field 
+			u1 = IINC;
+			writeU1(); 
+			//get id of variable in local var table 
+			u1 = simpleStmt->expr->primaryExpr->semanticType->idNum; 
+			writeU1(); 
+			//write constant 1 
+			u1 = 1; 
+			writeU1(); 
 			break; 
 		}
 		case DEC_SIMPLE_STMT: {
-			//TODO: implement this
+			//TODO: implement situation when operand of this operation is class's field 
+			u1 = IINC;
+			writeU1();
+			//get id of variable in local var table 
+			u1 = simpleStmt->expr->primaryExpr->semanticType->idNum;
+			writeU1();
+			//write constant 1 
+			u1 = 1;
+			writeU1();
 			break; 
 		}
-		case ASSIGN_STMT: {
-			
+		case ASSIGN_STMT: {			
 			struct Expression* leftExpr = simpleStmt->exprListLeft->firstExpression; 
 			struct Expression* rightExpr = simpleStmt->exprListRight->firstExpression; 
 			while (leftExpr != NULL) {
