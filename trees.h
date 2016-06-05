@@ -164,7 +164,7 @@ enum ArrayType {
 
 struct SemanticType {
 	enum TypeNames typeName;
-	int idNum; 
+	int idNum; //index of variable in local variable table or in fields table
 	enum ArrayType arrayType;
 	int arraySize; 
 	int constantExpressionNum; //index of constant types integer, float, string in constants table

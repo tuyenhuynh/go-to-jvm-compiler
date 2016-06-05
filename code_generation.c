@@ -14,6 +14,7 @@ LDC = 0x12,
 LDC_W = 0x13,
 ILOAD = 0x15,
 ALOAD = 0x19,
+ALOAD_0 = 0x2a, 
 ISTORE = 0x36,
 ASTORE = 0x3A,
 POP = 0x57,
@@ -54,8 +55,10 @@ ANEWARRAY = 0xBD,
 ARRAY_LENGTH = 0xBE,
 IALOAD = 0x2E,
 AALOAD = 0x32,
+FALOAD = 0x30, 
 IASTORE = 0x4F,
 AASTORE = 0x53,
+FASTORE = 0x51, 
 NEW = 0xBB, // create new object 
 GETFIELD = 0xB4,
 PUTFIELD = 0xB5,
@@ -600,34 +603,85 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code){
 	switch (primaryExpr->exprType) {
-		case DECIMAL_EXPR: {
-			//TODO: implement this
-			break; 
-		}
+		case DECIMAL_EXPR:
 		case FLOAT_EXPR: {
-			//TODO: implement this
+			//write command
+			u1 = LDC_W; 
+			writeU1(); 
+			//write constant id number
+			u2 = htons(primaryExpr->semanticType->constantExpressionNum); 
+			writeU2(); 
 			break;
 		}
 		case STRING_EXPR: {
-			//TODO: implement this
+			//TODO: verify this
+			//load constant String from constants table 
+			u1 = ALOAD; 
+			writeU1(); 
+			//get id of string in constants table
+			u1 = primaryExpr->semanticType->constantExpressionNum; 
+			writeU1(); 
 			break;
 		}
 		case ID_EXPRESSION: {
-			//TODO: implement this
+			//TODO: implementation loading field if ID_EXPRESSION is class's field
+
+			//write command
+			u1 = ILOAD; 
+			writeU1(); 
+			//write the id number of id_expression from local var table
+			u1 = primaryExpr->semanticType->idNum; 
+			writeU1(); 
 			break;
 		}
 		case PE_COMPOSITE: {
-			//ARRAY ACCESS
-			//TODO: implement this
+			//write command
+			u1 = ALOAD; 
+			writeU1(); 
+			//write array 's id 
+			u1 = primaryExpr->primaryExpr->semanticType->idNum; 
+			writeU1(); 
+			//write index of array's element using enerateCodeForExpression
+			generateCodeForExpression(method, primaryExpr->expr, code); 
+			//write load command to load element to stack's top
+			switch (primaryExpr->semanticType->typeName) {
+				case INT_TYPE_NAME: {
+					u1 = IALOAD;
+					break;
+				}case FLOAT32_TYPE_NAME: {
+					u1 = FALOAD; 
+					break; 
+				}case STRING_TYPE_NAME: {
+					//TODO: implement situation when array type is string
+					break; 
+				}
+			}
+			writeU1();
 			break;
 		}
 		case FUNCTION_CALL: {
-			//TODO: implement this
+			//load referece to object of called method
+			u1 = ALOAD_0; 
+			writeU1(); 
+			//write arguments
+			struct Expression* expr = primaryExpr->funcCall->exprList->firstExpression; 
+			while (expr != NULL) {
+				generateCodeForExpression(method, expr, code); 
+				expr = expr->nextExpr; 
+			}
+			//
+			u1 = INVOKESPECIAL; 
+			writeU1(); 
+			//find constant method ref from constants table
+			struct Method*  method = getMethod(primaryExpr->funcCall->primaryExpr->identifier); 
+			//write id of constant method ref
+			u2 = htons(method->constMethodref->id);
+			writeU2(); 
 			break;
 		}
 		case EXPRESSION: {
 			//nested expression (by parenthesies)
-			//TODO: implement this
+			generateCodeForExpression(method, primaryExpr->expr, code); 
 			break;
 		}
 		default: {
