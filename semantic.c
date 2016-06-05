@@ -17,23 +17,32 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		}
 		case NOT_UNARY_EXPR:
 		{
-			type = checkPrimaryExpressionType(expr->primaryExpr, method); 
-			
+			printf("Semantic error. Not operation not supported\n"); 
+			type->typeName = UNKNOWN_TYPE; 
+			break; 
+			/*
+			type = checkPrimaryExpressionType(expr->primaryExpr, method);
+
 			if (type->typeName != BOOL_TYPE_NAME)
 			{
 				printf("Semantic error. Operand must be bool type \n");
 				type->typeName = UNKNOWN_TYPE;
 			}
-			if(type->arrayType == ARRAY) {
+			if (type->arrayType == ARRAY) {
 				printf("Semantic error. Array use as operand of NOT operator\n");
-				type->typeName = UNKNOWN_TYPE; 
+				type->typeName = UNKNOWN_TYPE;
 			}
 			break;
+			*/
 		}
 		case PLUS_UNARY_EXPR:
 		case MINUS_UNARY_EXPR:
 		{
-			type = checkPrimaryExpressionType(expr->primaryExpr, method); 
+			printf("Semantic error. ++/-- operation not supported\n");
+			type->typeName = UNKNOWN_TYPE;
+			break;
+
+			/*type = checkPrimaryExpressionType(expr->primaryExpr, method); 
 			if(type->typeName != FLOAT32_TYPE_NAME && type->typeName != INT_TYPE_NAME){
 				printf("Semantic error. Type of plus/minus unary expression should be int or float \n");
 				type->typeName = UNKNOWN_TYPE;
@@ -42,22 +51,26 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 				printf("Semantic error. Array use as operand of PLUS/MINUS operator\n");
 				type->typeName = UNKNOWN_TYPE;
 			}
-			break;
+			break;*/
 		}
 		case AND_EXPRESSION:
 		case OR_EXPRESSION:
 		{
-			struct SemanticType* leftType = checkExpressionType(expr->leftExpr, method); 
-			struct SemanticType* rightType = checkExpressionType(expr->rightExpr, method); 
-			
-			if (leftType->typeName == BOOL_TYPE_NAME &&
-				rightType->typeName == BOOL_TYPE_NAME) {
-				type->typeName = BOOL_TYPE_NAME;
-			}else {
-				printf("Semantic error. Left and right operands of logical operator should be bool type \n");
-				type->typeName = UNKNOWN_TYPE;
-			}
+			printf("Semantic error. AND/OR operation not supported\n");
+			type->typeName = UNKNOWN_TYPE;
 			break;
+
+			//struct SemanticType* leftType = checkExpressionType(expr->leftExpr, method); 
+			//struct SemanticType* rightType = checkExpressionType(expr->rightExpr, method); 
+			//
+			//if (leftType->typeName == BOOL_TYPE_NAME &&
+			//	rightType->typeName == BOOL_TYPE_NAME) {
+			//	type->typeName = BOOL_TYPE_NAME;
+			//}else {
+			//	printf("Semantic error. Left and right operands of logical operator should be bool type \n");
+			//	type->typeName = UNKNOWN_TYPE;
+			//}
+			//break;
 		}
 		case EQU_EXPRESSION:
 		case NE_EXPRESSION:
@@ -150,13 +163,16 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 						}
 					}
 					else if (expr->exprType == MOD_EXPRESSION) {
+						printf("Semantic error. MOD operation not supported\n");
+						type->typeName = UNKNOWN_TYPE;						
+						/*
 						if (leftType->typeName != INT_TYPE_NAME || rightType->typeName != INT_TYPE_NAME) {
 							printf("Semantic error. Incompatible types of modulo operation\n");
 						}
 						else {
 							type->typeName = INT_TYPE_NAME;
 							type->arrayType = NONE_ARRAY; 
-						}
+						}*/
 					}
 				}
 				else {
@@ -696,6 +712,8 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 		case MINUS_ASSIGN_STMT:
 		case MUL_ASSIGN_STMT:
 		case DIV_ASSIGN_STMT: {
+			printf("Semantic error. Operation assignment with arithmetic not supported\n");
+			return false; 
 			if (exprListSize(simpleStmt->exprListLeft) == 1 && exprListSize(simpleStmt->exprListRight) == 1)
 			{
 				return checkSemanticAssignStmt(simpleStmt->exprListLeft->firstExpression, simpleStmt->exprListRight->firstExpression, method);
