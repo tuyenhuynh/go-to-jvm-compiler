@@ -348,10 +348,23 @@ char* generateCodeForMethod(struct Method* method, struct StatementList* stmtLis
 }
 
 void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code){
-	
+	bool isOk = true;
+	//one line declaration
+	if (varDecl->varSpec != NULL) {
+		generateCodeForVarSpec(method, varDecl->varSpec, code);
+	}
+	else {
+		//multiline declaration ( in parenthesises)
+		struct VarSpec * varSpec = varDecl->varSpecList->firstVarSpec;
+		while (varSpec != NULL) {
+			generateCodeForVarSpec(method, varSpec, code);
+			varSpec = varSpec->nextVarSpec;
+		}
+	}
 }
 
 void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code){
+	
 }
 void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code){
 }
@@ -359,38 +372,35 @@ void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec
 }
 void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, char* code){
 }
-void generateCodeForStatement(struct Method* method, struct Statement* stmt, char* code){
+void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* code){
+	
 }
 void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code){
-}
-
-void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code) {
 	
 }
 
-void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt){
+void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code){
 
 	if (ifStmt->ifStmtExpr->simpleStmt != NULL)
 	{
-		generateCodeForSimpleStmt(method, ifStmt->ifStmtExpr->simpleStmt);
+		generateCodeForSimpleStmt(method, ifStmt->ifStmtExpr->simpleStmt, code);
 		
 	}
 	else if(ifStmt->ifStmtExpr->expr != NULL)
 	{
-		generateCodeForExpression(method, ifStmt->ifStmtExpr->expr);
+		generateCodeForExpression(method, ifStmt->ifStmtExpr->expr, code);
 	}
 	
-	generateCodeForBlock(method, ifStmt->block);
+	generateCodeForStmtList(method, ifStmt->block->stmtList, code);
 
 	if (ifStmt->elseBlock != NULL)
 	{
 		if (ifStmt->elseBlock->ifStmt != NULL)
 		{
-			generateCodeForIfStmt(method, ifStmt->elseBlock->ifStmt);
+			generateCodeForIfStmt(method, ifStmt->elseBlock->ifStmt, code);
 		}
-		generateCodeForBlock(ifStmt->elseBlock->block);
+		generateCodeForStmtList(method, ifStmt->elseBlock->block->stmtList, code);
 	}
-
 }
 
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code){

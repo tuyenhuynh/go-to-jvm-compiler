@@ -37,6 +37,7 @@ void writeU4();
 void writeS2(); 
 void writeS4(); 
 void writeSf4(); 
+void writeString(char* str);
 void writeConstantsTable(); 
 void writeClassMetadata(); 
 void writeFieldsTable(); 

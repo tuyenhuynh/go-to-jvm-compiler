@@ -1075,10 +1075,13 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 	if (method != NULL) {
 		functionName = method->constMethodref->const2->const1->utf8;
 	}
-	//check for match of number of variables and number of values 
-	if (varSpec->idListType != 0) {
+	//Need not to check semantic for var declaration without assignment. 
+	//Repeating declaration of variable(var decl with the same name in a scope ) will be detected
+	//when add variable to local var table
+	if (varSpec->idListType != 0) { 
+		//declaration without assigment
 		struct Type* type = varSpec->idListType->type; 
-		if (type->expr != NULL) {
+		if (type->expr != NULL) {//check semantic of array declaration
 			//check size of array
 			if (type->expr->exprType != PRIMARY || type->expr->primaryExpr->exprType != DECIMAL_EXPR) {
 				printf("Semantic error. Array's size should be an integer value\n"); 
@@ -1089,7 +1092,7 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 				addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 				struct Type* type = varSpec->idListType->type;
 				if (varSpec->idListType->identifierList->size != 1) {
-					printf("Semantic error. Array initialization should contain 1 array\n");
+					printf("Semantic error. Array initialization should contain only 1 array variable\n");
 					isOk = false;
 				}
 				else {
