@@ -694,8 +694,8 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 		{
 			if (simpleStmt->expr->exprType == PRIMARY) {
 				struct SemanticType * semanticType = checkExpressionType(simpleStmt->expr, method);
-				if (semanticType->typeName != FLOAT32_TYPE_NAME && semanticType->typeName != INT_TYPE_NAME) {
-					printf("Semantic error. Increase or decrease statement can only perform in numeric variable\n"); 
+				if (semanticType->typeName != INT_TYPE_NAME) {
+					printf("Semantic error. Increase or decrease statement can only perform in INT-TYPE variable\n"); 
 					return false; 
 				}
 			}
