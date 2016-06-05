@@ -1,5 +1,7 @@
 #include "code_generation.h"
-struct Program* program; 
+
+// ===== JVM OPCODES
+
 unsigned short
 ICONST_M1 = 0x2, // REMOVE THIS (SIGNED) 
 ICONST_0 = 0x3,
@@ -21,16 +23,25 @@ POP = 0x57,
 DUP = 0x58,
 DUP2 = 0x5C,
 IADD = 0x60,
+FADD = 0x62,
 IMUL = 0x64,
+FMUL = 0x6A,
 ISUB = 0x68,
+FSUB = 0x66,
 IDIV = 0x6C,
+FDIV = 0x6e,
 IINC = 0x84,
+FNEG = 0x76,
+INEG = 0x74,
+IREM = 0x70,
 IF_ICMPEQ = 0x9F,
 IF_ICMPNE = 0xA0,
 IF_ICMPLT = 0xA1,
 IF_ICMPLE = 0xA4,
 IF_ICMPGT = 0xA3,
 IF_ICMPGE = 0xA2,
+FCMPG = 0x96,
+FCMPL = 0x95,
 IFEQ = 0x99,
 IFNE = 0x9A,
 IFLT = 0x55,
@@ -69,12 +80,9 @@ INVOKESTATIC = 0xB8,
 IRETURN = 0xAC,
 ARETURN = 0xB0,
 RETURN = 0xB1
-; 
+;
 
 
-
-
-; 
 void generateCode(struct Program* root){
 	// 0200 user can only write file
 	if ((fh = open(classFileName, O_BINARY | O_WRONLY | O_TRUNC | O_CREAT, 0200)) == -1) {
@@ -547,51 +555,162 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break; 
 		}
 		case PLUS_UNARY_EXPR: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->primaryExpr->expr, code); // for right expression or for left or for primary expression?
 			break; 
 		}
 		case MINUS_UNARY_EXPR : {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->primaryExpr->expr, code); // for right expression or for left or for primary expression?
+			if (expr->rightExpr->primaryExpr->expr->exprType == FLOAT_EXPR)
+			{
+				u1 = FNEG;
+			}
+			else if (expr->rightExpr->primaryExpr->expr->exprType == DECIMAL_EXPR)
+			{
+				u1 = INEG;
+			}
+			writeU1();
 			break; 
 		}
 		case EQU_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code); 
+			generateCodeForExpression(method, expr->rightExpr, code);
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO Need to store byte offset to jump on if condition is true or false
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPEQ;
+			}
+			writeU1();
 			break;
 		}
 		case NE_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+			// TODO
+
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPNE;
+			}
+			writeU1();
 			break;
 		}
 		case GT_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPGT;
+			}
+			writeU1();
 			break; 
 		}
 		case GTE_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPGE;
+			}
+			writeU1();
 			break;
 		}
 		case LT_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPLT;
+			}
+			writeU1();
 			break;
 		}
 		case LTE_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPLE;
+			}
+			writeU1();
 			break;
 		}
 		case PLUS_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code); // load left expr to stack
+			generateCodeForExpression(method, expr->rightExpr, code); // load right expr to stack
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR) // perform operations
+			{
+				u1 = FADD;
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IADD;
+			}
+			else if (expr->leftExpr->exprType == STRING_EXPR && expr->rightExpr->exprType == STRING_EXPR)
+			{
+				// TODO
+			}
+			writeU1();
 			break;
 		}
 		case MINUS_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code);
+			generateCodeForExpression(method, expr->rightExpr, code);
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				u1 = FSUB;
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = ISUB;
+			}
+			writeU1();
 			break;
 		}
 		case MUL_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code);
+			generateCodeForExpression(method, expr->rightExpr, code);
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				u1 = FMUL;
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IMUL;
+			}
+			writeU1();
 			break;
 		}
 		case DIV_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code);
+			generateCodeForExpression(method, expr->rightExpr, code);
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				u1 = FDIV;
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IDIV;
+			}
+			writeU1();
+			break;
+		}
+		case MOD_EXPRESSION: {
+			generateCodeForExpression(method, expr->leftExpr, code);
+			generateCodeForExpression(method, expr->rightExpr, code);
+			u1 = IREM;
+			writeU1();
 			break;
 		}
 		default: {

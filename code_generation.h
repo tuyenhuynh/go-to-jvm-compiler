@@ -10,14 +10,13 @@
 
 static char* classFileName = "Go.class"; 
 
-static int objectClass = 0; 
+struct Program* program;
 
 static unsigned short
 ACC_SUPER = 0x02,
 ACC_PUBLIC = 0x01;
 
-
-
+static int objectClass = 0; 
 
 int fd;
 unsigned char u1;

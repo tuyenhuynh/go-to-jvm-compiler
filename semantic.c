@@ -165,14 +165,14 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 					else if (expr->exprType == MOD_EXPRESSION) {
 						printf("Semantic error. MOD operation not supported\n");
 						type->typeName = UNKNOWN_TYPE;						
-						/*
+						
 						if (leftType->typeName != INT_TYPE_NAME || rightType->typeName != INT_TYPE_NAME) {
 							printf("Semantic error. Incompatible types of modulo operation\n");
 						}
 						else {
 							type->typeName = INT_TYPE_NAME;
 							type->arrayType = NONE_ARRAY; 
-						}*/
+						}
 					}
 				}
 				else {
