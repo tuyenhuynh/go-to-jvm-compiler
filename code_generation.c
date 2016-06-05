@@ -396,11 +396,21 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 		}
 	}
 }
+	
 void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code){
+	
 }
+
 void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec, char* code){
+	
 }
+
 void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, char* code){
+	struct Statement* stmt = stmtList->firstStmt; 
+	while (stmt != NULL) {
+		generateCodeForStmt(method, stmt, code); 
+		stmt = stmt->nextStatement; 
+	}
 }
 void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* code){
 	switch (stmt->stmtType) {
@@ -542,9 +552,10 @@ void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char
 
 }
 void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, char* code){
+
 }
 void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code){
-	
+		
 }
 
 //totally 13 types of expression supported 
