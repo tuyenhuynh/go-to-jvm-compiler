@@ -30,12 +30,17 @@ FSUB = 0x66,
 IDIV = 0x6C,
 FDIV = 0x6e,
 IINC = 0x84,
+FNEG = 0x76,
+INEG = 0x74,
+IREM = 0x70,
 IF_ICMPEQ = 0x9F,
 IF_ICMPNE = 0xA0,
 IF_ICMPLT = 0xA1,
 IF_ICMPLE = 0xA4,
 IF_ICMPGT = 0xA3,
 IF_ICMPGE = 0xA2,
+FCMPG = 0x96,
+FCMPL = 0x95,
 IFEQ = 0x99,
 IFNE = 0x9A,
 IFLT = 0x55,
@@ -547,35 +552,95 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break; 
 		}
 		case PLUS_UNARY_EXPR: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->primaryExpr->expr, code); // for right expression or for left or for primary expression?
 			break; 
 		}
 		case MINUS_UNARY_EXPR : {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->primaryExpr->expr, code); // for right expression or for left or for primary expression?
+			if (expr->rightExpr->primaryExpr->expr->exprType == FLOAT_EXPR)
+			{
+				u1 = FNEG;
+			}
+			else if (expr->rightExpr->primaryExpr->expr->exprType == DECIMAL_EXPR)
+			{
+				u1 = INEG;
+			}
+			writeU1();
 			break; 
 		}
 		case EQU_EXPRESSION: {
-			//TODO: implement this
+			generateCodeForExpression(method, expr->leftExpr, code); 
+			generateCodeForExpression(method, expr->rightExpr, code);
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO Need to store byte offset to jump on if condition is true or false
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPEQ;
+			}
+			writeU1();
 			break;
 		}
 		case NE_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+			// TODO
+
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPNE;
+			}
+			writeU1();
 			break;
 		}
 		case GT_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPGT;
+			}
+			writeU1();
 			break; 
 		}
 		case GTE_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPGE;
+			}
+			writeU1();
 			break;
 		}
 		case LT_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPLT;
+			}
+			writeU1();
 			break;
 		}
 		case LTE_EXPRESSION: {
-			//TODO: implement this
+			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			{
+				// TODO
+			}
+			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			{
+				u1 = IF_ICMPLE;
+			}
+			writeU1();
 			break;
 		}
 		case PLUS_EXPRESSION: {
@@ -588,6 +653,10 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
 			{
 				u1 = IADD;
+			}
+			else if (expr->leftExpr->exprType == STRING_EXPR && expr->rightExpr->exprType == STRING_EXPR)
+			{
+				// TODO
 			}
 			writeU1();
 			break;
@@ -634,6 +703,13 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			writeU1();
 			break;
 		}
+		case MOD_EXPRESSION: {
+			generateCodeForExpression(method, expr->leftExpr, code);
+			generateCodeForExpression(method, expr->rightExpr, code);
+			u1 = IREM;
+			writeU1();
+			break;
+		}
 		default: {
 			//some expressions are currently unsupported
 		}
@@ -670,7 +746,7 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 		}
 		case EXPRESSION: {
 			//nested expression (by parenthesies)
-			//TODO: implement this
+			generateCodeForExpression(method, primaryExpr->expr, code);
 			break;
 		}
 		default: {
