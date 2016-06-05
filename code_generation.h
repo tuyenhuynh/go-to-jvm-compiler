@@ -45,6 +45,7 @@ void writeMethod(struct Method* method);
 void generateCode(struct Program* root); 
 void writeConstant(struct Constant* constant); 
 void writeField(struct Field* field); 
+
 char* generateCodeForMethod(struct Method* method, struct StatementList* stmtList);  
 void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code);  
 void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code);  
@@ -60,7 +61,6 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt
 void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code);  
 void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code);  
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code);  
-
 
 
 #endif //_CODE_GENERATION_H_

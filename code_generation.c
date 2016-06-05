@@ -1,9 +1,80 @@
 #include "code_generation.h"
 struct Program* program; 
+unsigned short
+ICONST_M1 = 0x2, // REMOVE THIS (SIGNED) 
+ICONST_0 = 0x3,
+ICONST_1 = 0x4,
+ICONST_2 = 0x5,
+ICONST_3 = 0x6,
+ICONST_4 = 0x7,
+ICONST_5 = 0x8,
+BIPUSH = 0x10,
+SIPUSH = 0x11,
+LDC = 0x12,
+LDC_W = 0x13,
+ILOAD = 0x15,
+ALOAD = 0x19,
+ISTORE = 0x36,
+ASTORE = 0x3A,
+POP = 0x57,
+DUP = 0x58,
+DUP2 = 0x5C,
+IADD = 0x60,
+IMUL = 0x64,
+ISUB = 0x68,
+IDIV = 0x6C,
+IINC = 0x84,
+IF_ICMPEQ = 0x9F,
+IF_ICMPNE = 0xA0,
+IF_ICMPLT = 0xA1,
+IF_ICMPLE = 0xA4,
+IF_ICMPGT = 0xA3,
+IF_ICMPGE = 0xA2,
+IFEQ = 0x99,
+IFNE = 0x9A,
+IFLT = 0x55,
+IFLE = 0x9E,
+IFGT = 0x9D,
+IFGE = 0x9C,
+IF_ACMPEQ = 0xA5,
+IF_ACMPNE = 0xA6,
+GOTO = 0xA7,
+TABLESWITCH = 0xAA,
+LOOKUPSWITCH = 0xAB,
+NEWARRAY = 0xBC,
+T_BOOLEAN = 4,
+T_CHAR = 5,
+T_FLOAT = 6,
+T_DOUBLE = 7,
+T_BYTE = 8,
+T_SHORT = 9,
+T_INT = 10,
+T_LONG = 11,
+ANEWARRAY = 0xBD,
+ARRAY_LENGTH = 0xBE,
+IALOAD = 0x2E,
+AALOAD = 0x32,
+IASTORE = 0x4F,
+AASTORE = 0x53,
+NEW = 0xBB, // create new object 
+GETFIELD = 0xB4,
+PUTFIELD = 0xB5,
+INSTANCE = 0xC1,
+INVOKEVIRTUAL = 0xB6,
+INVOKESPECIAL = 0xB7,
+INVOKESTATIC = 0xB8,
+IRETURN = 0xAC,
+ARETURN = 0xB0,
+RETURN = 0xB1
+; 
 
+
+
+
+; 
 void generateCode(struct Program* root){
-	fh = open(classFileName, O_BINARY | O_WRONLY | O_TRUNC | O_CREAT); 
-	if (fh < 0) {
+	// 0200 user can only write file
+	if ((fh = open(classFileName, O_BINARY | O_WRONLY | O_TRUNC | O_CREAT, 0200)) == -1) {
 		freopen("CON", "w", stdout); 
 		printf("Failed to open class file\n"); 
 		return; 
@@ -25,9 +96,9 @@ void generateCode(struct Program* root){
 
 		writeClassMetadata(); 
 		
-		writeFieldsTable(); 
+		//writeFieldsTable(); TODO
 
-		writeMethodsTable(); 
+		//writeMethodsTable(); TODO
 
 		//write number of class's attributes(usally 0)
 		u2 = 0; 
@@ -36,6 +107,7 @@ void generateCode(struct Program* root){
 		
 	}
 	program = root; 
+	close(fh);
 }
 
 void writeConstantsTable() {
@@ -134,18 +206,6 @@ void writeMethodsTable() {
 		struct Method* method = (struct Method*) e; 
 		writeMethod(method);
 	}
-
-	/*
-	struct DeclarationList* declList = root->declList;
-	struct Declaration* decl = declList->firstDecl;
-	while (decl != NULL) {
-		if (decl->declType == FUNC_DECL) {
-			struct Method* method = getMethod(decl->funcDecl->identifier);
-			generateCodeForMethod(method, decl->funcDecl->block->stmtList);
-		}
-		decl = decl->nextDecl;
-	}*/
-
 }
 
 void writeMethod(struct Method* method) {
@@ -286,8 +346,11 @@ char* generateCodeForMethod(struct Method* method, struct StatementList* stmtLis
 	}
 	return code; 
 }
+
 void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code){
+	
 }
+
 void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code){
 }
 void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code){
@@ -300,18 +363,50 @@ void generateCodeForStatement(struct Method* method, struct Statement* stmt, cha
 }
 void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code){
 }
-void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code){
+
+void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code) {
+	
 }
+
+void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt){
+
+	if (ifStmt->ifStmtExpr->simpleStmt != NULL)
+	{
+		generateCodeForSimpleStmt(method, ifStmt->ifStmtExpr->simpleStmt);
+		
+	}
+	else if(ifStmt->ifStmtExpr->expr != NULL)
+	{
+		generateCodeForExpression(method, ifStmt->ifStmtExpr->expr);
+	}
+	
+	generateCodeForBlock(method, ifStmt->block);
+
+	if (ifStmt->elseBlock != NULL)
+	{
+		if (ifStmt->elseBlock->ifStmt != NULL)
+		{
+			generateCodeForIfStmt(method, ifStmt->elseBlock->ifStmt);
+		}
+		generateCodeForBlock(ifStmt->elseBlock->block);
+	}
+
+}
+
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code){
+		
 }
 void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code){
+
 }
 void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, char* code){
 }
 void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code){
 }
 void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code){
+	
 }
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code){
+
 }
 

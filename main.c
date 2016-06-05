@@ -2,13 +2,14 @@
 #include "scanner.h"
 #include "parser.h"
 #include "print_tree.h"
-#include <semantic.h>
+#include "code_generation.h"
+#include "semantic.h"
 
 int main(int argc, char *argv[])
 {
 	if (argc != 3)
 	{
-		printf("Program should take 3 arguments (path to source code file)\n");
+		printf("Program should take 2 arguments: path to source code file, path to dot file for AST\n");
 		return 1;
 	}
 
@@ -25,6 +26,7 @@ int main(int argc, char *argv[])
 				printf("Semantic checking successful\n");
 				printProgram(argv[2]);
 				printConstantsTable(); 
+				generateCode(root);
 			}
 			else {
 				printf("Semantic checking failed\n");
