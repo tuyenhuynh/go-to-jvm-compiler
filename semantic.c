@@ -201,19 +201,22 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		case DECIMAL_EXPR: {
 			type->typeName = INT_TYPE_NAME;
 			type->arrayType = NONE_ARRAY; 
-			addIntegerToConstantsTable(primaryExpr->decNumber);
+			struct Constant* constant = addIntegerToConstantsTable(primaryExpr->decNumber);
+			type->constantExpressionNum = constant->id; 
 			break;
 		}
 		case FLOAT_EXPR: {
 			type->typeName = FLOAT32_TYPE_NAME;
 			type->arrayType = NONE_ARRAY; 
-			addFloatToConstantsTable(primaryExpr->floatNumber);
+			struct Constant* constant = addFloatToConstantsTable(primaryExpr->floatNumber);
+			type->constantExpressionNum = constant->id; 
 			break;
 		}
 		case STRING_EXPR: {
 			type->typeName = STRING_TYPE_NAME;
 			type->arrayType = NONE_ARRAY; 
-			addStringToConstantsTable(primaryExpr->stringLiteral); 
+			struct Constant* constant = addStringToConstantsTable(primaryExpr->stringLiteral); 
+			type->constantExpressionNum = constant->id; 
 			break;
 		}
 		case ID_EXPRESSION: {

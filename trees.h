@@ -167,6 +167,7 @@ struct SemanticType {
 	int idNum; 
 	enum ArrayType arrayType;
 	int arraySize; 
+	int constantExpressionNum; //index of constant types integer, float, string in constants table
 };
 
 struct PrimaryExpression
