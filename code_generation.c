@@ -380,6 +380,7 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 			while (id != NULL) {
 				
 				id = id->nextId; 
+				expr = expr->nextExpr; 
 			}
 		}
 	}
@@ -394,11 +395,38 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* co
 	
 }
 void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code){
-	
+	switch (simpleStmt->stmtType) {
+		case EXPR_SIMPLE_STMT: {
+			generateCodeForExpression(method, simpleStmt->expr, code); 
+			break; 
+		}
+		case INC_SIMPLE_STMT: {
+			//TODO: implement this
+			break; 
+		}
+		case DEC_SIMPLE_STMT: {
+			//TODO: implement this
+			break; 
+		}
+		case ASSIGN_STMT: {
+			
+			struct Expression* leftExpr = simpleStmt->exprListLeft->firstExpression; 
+			struct Expression* rightExpr = simpleStmt->exprListRight->firstExpression; 
+			while (leftExpr != NULL) {
+				generateCodeForSingleAssignment(method, leftExpr->primaryExpr->identifier, rightExpr, code);
+				leftExpr = leftExpr->nextExpr; 
+				rightExpr = rightExpr->nextExpr; 
+			} 
+			break; 
+		}
+		default: {
+			// other type of assignment statements currently not supported
+		}
+	}
 }
 
 
-void generateCodeForAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code) {
+void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code) {
 	//generate code for right expression
 	//INCLUDE LOADING value to stack ???
 	generateCodeForExpression(method, expr, code); 
