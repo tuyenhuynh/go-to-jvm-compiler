@@ -38,11 +38,11 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		case PLUS_UNARY_EXPR:
 		case MINUS_UNARY_EXPR:
 		{
-			printf("Semantic error. ++/-- operation not supported\n");
+			/*printf("Semantic error. ++/-- operation not supported\n");
 			type->typeName = UNKNOWN_TYPE;
 			break;
-
-			/*type = checkPrimaryExpressionType(expr->primaryExpr, method); 
+*/
+			type = checkPrimaryExpressionType(expr->primaryExpr, method); 
 			if(type->typeName != FLOAT32_TYPE_NAME && type->typeName != INT_TYPE_NAME){
 				printf("Semantic error. Type of plus/minus unary expression should be int or float \n");
 				type->typeName = UNKNOWN_TYPE;
@@ -51,7 +51,7 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 				printf("Semantic error. Array use as operand of PLUS/MINUS operator\n");
 				type->typeName = UNKNOWN_TYPE;
 			}
-			break;*/
+			break;
 		}
 		case AND_EXPRESSION:
 		case OR_EXPRESSION:

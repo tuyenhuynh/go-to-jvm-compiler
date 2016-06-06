@@ -256,13 +256,15 @@ void writeMethod(struct Method* method) {
 	writeU2(); 
 	
 	//generate and write method's bytecode 
-	//struct FunctionDecl* functionDecl = findFuncionDeclByName(program, method->constMethodref->const2->const1->utf8); 
-	char* code = generateCodeForMethod(method); 
-	//define method's bytecode size
-	int length = strlen(code); 
-	u4 = htons(strlen(code));
+	int codeLength; 
+	char* code = generateCodeForMethod(method, &codeLength); 
+	//write method's bytecode size
+	u4 = htons(codeLength);
 	writeU4();
 	//write bytecode of method
+	for (int i = 0; i < codeLength; ++i) {
+		
+	}
 	writeString(code); 
 
 	//write number of exception
@@ -304,12 +306,12 @@ void writeSf4() {
 	Write((void*)&sf4, 4);
 }
 
-void writeU1ToArray(int* code, int* offset) { 
+void writeU1ToArray(char* code, int* offset) { 
 	code[*offset] = u1;
 	*offset += 1; 
 }
 
-void writeU2ToArray(int* code, int* offset) {
+void writeU2ToArray(char* code, int* offset) {
 	unsigned char bytes[2];	
 	bytes[0] = (u2 >> 8) & 0xFF;
 	bytes[1] = u2 & 0xFF;
@@ -318,7 +320,7 @@ void writeU2ToArray(int* code, int* offset) {
 	*offset += 2; 
 }
 
-void writeU4ToArray(int* code, int* offset) {
+void writeU4ToArray(char* code, int* offset) {
 	unsigned char bytes[4];
 	bytes[0] = (u4 >> 24) & 0xFF;
 	bytes[1] = (u4 >> 16) & 0xFF;
@@ -331,7 +333,7 @@ void writeU4ToArray(int* code, int* offset) {
 	*offset += 4; 
 }
 
-void writeS2ToArray(int* code, int* offset) {
+void writeS2ToArray(char* code, int* offset) {
 	char bytes[2];
 	bytes[0] = (u2 >> 8) & 0xFF;
 	bytes[1] = u2 & 0xFF;
@@ -340,7 +342,7 @@ void writeS2ToArray(int* code, int* offset) {
 	*offset += 2; 
 }
 
-void writeS4ToArray(int* code, int* offset) {
+void writeS4ToArray(char* code, int* offset) {
 	char bytes[4];
 	bytes[0] = (u4 >> 24) & 0xFF;
 	bytes[1] = (u4 >> 16) & 0xFF;
@@ -352,7 +354,7 @@ void writeS4ToArray(int* code, int* offset) {
 	code[*offset + 3] = bytes[3];
 	*offset += 4; 
 }
-void writeSf4ToArray(int* code, int* offset) {
+void writeSf4ToArray(char* code, int* offset) {
 	writeS4ToArray(code, offset); 
 }
 
@@ -403,18 +405,19 @@ void Write(void* data, int count) {
 }
 
 
-int* generateCodeForMethod(struct Method* method){
-	int* code = (int*)malloc(2000 * sizeof(int)); 
+char* generateCodeForMethod(struct Method* method,int* codeLength){
+	char* code = (char*)malloc(2000 * sizeof(char)); 
 	int* offset = (int*)malloc(sizeof(int)); 
 	struct Statement* stmt = method->functionDecl->block->stmtList->firstStmt; 
 	while (stmt != NULL) {
 		generateCodeForStmt(method, stmt, code, offset); 
 		stmt = stmt->nextStatement; 
 	}
+	*codeLength = *offset; 
 	return code; 
 }
 
-void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, int* code, int* offset){
+void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code, int* offset){
 	bool isOk = true;
 	//one line declaration
 	if (varDecl->varSpec != NULL) {
@@ -430,7 +433,7 @@ void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, int*
 	}
 }
 
-void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, int* code, int* offset){
+void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code, int* offset){
 	//array declaration
 	if (varSpec->idListType->type->expr != NULL) {
 		struct SemanticType* semanticType = varSpec->idListType->type->expr->semanticType; 
@@ -453,15 +456,15 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, int*
 	}
 }
 	
-void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, int* code, int* offset){
+void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code, int* offset){
 	
 }
 
-void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec, int* code, int* offset){
+void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec, char* code, int* offset){
 	
 }
 
-void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, int* code, int* offset){
+void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, char* code, int* offset){
 	struct Statement* stmt = stmtList->firstStmt; 
 	while (stmt != NULL) {
 		generateCodeForStmt(method, stmt, code, offset); 
@@ -469,7 +472,7 @@ void generateCodeForStmtList(struct Method* method, struct StatementList* stmtLi
 	}
 }
 
-void generateCodeForStmt(struct Method* method, struct Statement* stmt, int* code, int* offset){
+void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* code, int* offset){
 	switch (stmt->stmtType) {
 		case SIMPLE_STMT: {
 			generateCodeForSimpleStmt(method, stmt->simpleStmt, code, offset); 
@@ -523,7 +526,7 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, int* cod
 		}			  
 	}
 }
-void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, int* code, int* offset){
+void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code, int* offset){
 	switch (simpleStmt->stmtType) {
 		case EXPR_SIMPLE_STMT: {
 			generateCodeForExpression(method, simpleStmt->expr, code, offset); 
@@ -570,7 +573,7 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 }
 
 
-void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, int* code, int* offset) {
+void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code, int* offset) {
 	//generate code for right expression
 	//INCLUDE LOADING value to stack ???
 	generateCodeForExpression(method, expr, code, offset); 
@@ -593,7 +596,7 @@ void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* 
 	}
 }
 
-void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, int* code, int* offset){
+void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code, int* offset){
 
 	//generate code for condition-expression of if stmt
 	//if type if statement; expression is eliminated in semantic checking
@@ -634,21 +637,21 @@ void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, int* co
 	}
 }
 
-void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, int* code, int* offset){
+void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset){
 		
 }
-void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, int* code, int* offset){
+void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset){
 
 }
-void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, int* code, int* offset){
+void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, char* code, int* offset){
 
 }
-void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, int* code, int* offset){
+void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code, int* offset){
 		
 }
 
 //totally 13 types of expression supported 
-void generateCodeForExpression(struct Method* method, struct Expression* expr, int* code, int* offset){
+void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code, int* offset){
 	switch (expr->exprType) {
 		case PRIMARY: {
 			generateCodeForPrimaryExpression(method, expr->primaryExpr, code, offset);
@@ -820,7 +823,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 	
 }
 
-void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, int* code, int* offset){
+void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code, int* offset){
 	switch (primaryExpr->exprType) {
 		case DECIMAL_EXPR:
 		case FLOAT_EXPR: {
