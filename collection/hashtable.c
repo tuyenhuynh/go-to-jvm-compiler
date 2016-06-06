@@ -817,6 +817,9 @@ void hashtable_iter_init(HashTableIter *iter, HashTable *table)
  */
 bool hashtable_iter_has_next(HashTableIter *iter)
 {
+	if (iter->next_entry == 0xcccccccc) {
+		return false; 
+	}
     return iter->next_entry != NULL ? true : false;
 }
 
