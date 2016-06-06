@@ -649,6 +649,10 @@ struct ElseBlock *CreateElseBlockFromBlock(struct Block *_block) {
 struct Block *CreateBlock( struct StatementList *_stmtList) {
 	struct Block *Result = (struct Block *)malloc(sizeof(struct Block));
 
+	if (_stmtList == NULL) {
+		_stmtList = CreateStmtList(NULL);
+	}
+
 	Result->stmtList = _stmtList;
 
 	return Result;
