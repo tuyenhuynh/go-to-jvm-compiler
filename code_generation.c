@@ -659,16 +659,16 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break; 
 		}
 		case PLUS_UNARY_EXPR: {
-			generateCodeForExpression(method, expr->primaryExpr->expr, code, offset); // for right expression or for left or for primary expression?
+			generateCodeForPrimaryExpression(method, expr->primaryExpr, code, offset); // for right expression or for left or for primary expression?
 			break; 
 		}
 		case MINUS_UNARY_EXPR : {
-			generateCodeForExpression(method, expr->primaryExpr->expr, code, offset); // for right expression or for left or for primary expression?
-			if (expr->rightExpr->primaryExpr->expr->exprType == FLOAT_EXPR)
+			generateCodeForPrimaryExpression(method, expr->primaryExpr, code, offset); // for right expression or for left or for primary expression?
+			if (expr->primaryExpr->exprType == FLOAT_EXPR)
 			{
 				u1 = FNEG;
 			}
-			else if (expr->rightExpr->primaryExpr->expr->exprType == DECIMAL_EXPR)
+			else if (expr->primaryExpr->exprType == DECIMAL_EXPR)
 			{
 				u1 = INEG;
 			}
