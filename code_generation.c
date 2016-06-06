@@ -668,7 +668,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = INEG;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break; 
 		}
 		case EQU_EXPRESSION: {
@@ -682,7 +682,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = IF_ICMPEQ;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case NE_EXPRESSION: {
@@ -695,7 +695,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = IF_ICMPNE;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case GT_EXPRESSION: {
@@ -707,7 +707,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = IF_ICMPGT;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break; 
 		}
 		case GTE_EXPRESSION: {
@@ -719,7 +719,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = IF_ICMPGE;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case LT_EXPRESSION: {
@@ -731,7 +731,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = IF_ICMPLT;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case LTE_EXPRESSION: {
@@ -743,7 +743,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = IF_ICMPLE;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case PLUS_EXPRESSION: {
@@ -761,7 +761,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				// TODO
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case MINUS_EXPRESSION: {
@@ -775,7 +775,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = ISUB;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case MUL_EXPRESSION: {
@@ -789,7 +789,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = IMUL;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case DIV_EXPRESSION: {
@@ -803,14 +803,14 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, i
 			{
 				u1 = IDIV;
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case MOD_EXPRESSION: {
 			generateCodeForExpression(method, expr->leftExpr, code, offset);
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			u1 = IREM;
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		default: {
