@@ -1,5 +1,4 @@
 #include "code_generation.h"
-
 // ===== JVM OPCODES
 
 unsigned short
@@ -99,17 +98,17 @@ void generateCode(struct Program* root){
 		u2 = htons(0); 
 		writeU2();
 
-		//major version
-		u2 = htons(53);
+		//major version of jdk 5
+		u2 = htons(49);
 		writeU2();
 
 		writeConstantsTable(); 
 
 		writeClassMetadata(); 
 		
-		//writeFieldsTable(); TODO
+		writeFieldsTable(); //TODO
 
-		//writeMethodsTable(); TODO
+		writeMethodsTable(); //TODO
 
 		//write number of class's attributes(usally 0)
 		u2 = 0; 
@@ -211,10 +210,11 @@ void writeMethodsTable() {
 	//write methods
 	HashTableIter i;
 	hashtable_iter_init(&i, methodsTable);
+	int size = hashtable_size(methodsTable);
 	while (hashtable_iter_has_next(&i)) {
 		TableEntry *e;
 		hashtable_iter_next(&i, &e);
-		struct Method* method = (struct Method*) e; 
+		struct Method* method = (struct Method*) e->value; 
 		writeMethod(method);
 	}
 }
@@ -224,7 +224,9 @@ void writeMethod(struct Method* method) {
 	writeU2(); 
 
 	//write id of  constant utf8, which contains method's name
-	struct Constant* constant = getConstantUtf8(method->constMethodref->const2->const1->utf8); 
+	struct Constant* c = method->constMethodref->const2->const1; 
+	char*  methodName = c->utf8; 
+	struct Constant* constant = getConstantUtf8(methodName); 
 	u2 = htons(constant->id);
 	writeU2(); 
 
@@ -254,9 +256,10 @@ void writeMethod(struct Method* method) {
 	writeU2(); 
 	
 	//generate and write method's bytecode 
-	struct FunctionDecl* functionDecl = findFuncionDeclByName(program, method->constMethodref->const2->const1->utf8); 
-	char* code = generateCodeForMethod(method, functionDecl->block->stmtList); 
+	//struct FunctionDecl* functionDecl = findFuncionDeclByName(program, method->constMethodref->const2->const1->utf8); 
+	char* code = generateCodeForMethod(method); 
 	//define method's bytecode size
+	int length = strlen(code); 
 	u4 = htons(strlen(code));
 	writeU4();
 	//write bytecode of method
@@ -299,6 +302,58 @@ void writeS4() {
 
 void writeSf4() {
 	Write((void*)&sf4, 4);
+}
+
+void writeU1ToArray(int* code, int* offset) { 
+	code[*offset] = u1;
+	*offset += 1; 
+}
+
+void writeU2ToArray(int* code, int* offset) {
+	unsigned char bytes[2];	
+	bytes[0] = (u2 >> 8) & 0xFF;
+	bytes[1] = u2 & 0xFF;
+	code[*offset] = bytes[0];
+	code[*offset + 1] = bytes[1];
+	*offset += 2; 
+}
+
+void writeU4ToArray(int* code, int* offset) {
+	unsigned char bytes[4];
+	bytes[0] = (u4 >> 24) & 0xFF;
+	bytes[1] = (u4 >> 16) & 0xFF;
+	bytes[2] = (u4 >> 8) & 0xFF;
+	bytes[3] = u4 & 0xFF;
+	code[*offset] = bytes[0];
+	code[*offset + 1] = bytes[1];
+	code[*offset + 2] = bytes[2]; 
+	code[*offset + 3] = bytes[3]; 
+	*offset += 4; 
+}
+
+void writeS2ToArray(int* code, int* offset) {
+	char bytes[2];
+	bytes[0] = (u2 >> 8) & 0xFF;
+	bytes[1] = u2 & 0xFF;
+	code[*offset] = bytes[0];
+	code[*offset + 1] = bytes[1];
+	*offset += 2; 
+}
+
+void writeS4ToArray(int* code, int* offset) {
+	char bytes[4];
+	bytes[0] = (u4 >> 24) & 0xFF;
+	bytes[1] = (u4 >> 16) & 0xFF;
+	bytes[2] = (u4 >> 8) & 0xFF;
+	bytes[3] = u4 & 0xFF;
+	code[*offset] = bytes[0];
+	code[*offset + 1] = bytes[1];
+	code[*offset + 2] = bytes[2];
+	code[*offset + 3] = bytes[3];
+	*offset += 4; 
+}
+void writeSf4ToArray(int* code, int* offset) {
+	writeS4ToArray(code, offset); 
 }
 
 void writeConstant(struct Constant* constant) {
@@ -348,33 +403,34 @@ void Write(void* data, int count) {
 }
 
 
-char* generateCodeForMethod(struct Method* method, struct StatementList* stmtList){
-	char* code = (char*)malloc(1000 * sizeof(char)); 
-	struct Statement* stmt = stmtList->firstStmt; 
+char* generateCodeForMethod(struct Method* method){
+	int* code = (int*)malloc(2000 * sizeof(int)); 
+	int* offset = (int*)malloc(sizeof(int)); 
+	struct Statement* stmt = method->functionDecl->block->stmtList->firstStmt; 
 	while (stmt != NULL) {
-		generateCodeForStmt(method, stmt, code); 
+		generateCodeForStmt(method, stmt, code, offset); 
 		stmt = stmt->nextStatement; 
 	}
 	return code; 
 }
 
-void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code){
+void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, int* code, int* offset){
 	bool isOk = true;
 	//one line declaration
 	if (varDecl->varSpec != NULL) {
-		generateCodeForVarSpec(method, varDecl->varSpec, code);
+		generateCodeForVarSpec(method, varDecl->varSpec, code, offset);
 	}
 	else {
 		//multiline declaration ( in parenthesises)
 		struct VarSpec * varSpec = varDecl->varSpecList->firstVarSpec;
 		while (varSpec != NULL) {
-			generateCodeForVarSpec(method, varSpec, code);
+			generateCodeForVarSpec(method, varSpec, code, offset);
 			varSpec = varSpec->nextVarSpec;
 		}
 	}
 }
 
-void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code){
+void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, int* code, int* offset){
 	//array declaration
 	if (varSpec->idListType->type->expr != NULL) {
 		struct SemanticType* semanticType = varSpec->idListType->type->expr->semanticType; 
@@ -397,15 +453,15 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 	}
 }
 	
-void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code){
+void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, int* code, int* offset){
 	
 }
 
-void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec, char* code){
+void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec, int* code, int* offset){
 	
 }
 
-void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, char* code){
+void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, int* code, int* offset){
 	struct Statement* stmt = stmtList->firstStmt; 
 	while (stmt != NULL) {
 		generateCodeForStmt(method, stmt, code); 
@@ -413,18 +469,18 @@ void generateCodeForStmtList(struct Method* method, struct StatementList* stmtLi
 	}
 }
 
-void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* code){
+void generateCodeForStmt(struct Method* method, struct Statement* stmt, int* code, int* offset){
 	switch (stmt->stmtType) {
 		case SIMPLE_STMT: {
-			generateCodeForSimpleStmt(method, stmt->simpleStmt, code); 
+			generateCodeForSimpleStmt(method, stmt->simpleStmt, code, offset); 
 			break; 
 		}
 		case VAR_DECL_STMT: {
-			generateCodeForVarDecl(method, stmt->varDecl, code); 
+			generateCodeForVarDecl(method, stmt->varDecl, code, offset); 
 			break; 
 		}
 		case CONST_DECL_STMT: {
-			generateCodeForConstDecl(method, stmt->constDecl, code); 
+			generateCodeForConstDecl(method, stmt->constDecl, code, offset); 
 			break; 
 		}
 		case RETURN_STMT: {
@@ -442,35 +498,35 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* co
 		}
 		case BLOCK: {
 			//generate code for stmt list
-			generateCodeForStmtList(method, stmt->block->stmtList, code); 
+			generateCodeForStmtList(method, stmt->block->stmtList, code, offset); 
 			break; 
 		}
 		case IF_STMT: {
-			generateCodeForIfStmt(method, stmt->ifStmt, method); 
+			generateCodeForIfStmt(method, stmt->ifStmt, code, offset); 
 			break; 
 		}
 		case SWITCH_STMT: {
-			generateCodeForSwitchStmt(method, stmt->switchStmt, method); 
+			generateCodeForSwitchStmt(method, stmt->switchStmt, code, offset); 
 			break; 
 		}
 		case FOR_STMT: {
-			generateCodeForForStmt(method, stmt->forStmt, method); 
+			generateCodeForForStmt(method, stmt->forStmt, code, offset); 
 			break; 
 		}
 		case PRINT_STMT: {
-			generateCodeForPrintStmt(method, stmt->printStatement, method); 
+			generateCodeForPrintStmt(method, stmt->printStatement, code, offset); 
 			break; 
 		}
 		case SCAN_STMT: {
-			generateCodeForScanStmt(method, stmt->scanStatement, method); 
+			generateCodeForScanStmt(method, stmt->scanStatement, code, offset); 
 			break; 
 		}			  
 	}
 }
-void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code){
+void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, int* code, int* offset){
 	switch (simpleStmt->stmtType) {
 		case EXPR_SIMPLE_STMT: {
-			generateCodeForExpression(method, simpleStmt->expr, code); 
+			generateCodeForExpression(method, simpleStmt->expr, code, offset); 
 			break; 
 		}
 		case INC_SIMPLE_STMT: {
@@ -514,10 +570,10 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 }
 
 
-void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code) {
+void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, int* code, int* offset) {
 	//generate code for right expression
 	//INCLUDE LOADING value to stack ???
-	generateCodeForExpression(method, expr, code); 
+	generateCodeForExpression(method, expr, code, offset); 
 	
 	//load value on top of stack to local variable
 	//TODO: generate code id is field, not local variable
@@ -537,56 +593,73 @@ void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* 
 	}
 }
 
-void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code){
+void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, int* code, int* offset){
 
-	if (ifStmt->ifStmtExpr->simpleStmt != NULL)
-	{
-		generateCodeForSimpleStmt(method, ifStmt->ifStmtExpr->simpleStmt, code);
-		
-	}
-	else if(ifStmt->ifStmtExpr->expr != NULL)
-	{
-		generateCodeForExpression(method, ifStmt->ifStmtExpr->expr, code);
-	}
+	//generate code for condition-expression of if stmt
+	//if type if statement; expression is eliminated in semantic checking
+	generateCodeForExpression(method, ifStmt->ifStmtExpr->expr, code, offset); 
+	int ifeqPos = strlen(code); 
+	//write command ifeq
+	u1 = IFEQ; 
+	writeU1(); 
+	//define and value of displacement
+	/*
+	TODO: WHAT THE HELL TO DO WITH THIS ????
+	save address of command ifeq to specify length of jump operand later;*/
+
+	//generate code for block if condition is correct
+	generateCodeForStmtList(method, ifStmt->block->stmtList, code, offset);
 	
-	generateCodeForStmtList(method, ifStmt->block->stmtList, code);
+	if (ifStmt->elseBlock == NULL) {
+		//TODO:
+		//gen operator goto and save it address for future process
 
+	}
+	//TODO: implement else if
+	if (ifStmt->elseBlock != NULL) {
+		generateCodeForStmtList(method, ifStmt->elseBlock->block->stmtList, code, offset); 
+		//
+	}
+
+	//save address of command ALREADY DONE ???
+
+	
 	if (ifStmt->elseBlock != NULL)
 	{
 		if (ifStmt->elseBlock->ifStmt != NULL)
 		{
-			generateCodeForIfStmt(method, ifStmt->elseBlock->ifStmt, code);
+			generateCodeForIfStmt(method, ifStmt->elseBlock->ifStmt, code, offset);
 		}
-		generateCodeForStmtList(method, ifStmt->elseBlock->block->stmtList, code);
+		generateCodeForStmtList(method, ifStmt->elseBlock->block->stmtList, code, offset);
 	}
 }
 
-void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code){
+void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, int* code, int* offset){
 		
 }
-void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code){
+void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, int* code, int* offset){
 
 }
-void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, char* code){
+void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, int* code, int* offset){
 
 }
-void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code){
+void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, int* code, int* offset){
 		
 }
 
 //totally 13 types of expression supported 
-void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code){
+void generateCodeForExpression(struct Method* method, struct Expression* expr, int* code, int* offset){
 	switch (expr->exprType) {
 		case PRIMARY: {
-			generateCodeForPrimaryExpression(method, expr->primaryExpr, code);
+			generateCodeForPrimaryExpression(method, expr->primaryExpr, code, offset);
 			break; 
 		}
 		case PLUS_UNARY_EXPR: {
-			generateCodeForExpression(method, expr->primaryExpr->expr, code); // for right expression or for left or for primary expression?
+			generateCodeForExpression(method, expr->primaryExpr->expr, code, offset); // for right expression or for left or for primary expression?
 			break; 
 		}
 		case MINUS_UNARY_EXPR : {
-			generateCodeForExpression(method, expr->primaryExpr->expr, code); // for right expression or for left or for primary expression?
+			generateCodeForExpression(method, expr->primaryExpr->expr, code, offset); // for right expression or for left or for primary expression?
 			if (expr->rightExpr->primaryExpr->expr->exprType == FLOAT_EXPR)
 			{
 				u1 = FNEG;
@@ -599,8 +672,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break; 
 		}
 		case EQU_EXPRESSION: {
-			generateCodeForExpression(method, expr->leftExpr, code); 
-			generateCodeForExpression(method, expr->rightExpr, code);
+			generateCodeForExpression(method, expr->leftExpr, code, offset); 
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
 			{
 				// TODO Need to store byte offset to jump on if condition is true or false
@@ -674,8 +747,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break;
 		}
 		case PLUS_EXPRESSION: {
-			generateCodeForExpression(method, expr->leftExpr, code); // load left expr to stack
-			generateCodeForExpression(method, expr->rightExpr, code); // load right expr to stack
+			generateCodeForExpression(method, expr->leftExpr, code, offset); // load left expr to stack
+			generateCodeForExpression(method, expr->rightExpr, code, offset); // load right expr to stack
 			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR) // perform operations
 			{
 				u1 = FADD;
@@ -692,8 +765,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break;
 		}
 		case MINUS_EXPRESSION: {
-			generateCodeForExpression(method, expr->leftExpr, code);
-			generateCodeForExpression(method, expr->rightExpr, code);
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
 			{
 				u1 = FSUB;
@@ -706,8 +779,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break;
 		}
 		case MUL_EXPRESSION: {
-			generateCodeForExpression(method, expr->leftExpr, code);
-			generateCodeForExpression(method, expr->rightExpr, code);
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
 			{
 				u1 = FMUL;
@@ -720,8 +793,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break;
 		}
 		case DIV_EXPRESSION: {
-			generateCodeForExpression(method, expr->leftExpr, code);
-			generateCodeForExpression(method, expr->rightExpr, code);
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
 			{
 				u1 = FDIV;
@@ -734,8 +807,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break;
 		}
 		case MOD_EXPRESSION: {
-			generateCodeForExpression(method, expr->leftExpr, code);
-			generateCodeForExpression(method, expr->rightExpr, code);
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			u1 = IREM;
 			writeU1();
 			break;
@@ -747,13 +820,13 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 	
 }
 
-void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code){
+void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, int* code, int* offset){
 	switch (primaryExpr->exprType) {
 		case DECIMAL_EXPR:
 		case FLOAT_EXPR: {
 			//write command
 			u1 = LDC_W; 
-			writeU1(); 
+			writeU1toString(); 
 			//write constant id number
 			u2 = htons(primaryExpr->semanticType->constantExpressionNum); 
 			writeU2(); 
@@ -827,7 +900,7 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 		}
 		case EXPRESSION: {
 			//nested expression (by parenthesies)
-			generateCodeForExpression(method, primaryExpr->expr, code); 
+			generateCodeForExpression(method, primaryExpr->expr, code, offset); 
 			break;
 		}
 		default: {
