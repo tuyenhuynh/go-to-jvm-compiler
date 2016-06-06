@@ -403,7 +403,7 @@ void Write(void* data, int count) {
 }
 
 
-char* generateCodeForMethod(struct Method* method){
+int* generateCodeForMethod(struct Method* method){
 	int* code = (int*)malloc(2000 * sizeof(int)); 
 	int* offset = (int*)malloc(sizeof(int)); 
 	struct Statement* stmt = method->functionDecl->block->stmtList->firstStmt; 
@@ -464,7 +464,7 @@ void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec
 void generateCodeForStmtList(struct Method* method, struct StatementList* stmtList, int* code, int* offset){
 	struct Statement* stmt = stmtList->firstStmt; 
 	while (stmt != NULL) {
-		generateCodeForStmt(method, stmt, code); 
+		generateCodeForStmt(method, stmt, code, offset); 
 		stmt = stmt->nextStatement; 
 	}
 }
@@ -557,7 +557,7 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 			struct Expression* leftExpr = simpleStmt->exprListLeft->firstExpression; 
 			struct Expression* rightExpr = simpleStmt->exprListRight->firstExpression; 
 			while (leftExpr != NULL) {
-				generateCodeForSingleAssignment(method, leftExpr->primaryExpr->identifier, rightExpr, code);
+				generateCodeForSingleAssignment(method, leftExpr->primaryExpr->identifier, rightExpr, code, offset);
 				leftExpr = leftExpr->nextExpr; 
 				rightExpr = rightExpr->nextExpr; 
 			} 
@@ -826,20 +826,20 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 		case FLOAT_EXPR: {
 			//write command
 			u1 = LDC_W; 
-			writeU1toString(); 
+			writeU1ToArray(code, offset); 
 			//write constant id number
 			u2 = htons(primaryExpr->semanticType->constantExpressionNum); 
-			writeU2(); 
+			writeU2ToArray(code, offset); 
 			break;
 		}
 		case STRING_EXPR: {
 			//TODO: verify this
 			//load constant String from constants table 
 			u1 = ALOAD; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			//get id of string in constants table
 			u1 = primaryExpr->semanticType->constantExpressionNum; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			break;
 		}
 		case ID_EXPRESSION: {
@@ -847,21 +847,21 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 
 			//write command
 			u1 = ILOAD; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			//write the id number of id_expression from local var table
 			u1 = primaryExpr->semanticType->idNum; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			break;
 		}
 		case PE_COMPOSITE: {
 			//write command
 			u1 = ALOAD; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			//write array 's id 
 			u1 = primaryExpr->primaryExpr->semanticType->idNum; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			//write index of array's element using enerateCodeForExpression
-			generateCodeForExpression(method, primaryExpr->expr, code); 
+			generateCodeForExpression(method, primaryExpr->expr, code, offset); 
 			//write load command to load element to stack's top
 			switch (primaryExpr->semanticType->typeName) {
 				case INT_TYPE_NAME: {
@@ -875,27 +875,27 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 					break; 
 				}
 			}
-			writeU1();
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case FUNCTION_CALL: {
 			//load referece to object of called method
 			u1 = ALOAD_0; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			//write arguments
 			struct Expression* expr = primaryExpr->funcCall->exprList->firstExpression; 
 			while (expr != NULL) {
-				generateCodeForExpression(method, expr, code); 
+				generateCodeForExpression(method, expr, code, offset); 
 				expr = expr->nextExpr; 
 			}
 			//
 			u1 = INVOKESPECIAL; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			//find constant method ref from constants table
 			struct Method*  method = getMethod(primaryExpr->funcCall->primaryExpr->identifier); 
 			//write id of constant method ref
 			u2 = htons(method->constMethodref->id);
-			writeU2(); 
+			writeU2ToArray(code, offset); 
 			break;
 		}
 		case EXPRESSION: {
