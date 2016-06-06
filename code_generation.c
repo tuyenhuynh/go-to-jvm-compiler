@@ -263,9 +263,9 @@ void writeMethod(struct Method* method) {
 	writeU4();
 	//write bytecode of method
 	for (int i = 0; i < codeLength; ++i) {
-		
+		u1 = code[i]; 
+		writeU1(); 
 	}
-	writeString(code); 
 
 	//write number of exception
 	u2 = htons(0); 
@@ -408,6 +408,7 @@ void Write(void* data, int count) {
 char* generateCodeForMethod(struct Method* method,int* codeLength){
 	char* code = (char*)malloc(2000 * sizeof(char)); 
 	int* offset = (int*)malloc(sizeof(int)); 
+	*offset = 0; 
 	struct Statement* stmt = method->functionDecl->block->stmtList->firstStmt; 
 	while (stmt != NULL) {
 		generateCodeForStmt(method, stmt, code, offset); 
@@ -448,7 +449,7 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 			struct Identifier* id = idList->firstId; 
 			struct Expression* expr = exprList->firstExpression; 
 			while (id != NULL) {
-				
+				generateCodeForSingleAssignment(method, id, expr, code, offset); 
 				id = id->nextId; 
 				expr = expr->nextExpr; 
 			}
