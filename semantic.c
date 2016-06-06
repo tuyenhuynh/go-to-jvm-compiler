@@ -382,6 +382,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		method->constMethodref = constMethodRef;
 		method->returnType = semanticReturnType;
 		method->paramList = paramList; 
+		method->functionDecl = functionDecl; 
 
 		/*-----------------*/
 		//add method to methodsTable of class
@@ -1804,6 +1805,7 @@ struct Constant* getConstantUtf8(char* utf8) {
 
 struct FunctionDecl* findFuncionDeclByName(struct Program* program, char* functionName) {
 	struct FunctionDecl* functionDecl = NULL; 
+
 	struct Declaration* decl = program->declList->firstDecl; 
 	bool found = false; 
 	while (!found && decl != NULL) {

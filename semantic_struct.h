@@ -49,6 +49,7 @@ struct Method {
 	struct SemanticType* returnType; 
 	List* localVariablesTable; 
 	struct ParameterList* paramList; 
+	struct FunctionDecl* functionDecl; 
 };
 
 struct Class {
