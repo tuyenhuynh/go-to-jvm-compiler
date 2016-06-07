@@ -15,8 +15,9 @@ LDC = 0x12,
 LDC_W = 0x13,
 ILOAD = 0x15,
 ALOAD = 0x19,
-ALOAD_0 = 0x2a, 
+ALOAD_0 = 0x2a,
 ISTORE = 0x36,
+FSTORE = 0x38, 
 ASTORE = 0x3A,
 POP = 0x57,
 DUP = 0x58,
@@ -269,8 +270,7 @@ void writeMethod(struct Method* method) {
 
 	//write number of attribute's attribute
 	u2 = htons(0); 
-	writeU2(); 
-	
+	writeU2(); 	
 }
 
 void writeString(char* str) {
@@ -571,16 +571,22 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 
 void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code, int* offset) {
 	//generate code for right expression
-	//INCLUDE LOADING value to stack ???
+	//INCLUDE LOADING value to stack operand
 	generateCodeForExpression(method, expr, code, offset); 
 	
 	//load value on top of stack to local variable
 	//TODO: generate code id is field, not local variable
 	//TODO: generate code when assign value to array element, even though its not in this function
 	switch (expr->semanticType->typeName) {
-		case INT_TYPE_NAME:
-		case FLOAT32_TYPE_NAME:{
+		case INT_TYPE_NAME: {
 			u1 = ISTORE; 
+			writeU1ToArray(code, offset); 
+			u1 = id->idNum; 
+			writeU1ToArray(code, offset); 
+			break; 
+		}
+		case FLOAT32_TYPE_NAME:{
+			u1 = FSTORE; 
 			writeU1ToArray(code, offset);
 			//id of local variable
 			u1 = id->idNum; 
@@ -588,7 +594,11 @@ void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* 
 			break; 
 		}
 		case STRING_TYPE_NAME: {
-			//TODO: impelement this	
+			u1 = ASTORE; 
+			writeU1ToArray(code, offset); 
+			//id of local variable
+			u1 = id->idNum; 
+			writeU1ToArray(code, offset); 
 			break; 
 		}
 	}
@@ -817,8 +827,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 		default: {
 			//some expressions are currently unsupported
 		}
-	}
-	
+	}	
 }
 
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code, int* offset){
