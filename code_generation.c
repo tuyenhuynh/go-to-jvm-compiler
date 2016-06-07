@@ -824,15 +824,35 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code, int* offset){
 	switch (primaryExpr->exprType) {
 		case DECIMAL_EXPR: {
+			//write push int instruction
+			u1 = LDC; 
+			writeU1ToArray(code, offset); 
+			//write index of constants 
+			u1 = primaryExpr->semanticType->constantExpressionNum; 
+			writeU1ToArray(code, offset); 
+			/*
 			u4 = htonl(primaryExpr->decNumber); 
 			writeU4ToArray(code, offset); 
+			*/
 			break; 
 		}
 		case FLOAT_EXPR: {
+			//write push int instruction
+			u1 = LDC;
+			writeU1ToArray(code, offset);
+			//write index of constants 
+			u1 = primaryExpr->semanticType->constantExpressionNum;
+			writeU1ToArray(code, offset);
+			/*
+			u4 = htonl(primaryExpr->decNumber);
+			writeU4ToArray(code, offset);
+			*/
+			break;
+/*
 			int* intPointer = (int*)(&(primaryExpr->floatNumber)); 
 			u4 = htonl(*intPointer);
 			writeU4ToArray(code, offset); 
-			break;
+			break;*/
 		}
 		case STRING_EXPR: {
 			//load constant String from constants table 
