@@ -718,10 +718,10 @@ void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchS
 void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset){
 
 }
-void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, char* code, int* offset){
+void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset){
 
 }
-void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code, int* offset){
+void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanStmt, char* code, int* offset){
 		
 }
 

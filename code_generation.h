@@ -64,8 +64,8 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code, int* offset);  
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset);  
 void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset);  
-void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt, char* code, int* offset);  
-void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code, int*  offset);  
+void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset);  
+void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanStmt, char* code, int*  offset);  
 void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code, int* offset);  
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code, int* offset);  
 void generateCodeForSingleAssignment(struct Method*  method, int localVarId, struct Expression* expr, char* code, int* offset);
