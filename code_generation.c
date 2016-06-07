@@ -569,40 +569,30 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 	}
 }
 
-
 void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code, int* offset) {
 	//generate code for right expression
-	//INCLUDE LOADING value to stack operand
-	generateCodeForExpression(method, expr, code, offset); 
-	
+	generateCodeForExpression(method, expr, code, offset);
+
 	//load value on top of stack to local variable
 	//TODO: generate code id is field, not local variable
-	//TODO: generate code when assign value to array element, even though its not in this function
 	switch (expr->semanticType->typeName) {
 		case INT_TYPE_NAME: {
-			u1 = ISTORE; 
-			writeU1ToArray(code, offset); 
-			u1 = id->idNum; 
-			writeU1ToArray(code, offset); 
-			break; 
+			u1 = ISTORE;
+			break;
 		}
-		case FLOAT32_TYPE_NAME:{
-			u1 = FSTORE; 
-			writeU1ToArray(code, offset);
-			//id of local variable
-			u1 = id->idNum; 
-			writeU1ToArray(code, offset); 
-			break; 
+		case FLOAT32_TYPE_NAME: {
+			u1 = FSTORE;
+			break;
 		}
 		case STRING_TYPE_NAME: {
-			u1 = ASTORE; 
-			writeU1ToArray(code, offset); 
-			//id of local variable
-			u1 = id->idNum; 
-			writeU1ToArray(code, offset); 
-			break; 
+			u1 = ASTORE;
+			break;
 		}
 	}
+	writeU1ToArray(code, offset);
+	//id of local variable
+	u1 = id->idNum;
+	writeU1ToArray(code, offset);
 }
 
 void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code, int* offset){
@@ -871,28 +861,26 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 			break;
 		}
 		case PE_COMPOSITE: {
-			//write command
-			u1 = ALOAD; 
-			writeU1ToArray(code, offset); 
-			//write array 's id 
+			//load array reference 
 			u1 = primaryExpr->primaryExpr->semanticType->idNum; 
 			writeU1ToArray(code, offset); 
-			//write index of array's element using enerateCodeForExpression
+			//generate code to define index 
 			generateCodeForExpression(method, primaryExpr->expr, code, offset); 
-			//write load command to load element to stack's top
 			switch (primaryExpr->semanticType->typeName) {
 				case INT_TYPE_NAME: {
-					u1 = IALOAD;
-					break;
-				}case FLOAT32_TYPE_NAME: {
-					u1 = FALOAD; 
-					break; 
-				}case STRING_TYPE_NAME: {
-					//TODO: implement situation when array type is string
+					u1 = IALOAD; 
 					break; 
 				}
+				case FLOAT32_TYPE_NAME: {
+					u1 = FALOAD; 
+				}
+				default: {
+					//array of string 
+					//TODO: implement this
+				}
 			}
-			writeU1ToArray(code, offset);
+			//write command
+			writeU1ToArray(code, offset); 
 			break;
 		}
 		case FUNCTION_CALL: {
