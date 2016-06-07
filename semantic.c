@@ -7,6 +7,8 @@
 char* CLASS_NAME = "GO_CLASS";
 int scope = 0;
 int objectClass; 
+struct Constant* constantCode; 
+
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
 	switch (expr->exprType) 
@@ -317,11 +319,15 @@ bool doSemantic(struct Program* program) {
 	struct Constant* constantObjectClass = addObjectClassToConstantsTable();
 	objectClass = constantObjectClass->id; 
 
+	//add Code constants table
+	constantCode = addUtf8ToConstantsTable("Code");
+
 	//add CLASS's name to constantsTAble
 	struct Constant* constClassName = addUtf8ToConstantsTable(CLASS_NAME); 
 	//add class to constants table
 	constantClass = addClassToConstantsTable(CLASS_NAME);
 	
+
 	//
 	bool isOk = true; 
 	struct DeclarationList* declList = program->declList;
