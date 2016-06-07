@@ -106,9 +106,9 @@ void generateCode(struct Program* root){
 
 		writeClassMetadata(); 
 		
-		writeFieldsTable(); //TODO
+		writeFieldsTable(); 
 
-		writeMethodsTable(); //TODO
+		writeMethodsTable(); 
 
 		//write number of class's attributes(usally 0)
 		u2 = 0; 
@@ -581,13 +581,15 @@ void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* 
 	
 	//load value on top of stack to local variable
 	//TODO: generate code id is field, not local variable
+	//TODO: generate code when assign value to array element, even though its not in this function
 	switch (expr->semanticType->typeName) {
 		case INT_TYPE_NAME:
 		case FLOAT32_TYPE_NAME:{
 			u1 = ISTORE; 
-			writeU1(); 
+			writeU1ToArray(code, offset);
+			//id of local variable
 			u1 = id->idNum; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			break; 
 		}
 		case STRING_TYPE_NAME: {
@@ -826,20 +828,20 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code, int* offset){
 	switch (primaryExpr->exprType) {
-		case DECIMAL_EXPR:
+		case DECIMAL_EXPR: {
+			u4 = htonl(primaryExpr->decNumber); 
+			writeU4ToArray(code, offset); 
+			break; 
+		}
 		case FLOAT_EXPR: {
-			//write command
-			u1 = LDC_W; 
-			writeU1ToArray(code, offset); 
-			//write constant id number
-			u2 = htons(primaryExpr->semanticType->constantExpressionNum); 
-			writeU2ToArray(code, offset); 
+			int* intPointer = (int*)(&(primaryExpr->floatNumber)); 
+			u4 = htonl(*intPointer);
+			writeU4ToArray(code, offset); 
 			break;
 		}
 		case STRING_EXPR: {
-			//TODO: verify this
 			//load constant String from constants table 
-			u1 = ALOAD; 
+			u1 = LDC; 
 			writeU1ToArray(code, offset); 
 			//get id of string in constants table
 			u1 = primaryExpr->semanticType->constantExpressionNum; 
