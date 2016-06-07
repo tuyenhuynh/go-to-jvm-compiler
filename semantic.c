@@ -800,9 +800,11 @@ bool checkSemanticAssignStmt(struct Expression* leftExpr, struct Expression* rig
 	if (!isOk) {
 		printf("Semantic error. Type mismatch in assign statement\n");
 	}
-	if (leftExpr->exprType != IDENTIFIER_TYPE_NAME) {
-		printf("Semantic error. Left expression of assignment statement must be an identifier\n");
-		isOk = false; 
+	isOk = (leftExpr->exprType == IDENTIFIER_TYPE_NAME ||
+		leftExpr->exprType == PRIMARY && leftExpr->primaryExpr->exprType == PE_COMPOSITE
+		);
+	if (isOk) {
+		printf("Semantic error. Left expression of assignment statement must be an identifier or array access\n");
 	}
 	return isOk;
 }
