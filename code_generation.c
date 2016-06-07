@@ -407,8 +407,17 @@ char* generateCodeForMethod(struct Method* method,int* codeLength){
 	*offset = 0; 
 	struct Statement* stmt = method->functionDecl->block->stmtList->firstStmt; 
 	while (stmt != NULL) {
-		generateCodeForStmt(method, stmt, code, offset); 
-		stmt = stmt->nextStatement; 
+		generateCodeForStmt(method, stmt, code, offset);
+		if (stmt->stmtType != RETURN_STMT) {
+			stmt = stmt->nextStatement;
+		}
+		else {
+			stmt = NULL; 
+		}
+	}
+	if (method->returnType->typeName == VOID_TYPE_NAME) {
+		u1 = RETURN; 
+		writeU1ToArray(code, offset); 
 	}
 	*codeLength = *offset; 
 	return code; 
@@ -445,7 +454,8 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 			struct Identifier* id = idList->firstId; 
 			struct Expression* expr = exprList->firstExpression; 
 			while (id != NULL) {
-				generateCodeForSingleAssignment(method, id, expr, code, offset); 
+				
+				generateCodeForSingleAssignment(method, id->idNum, expr, code, offset); 
 				id = id->nextId; 
 				expr = expr->nextExpr; 
 			}
@@ -557,7 +567,14 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 			struct Expression* leftExpr = simpleStmt->exprListLeft->firstExpression; 
 			struct Expression* rightExpr = simpleStmt->exprListRight->firstExpression; 
 			while (leftExpr != NULL) {
-				generateCodeForSingleAssignment(method, leftExpr->primaryExpr->identifier, rightExpr, code, offset);
+				if (leftExpr->exprType == PRIMARY && leftExpr->primaryExpr->exprType == PE_COMPOSITE) {
+					//assign value to array element
+					generateCodeForArrayElementAssignment(method,
+						leftExpr->primaryExpr->primaryExpr, leftExpr->primaryExpr->expr,rightExpr, code, offset); 
+				}
+				else {
+					generateCodeForSingleAssignment(method, leftExpr->primaryExpr->semanticType->idNum, rightExpr, code, offset);
+				}
 				leftExpr = leftExpr->nextExpr; 
 				rightExpr = rightExpr->nextExpr; 
 			} 
@@ -569,11 +586,11 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 	}
 }
 
-void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code, int* offset) {
+void generateCodeForSingleAssignment(struct Method*  method, int localVarId, struct Expression* expr, char* code, int* offset) {
 	//generate code for right expression
 	generateCodeForExpression(method, expr, code, offset);
 
-	//load value on top of stack to local variable
+	//store value on top of stack to local variable
 	//TODO: generate code id is field, not local variable
 	switch (expr->semanticType->typeName) {
 		case INT_TYPE_NAME: {
@@ -591,9 +608,44 @@ void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* 
 	}
 	writeU1ToArray(code, offset);
 	//id of local variable
-	u1 = id->idNum;
+	u1 = localVarId; 
 	writeU1ToArray(code, offset);
 }
+
+void generateCodeForArrayElementAssignment(struct Method*  method, 
+	struct PrimaryExpression* arrayExpr, struct Expression* indexExpr , struct Expression* expr, char* code, int* offset) {
+	//TODO: generate code id is field, not local variable
+	
+	//gen code to load array reference to stack operand
+	u1 = ALOAD; 
+	writeU1ToArray(code, offset); 
+	u1 = arrayExpr->semanticType->idNum; 
+	writeU1ToArray(code, offset); 
+
+	//gen code to define array index ; 
+	generateCodeForExpression(method, indexExpr, code, offset); 
+
+	//generate code for right expression
+	generateCodeForExpression(method, expr, code, offset);
+
+	//store value on top of stack to local variable
+	switch (expr->semanticType->typeName) {
+		case INT_TYPE_NAME: {
+			u1 = IASTORE;
+			break;
+		}
+		case FLOAT32_TYPE_NAME: {
+			u1 = FASTORE;
+			break;
+		}
+		case STRING_TYPE_NAME: {
+			u1 = AASTORE;
+			break;
+		}
+	}
+	writeU1ToArray(code, offset);
+}
+
 
 void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code, int* offset){
 
@@ -861,9 +913,13 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 			break;
 		}
 		case PE_COMPOSITE: {
-			//load array reference 
+			//gen code to load array reference to stack operand
+			//load array reference to stack operand
+			u1 = ALOAD; 
+			writeU1ToArray(code, offset);
 			u1 = primaryExpr->primaryExpr->semanticType->idNum; 
 			writeU1ToArray(code, offset); 
+
 			//generate code to define index 
 			generateCodeForExpression(method, primaryExpr->expr, code, offset); 
 			switch (primaryExpr->semanticType->typeName) {
@@ -875,10 +931,10 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 					u1 = FALOAD; 
 				}
 				default: {
-					//array of string 
-					//TODO: implement this
+					u1 = AALOAD; 
 				}
 			}
+			
 			//write command
 			writeU1ToArray(code, offset); 
 			break;

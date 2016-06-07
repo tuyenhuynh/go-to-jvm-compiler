@@ -68,6 +68,7 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStmt* printStmt
 void generateCodeForScanStmt(struct Method* method, struct ScanStmt* scanStmt, char* code, int*  offset);  
 void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code, int* offset);  
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code, int* offset);  
-void generateCodeForSingleAssignment(struct Method*  method, struct Identifier* id, struct Expression* expr, char* code, int* offset);
-
+void generateCodeForSingleAssignment(struct Method*  method, int localVarId, struct Expression* expr, char* code, int* offset);
+void generateCodeForArrayElementAssignment(struct Method*  method,
+struct PrimaryExpression* arrayExpr, struct Expression* indexExpr, struct Expression* expr, char* code, int* offset); 
 #endif //_CODE_GENERATION_H_
