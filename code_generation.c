@@ -79,6 +79,7 @@ INVOKEVIRTUAL = 0xB6,
 INVOKESPECIAL = 0xB7,
 INVOKESTATIC = 0xB8,
 IRETURN = 0xAC,
+FRETURN = 0xAE, 
 ARETURN = 0xB0,
 RETURN = 0xB1
 ;
@@ -495,7 +496,30 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* co
 		}
 		case RETURN_STMT: {
 			struct ReturnStmt* returnStmt = stmt->returnStmt; 
-			//TODO: generate code for this statement
+			if (method->returnType->typeName == VOID_TYPE_NAME) {
+				u1 = RETURN; 
+				writeU1ToArray(code, offset); 
+			}
+			else {
+				//generate return value 
+				generateCodeForExpression(method, returnStmt->exprList->firstExpression, code, offset);
+				//write return instruction
+				if (method->returnType->arrayType == NONE_ARRAY &&
+					method->returnType->typeName != STRING_TYPE_NAME) {
+					if (method->returnType->typeName == INT_TYPE_NAME) {
+						u1 = IRETURN; 
+					}
+					else {
+						//FLOAT32_TYPE_NAME
+						u1 = FRETURN; 
+					}
+				}
+				else {
+					u1 = ARETURN; 
+				}
+				writeU1ToArray(code, offset);
+			}
+
 			break; 
 		}
 		case BREAK_STMT: {
