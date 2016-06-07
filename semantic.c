@@ -6,7 +6,7 @@
 
 char* CLASS_NAME = "GO_CLASS";
 int scope = 0;
-
+int objectClass; 
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
 	switch (expr->exprType) 
@@ -313,6 +313,10 @@ bool doSemantic(struct Program* program) {
 	hashtable_new(&methodsTable); 
 	semanticClass->methodsTable = methodsTable; 
 	
+	//add object class and it's init method to constants table
+	struct Constant* constantObjectClass = addObjectClassToConstantsTable();
+	objectClass = constantObjectClass->id; 
+
 	//add CLASS's name to constantsTAble
 	struct Constant* constClassName = addUtf8ToConstantsTable(CLASS_NAME); 
 	//add class to constants table
@@ -342,6 +346,30 @@ bool doSemantic(struct Program* program) {
 	//check semantic main function (function without parameters)
 	return isOk; 
 }
+
+struct Constant* addObjectClassToConstantsTable() {
+	//Add class's metadata to constants table 
+	char* constructorName = "<init>";
+	struct Constant* constructorConstant = addUtf8ToConstantsTable(constructorName);
+	char* constructorTypeStr = "()V";
+	struct Constant* constructorType = addUtf8ToConstantsTable(constructorTypeStr);
+	struct Constant* constructorNameAndType =
+		addNameAndTypeToConstantsTable(constructorName, constructorTypeStr);
+	char* objectClassName = "java/lang/Object";
+	struct Constant* objectClassUtf8 = addUtf8ToConstantsTable(objectClassName);
+	struct Constant* constantObjectClass = addClassToConstantsTable(objectClassName);
+	struct Constant* objectConstructorMethodRef = (struct Constant*) malloc(sizeof(struct Constant)); 
+	int size = list_size(constantsTable); 
+	//add method ref to constants table
+	objectConstructorMethodRef->type = CONSTANT_Methodref; 
+	objectConstructorMethodRef->const1 = constantObjectClass; 
+	objectConstructorMethodRef->const2 = constructorNameAndType; 
+	objectConstructorMethodRef->id = size + 1; 
+	list_add(constantsTable, objectConstructorMethodRef); 
+
+	return constantObjectClass;
+}
+
 
 
 //check and add function to method table
