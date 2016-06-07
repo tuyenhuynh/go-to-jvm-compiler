@@ -83,6 +83,7 @@ RETURN = 0xB1
 
 
 void generateCode(struct Program* root){
+	program = root;
 	// 0200 user can only write file
 	if ((fh = open(classFileName, O_BINARY | O_WRONLY | O_TRUNC | O_CREAT, 0200)) == -1) {
 		freopen("CON", "w", stdout); 
@@ -116,7 +117,6 @@ void generateCode(struct Program* root){
 		//write class's attributes(nothing to do)
 		
 	}
-	program = root; 
 	close(fh);
 }
 
@@ -136,7 +136,8 @@ void writeConstantsTable() {
 
 void writeClassMetadata() {
 	//access flags 
-	u2 = htons(ACC_SUPER);
+	int accessFlags = ACC_SUPER | ACC_PUBLIC; 
+	u2 = htons(accessFlags);
 	writeU2();
 
 	//write constants class
@@ -144,7 +145,7 @@ void writeClassMetadata() {
 	writeU2();
 
 	//write parent class(Object); 
-	u2 = 0;
+	u2 = htons(objectClass);
 	writeU2();
 
 	//number of interface
@@ -202,11 +203,7 @@ void writeMethodsTable() {
 	int methodCount = hashtable_size(methodsTable);
 	u2 = htons(methodCount);
 	writeU2();
-	
-	//add Code constants table
-	constantCode = addUtf8ToConstantsTable("Code"); 
-	
-	
+
 	//write methods
 	HashTableIter i;
 	hashtable_iter_init(&i, methodsTable);
@@ -223,16 +220,12 @@ void writeMethod(struct Method* method) {
 	u2 = htons(ACC_PUBLIC);
 	writeU2(); 
 
-	//write id of  constant utf8, which contains method's name
-	struct Constant* c = method->constMethodref->const2->const1; 
-	char*  methodName = c->utf8; 
-	struct Constant* constant = getConstantUtf8(methodName); 
-	u2 = htons(constant->id);
+	//write id of  constant utf8, which contains method's name 
+	u2 = htons(method->constMethodref->const2->const1->id);
 	writeU2(); 
 
 	//write id of constant utf8, which contains method's description 
-	constant = getConstantUtf8(method->constMethodref->const2->const2->utf8); 
-	u2 = htons(constant->id); 
+	u2 = htons(method->constMethodref->const2->const2->id);
 	writeU2(); 
 
 	//method's attribute count
@@ -243,23 +236,25 @@ void writeMethod(struct Method* method) {
 	//constant utf8's id
 	u2 = htons(constantCode->id); 
 	writeU2(); 
-	//attribute's length
-	//TODO: find the value of u4
-	u4 = htons(0); 
+
+	//generate code for method
+	int codeLength;
+	char* code = generateCodeForMethod(method, &codeLength);
+
+	//define length of attribute code
+	int attributeCodeLength = 12 + codeLength; 
+	u4 = htonl(attributeCodeLength); 
 	writeU4(); 
 	//stack's size
 	u2 = 1000; 
 	writeU2(); 
 	//local variable count
-	int localVarsCount = list_size(method->localVariablesTable); 
+	int localVarsCount = list_size(method->localVariablesTable)+1; //include variable this(id = 0)
 	u2 = htons(localVarsCount); 
 	writeU2(); 
-	
-	//generate and write method's bytecode 
-	int codeLength; 
-	char* code = generateCodeForMethod(method, &codeLength); 
+	 
 	//write method's bytecode size
-	u4 = htons(codeLength);
+	u4 = htonl(codeLength);
 	writeU4();
 	//write bytecode of method
 	for (int i = 0; i < codeLength; ++i) {
