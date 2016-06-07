@@ -14,6 +14,7 @@ SIPUSH = 0x11,
 LDC = 0x12,
 LDC_W = 0x13,
 ILOAD = 0x15,
+FLOAD = 0x17, 
 ALOAD = 0x19,
 ALOAD_0 = 0x2a,
 ISTORE = 0x36,
@@ -832,55 +833,41 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code, int* offset){
 	switch (primaryExpr->exprType) {
-		case DECIMAL_EXPR: {
-			//write push int instruction
-			u1 = LDC; 
-			writeU1ToArray(code, offset); 
-			//write index of constants 
-			u1 = primaryExpr->semanticType->constantExpressionNum; 
-			writeU1ToArray(code, offset); 
-			/*
-			u4 = htonl(primaryExpr->decNumber); 
-			writeU4ToArray(code, offset); 
-			*/
-			break; 
-		}
-		case FLOAT_EXPR: {
-			//write push int instruction
-			u1 = LDC;
-			writeU1ToArray(code, offset);
-			//write index of constants 
-			u1 = primaryExpr->semanticType->constantExpressionNum;
-			writeU1ToArray(code, offset);
-			/*
-			u4 = htonl(primaryExpr->decNumber);
-			writeU4ToArray(code, offset);
-			*/
-			break;
-/*
-			int* intPointer = (int*)(&(primaryExpr->floatNumber)); 
-			u4 = htonl(*intPointer);
-			writeU4ToArray(code, offset); 
-			break;*/
-		}
+		case DECIMAL_EXPR:
+		case FLOAT_EXPR:
 		case STRING_EXPR: {
-			//load constant String from constants table 
+			//write instruction LDC (to load int/float/string reference) 
 			u1 = LDC; 
 			writeU1ToArray(code, offset); 
-			//get id of string in constants table
+			//get id of constant int/float/string reference from constants table
 			u1 = primaryExpr->semanticType->constantExpressionNum; 
 			writeU1ToArray(code, offset); 
 			break;
 		}
 		case ID_EXPRESSION: {
 			//TODO: implementation loading field if ID_EXPRESSION is class's field
-
-			//write command
-			u1 = ILOAD; 
-			writeU1ToArray(code, offset); 
+			switch (primaryExpr->semanticType->typeName) {
+				case INT_TYPE_NAME: {
+					//write command
+					u1 = ILOAD;
+					break; 
+				}
+				case FLOAT32_TYPE_NAME: {
+					//write command
+					u1 = FLOAD;
+					break; 
+				}
+				case STRING_TYPE_NAME: {
+					//write command
+					u1 = ALOAD;
+					break; 
+				}
+			} 
+			//write load instruction
+			writeU1ToArray(code, offset);
 			//write the id number of id_expression from local var table
-			u1 = primaryExpr->semanticType->idNum; 
-			writeU1ToArray(code, offset); 
+			u1 = primaryExpr->semanticType->idNum;
+			writeU1ToArray(code, offset);
 			break;
 		}
 		case PE_COMPOSITE: {
