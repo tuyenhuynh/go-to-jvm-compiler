@@ -767,7 +767,6 @@ void generateCodeForArrayElementAssignment(struct Method*  method,
 
 
 void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code, int* offset){
-
 	//generate code for condition-expression of if stmt
 	//if type (if statement; expression - not supported if type) is eliminated in semantic checking
 	generateCodeForExpression(method, ifStmt->ifStmtExpr->expr, code, offset); 
@@ -820,7 +819,8 @@ void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchS
 		
 }
 void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset){
-
+	//generate code for initial statement 
+	
 }
 void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset){
 
