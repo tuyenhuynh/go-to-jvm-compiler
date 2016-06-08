@@ -7,7 +7,10 @@
 char* CLASS_NAME = "GO_CLASS";
 int scope = 0;
 int objectClass; 
+
 struct Constant* constantCode; 
+struct Constant* constantClassString;
+struct Constant* objectConstructorMethodRef; 
 
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
@@ -327,8 +330,9 @@ bool doSemantic(struct Program* program) {
 	//add class to constants table
 	constantClass = addClassToConstantsTable(CLASS_NAME);
 	
+	//add constant type string 
+	constantClassString = addClassToConstantsTable("java/lang/String"); 
 
-	//
 	bool isOk = true; 
 	struct DeclarationList* declList = program->declList;
 	
@@ -364,7 +368,7 @@ struct Constant* addObjectClassToConstantsTable() {
 	char* objectClassName = "java/lang/Object";
 	struct Constant* objectClassUtf8 = addUtf8ToConstantsTable(objectClassName);
 	struct Constant* constantObjectClass = addClassToConstantsTable(objectClassName);
-	struct Constant* objectConstructorMethodRef = (struct Constant*) malloc(sizeof(struct Constant)); 
+	objectConstructorMethodRef = (struct Constant*) malloc(sizeof(struct Constant)); 
 	int size = list_size(constantsTable); 
 	//add method ref to constants table
 	objectConstructorMethodRef->type = CONSTANT_Methodref; 

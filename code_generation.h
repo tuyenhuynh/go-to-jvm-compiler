@@ -16,7 +16,7 @@ static unsigned short
 ACC_SUPER = 0x0020,
 ACC_PUBLIC = 0x0001;
 
-extern int objectClass; 
+extern int objectClass;
 
 int fd;
 unsigned char u1;
@@ -28,6 +28,8 @@ float sf4;
 
 int fh; 
 struct Constant* constantCode; 
+extern struct Constant* constantClassString;
+extern struct Constant* objectConstructorMethodRef; 
 
 void Write(void* data, int count);
 void writeU1(); 
@@ -53,6 +55,7 @@ void generateCode(struct Program* root);
 void writeConstant(struct Constant* constant); 
 void writeField(struct Field* field); 
 
+void generateCodeForDefaultConstructor(); 
 char* generateCodeForMethod(struct Method* method, int* codeLength);  
 void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code, int *offset);  
 void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code, int* offset);  

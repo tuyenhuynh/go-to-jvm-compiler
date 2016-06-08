@@ -118,7 +118,6 @@ void generateCode(struct Program* root){
 		u2 = 0; 
 		writeU2(); 
 		//write class's attributes(nothing to do)
-		
 	}
 	close(fh);
 }
@@ -203,9 +202,12 @@ void writeField(struct Field* field) {
 }
 
 void writeMethodsTable() {
-	int methodCount = hashtable_size(methodsTable);
+
+	int methodCount = hashtable_size(methodsTable) + 1;
 	u2 = htons(methodCount);
 	writeU2();
+
+	generateCodeForDefaultConstructor(); 
 
 	//write methods
 	HashTableIter i;
@@ -217,6 +219,71 @@ void writeMethodsTable() {
 		struct Method* method = (struct Method*) e->value; 
 		writeMethod(method);
 	}
+}
+
+
+void generateCodeForDefaultConstructor() {
+	u2 = htons(ACC_PUBLIC); 
+	writeU2(); 
+
+	//write id of  constant utf8, which contains method's name
+	struct Constant* constantInit = getConstantUtf8("<init>"); 
+	u2 = htons(constantInit->id);
+	writeU2();
+
+	//write id of constant utf8, which contains method's description 
+	struct Constant* constantConstructorDescriptor = getConstantUtf8("()V"); 
+	u2 = htons(constantConstructorDescriptor->id);
+	writeU2();
+
+	//method's attribute count
+	u2 = htons(1);
+	writeU2();
+
+	//write method's attribute table
+	//constant utf8's id
+	u2 = htons(constantCode->id);
+	writeU2();
+ 
+	int codeLength = 5; 
+
+	//define length of attribute code
+	int attributeCodeLength = 12 + codeLength;
+	u4 = htonl(attributeCodeLength);
+	writeU4();
+	//stack's size
+	u2 = htons(10);
+	writeU2();
+	//local variable count
+	int localVarsCount = 1; //include variable this(id = 0)
+	u2 = htons(localVarsCount);
+	writeU2();
+
+	//write method's bytecode size
+	u4 = htonl(codeLength);
+	writeU4();
+
+	/*-----------------------------------*/
+	//write bytecode of method
+	u1 = ALOAD_0;
+	writeU1();
+	//call to object's contructor 
+	u1 = INVOKESPECIAL;
+	writeU1();
+	u2 = htons(objectConstructorMethodRef->id);
+	writeU2();
+	u1 = RETURN;
+	writeU1();
+	/*-----------------------------------*/
+
+	//write number of exception
+	u2 = htons(0);
+	writeU2();
+	//write exception table(no exception)
+
+	//write number of attribute's attribute
+	u2 = htons(0);
+	writeU2();
 }
 
 void writeMethod(struct Method* method) {
@@ -310,8 +377,8 @@ void writeU1ToArray(char* code, int* offset) {
 
 void writeU2ToArray(char* code, int* offset) {
 	unsigned char bytes[2];	
-	bytes[0] = (u2 >> 8) & 0xFF;
-	bytes[1] = u2 & 0xFF;
+	bytes[1] = (u2 >> 8) & 0xFF;
+	bytes[0] = u2 & 0xFF;
 	code[*offset] = bytes[0];
 	code[*offset + 1] = bytes[1];
 	*offset += 2; 
@@ -319,10 +386,10 @@ void writeU2ToArray(char* code, int* offset) {
 
 void writeU4ToArray(char* code, int* offset) {
 	unsigned char bytes[4];
-	bytes[0] = (u4 >> 24) & 0xFF;
-	bytes[1] = (u4 >> 16) & 0xFF;
-	bytes[2] = (u4 >> 8) & 0xFF;
-	bytes[3] = u4 & 0xFF;
+	bytes[3] = (u4 >> 24) & 0xFF;
+	bytes[2] = (u4 >> 16) & 0xFF;
+	bytes[1] = (u4 >> 8) & 0xFF;
+	bytes[0] = u4 & 0xFF;
 	code[*offset] = bytes[0];
 	code[*offset + 1] = bytes[1];
 	code[*offset + 2] = bytes[2]; 
@@ -332,8 +399,8 @@ void writeU4ToArray(char* code, int* offset) {
 
 void writeS2ToArray(char* code, int* offset) {
 	char bytes[2];
-	bytes[0] = (u2 >> 8) & 0xFF;
-	bytes[1] = u2 & 0xFF;
+	bytes[1] = (s2 >> 8) & 0xFF;
+	bytes[0] = s2 & 0xFF;
 	code[*offset] = bytes[0];
 	code[*offset + 1] = bytes[1];
 	*offset += 2; 
@@ -446,15 +513,17 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 	if (type->expr != NULL) {
 		struct SemanticType* semanticType = type->expr->semanticType;
 		//allocation new array 
+
 		//generate code to load array size to stack operand 
 		generateCodeForExpression(method, type->expr, code, offset); 
 
 		//write instruction 
 		if (type->typeName == STRING_TYPE_NAME) {
+			//write command 
 			u1 = ANEWARRAY; 
-			writeU1ToArray(code, offset); 
-			struct Constant* classString = addClassToConstantsTable("Ljava/lang/String;");
-			u2 = htons(classString->id); 
+			writeU1ToArray(code, offset);
+			//write type of element
+			u2 = htons(constantClassString->id); 
 			writeU2ToArray(code, offset); 
 		}
 		else {
@@ -468,6 +537,11 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 			}
 			writeU1ToArray(code, offset); 
 		}
+		u1 = ASTORE; 
+		writeU1ToArray(code, offset); 
+		int idNum = varSpec->idListType->identifierList->firstId->idNum;
+		u1 = idNum;
+		writeU1ToArray(code, offset); 
 	}
 	else { //none array declaration
 		struct IdentifierList* idList = varSpec->idListType->identifierList; 
@@ -695,42 +769,40 @@ void generateCodeForArrayElementAssignment(struct Method*  method,
 void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code, int* offset){
 
 	//generate code for condition-expression of if stmt
-	//if type if statement; expression is eliminated in semantic checking
+	//if type (if statement; expression - not supported if type) is eliminated in semantic checking
 	generateCodeForExpression(method, ifStmt->ifStmtExpr->expr, code, offset); 
-	int ifeqPos = strlen(code); 
-	//write command ifeq
-	u1 = IFEQ; 
-	writeU1(); 
-	//define and value of displacement
-	/*
-	TODO: WHAT THE HELL TO DO WITH THIS ????
-	save address of command ifeq to specify length of jump operand later;*/
 
+	//write command ifeq
+	int ifeqPos = *offset; 
+	int elsePos; 
+	u1 = IFEQ; 
+	writeU1ToArray(code, offset);
+
+	//temporary 2 bytes for displacement
+	s2 = htons(0);
+	writeS2ToArray(code,offset);
 	//generate code for block if condition is correct
 	generateCodeForStmtList(method, ifStmt->block->stmtList, code, offset);
-	
-	if (ifStmt->elseBlock == NULL) {
-		//TODO:
-		//gen operator goto and save it address for future process
-
-	}
-	//TODO: implement else if
 	if (ifStmt->elseBlock != NULL) {
-		generateCodeForStmtList(method, ifStmt->elseBlock->block->stmtList, code, offset); 
-		//
-	}
+		//generate code for else block
+		elsePos = *offset; 
+		u1 = GOTO;
+		writeU1ToArray(code, offset);
+		//reserve 2 bytes to for displacement of goto 
+		*offset += 2;
 
-	//save address of command ALREADY DONE ???
+		//save position of else block
+		int elseBlockPos = *offset;
+	}	
+	//reserve value of offset
+	int tmp = *offset; 
+	s2 = htons(*offset - ifeqPos);//htons();
+	//fix the value of ifeq's operand
+	*offset = ifeqPos; 
+	writeS2ToArray(code, offset); 
+	//restore value of offset for future instructions
+	*offset = tmp; 
 
-	
-	if (ifStmt->elseBlock != NULL)
-	{
-		if (ifStmt->elseBlock->ifStmt != NULL)
-		{
-			generateCodeForIfStmt(method, ifStmt->elseBlock->ifStmt, code, offset);
-		}
-		generateCodeForStmtList(method, ifStmt->elseBlock->block->stmtList, code, offset);
-	}
 }
 
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset){
@@ -798,15 +870,27 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break;
 		}
 		case GT_EXPRESSION: {
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset); 
 			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
 			{
 				// TODO
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IF_ICMPGT;
 			}
 			writeU1ToArray(code, offset);
+			s2 =  htons(7);
+			writeS2ToArray(code, offset); 
+			u1 =  ICONST_0;
+			writeU1ToArray(code, offset); 
+			u1 = GOTO; 
+			writeU1ToArray(code, offset); 
+			s2 = htons(4);
+			writeS2ToArray(code, offset); 
+			u1 = ICONST_1;
+			writeU1ToArray(code, offset); 
 			break; 
 		}
 		case GTE_EXPRESSION: {
