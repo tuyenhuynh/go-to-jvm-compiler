@@ -1694,9 +1694,9 @@ struct Method* getMethod( char* methodName) {
 	return NULL; 
 }
 
-struct Field* getField(struct Class* class, char* fieldName) {
+struct Field* getField(struct Class* class_, char* fieldName) {
 	struct Field* field = NULL; // (struct Field*) malloc(sizeof(struct Field));
-	if (hashtable_get(class->fieldsTable, fieldName, &field) == CC_OK) {
+	if (hashtable_get(class_->fieldsTable, fieldName, &field) == CC_OK) {
 		return field; 
 	}
 	return NULL; 
