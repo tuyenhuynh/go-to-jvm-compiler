@@ -128,6 +128,7 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 		{
 			struct SemanticType*  leftType = checkExpressionType(expr->leftExpr, method);
 			struct SemanticType* rightType = checkExpressionType(expr->rightExpr, method);
+
 			if (leftType->arrayType != NONE_ARRAY || rightType->arrayType != NONE_ARRAY) {
 				printf("Semantic error. Array used as operand of arithmetic operator\n");
 			}
@@ -977,6 +978,7 @@ bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method) {
 				printf("Semantic error. Initial statement of for expression cannot be an expression\n"); 
 				isOk = false; 
 			}
+			isOk = checkSemanticSimpleStmt(forInit->initStmt, method);
 		}
 		if (forCondition->expression != NULL) {
 			//check semantic type of for-condition
@@ -997,7 +999,6 @@ bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method) {
 			
 			if (!isOk) {
 				printf("Semantic error. Problem in post statement of for statement\n");
-				//isOk = false; 
 			}
 		}
 	}
@@ -1005,18 +1006,6 @@ bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method) {
 		printf("Semantic error. For statement type while not support\n");
 		isOk = false; 
 	}
-	//else if (forStmt->expr != NULL) {
-	//	//for statement with for condition ( for 1 < 2 {...})
-	//	//check semantic type of for-condition
-	//	struct SemanticType * semanticType = checkExpressionType(forStmt->expr, method);
-	//	if (semanticType->typeName != BOOL_TYPE_NAME) {
-	//		if (semanticType->typeName != UNKNOWN_TYPE) {
-	//			printf("Semantic error. Non bool value used as for condition\n");
-	//		}
-	//		isOk = false;
-	//	}
-	//}
-	////for statement without for condition and for-clause for {...} -> nothing to do with this
 	//check semantic block
 	if (isOk) {
 		isOk = checkSemanticBlock(forStmt->block, method); 
