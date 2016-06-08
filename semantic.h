@@ -2,11 +2,10 @@
 #define _SEMANTIC_H_
 
 #include <stdbool.h>
-#include <trees.h>
+#include "trees.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <semantic_struct.h>
-#include "list.h"
+#include "semantic_struct.h"
 #include "helpers.h"
 
 struct  Class* semanticClass; 
@@ -72,7 +71,7 @@ struct Constant* addClassToConstantsTable(char* className);
 struct Constant* getConstantUtf8(char* utf8); 
 char* createMethodDescriptor(struct ParameterList* paramList, char* returnTypeStr);
 char* convertTypeToString(struct SemanticType* type);
-struct Field* getField(struct Class* class, char* fieldName); 
+struct Field* getField(struct Class* class_, char* fieldName); 
 struct Method* getMethod(char* methodName);
 struct SemanticType* getFunctionReturnType(struct FunctionDecl* functionDecl);
 void printLocalVariablesTable(struct Method* method);
