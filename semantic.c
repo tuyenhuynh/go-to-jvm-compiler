@@ -1144,6 +1144,7 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 		//declaration without assigment
 		struct Type* type = varSpec->idListType->type; 
 		if (type->expr != NULL) {//check semantic of array declaration
+			checkExpressionType(type->expr, method); 
 			//check size of array
 			if (type->expr->exprType != PRIMARY || type->expr->primaryExpr->exprType != DECIMAL_EXPR) {
 				printf("Semantic error. Array's size should be an integer value\n"); 

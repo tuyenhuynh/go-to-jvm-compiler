@@ -441,12 +441,33 @@ void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char
 }
 
 void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code, int* offset){
+	struct Type* type = varSpec->idListType->type; 
 	//array declaration
-	if (varSpec->idListType->type->expr != NULL) {
-		struct SemanticType* semanticType = varSpec->idListType->type->expr->semanticType; 
-		//TODO: implement this
+	if (type->expr != NULL) {
+		struct SemanticType* semanticType = type->expr->semanticType;
+		//allocation new array 
+		//generate code to load array size to stack operand 
+		generateCodeForExpression(method, type->expr, code, offset); 
 
-
+		//write instruction 
+		if (type->typeName == STRING_TYPE_NAME) {
+			u1 = ANEWARRAY; 
+			writeU1ToArray(code, offset); 
+			struct Constant* classString = addClassToConstantsTable("Ljava/lang/String;");
+			u2 = htons(classString->id); 
+			writeU2ToArray(code, offset); 
+		}
+		else {
+			u1 = NEWARRAY; 
+			writeU1ToArray(code, offset); 
+			if (type->typeName == INT_TYPE_NAME) {
+				u1 = 10; 
+			}
+			else if (type->typeName == FLOAT32_TYPE_NAME) {
+				u1 = 6; 
+			}
+			writeU1ToArray(code, offset); 
+		}
 	}
 	else { //none array declaration
 		struct IdentifierList* idList = varSpec->idListType->identifierList; 
