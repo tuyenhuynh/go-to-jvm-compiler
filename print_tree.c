@@ -32,7 +32,6 @@ void printExpression(int parentId, struct Expression* expression) {
 	if (expression != NULL) {
 		maxId++;
 		int id = maxId; 
-		
 		char* exprTypeName = convertTypeNameToString(expression->semanticType->typeName); 
 		char exprNodeInfo[20];
 		strcpy(exprNodeInfo, "EXPR__"); 

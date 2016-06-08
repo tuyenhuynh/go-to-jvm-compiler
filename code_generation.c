@@ -820,7 +820,48 @@ void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchS
 }
 void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset){
 	//generate code for initial statement 
-	
+	struct ForClause* forClause = forStmt->forClause; 
+	if (forClause->forInitStmt->initStmt != NULL) {
+		struct SimpleStmt* simpleStmt = forClause->forInitStmt->initStmt; 
+		generateCodeForSimpleStmt(method, simpleStmt, code, offset); 		
+	}
+	//generate code for goto statement and reserve it's address 
+	int gotoInstructionPos = *offset;
+	u1 = GOTO; 
+	writeU1ToArray(code, offset); 
+	s2 = htons(0); 
+	writeS2ToArray(code, offset); 
+	//generate code for body of for statement
+	int forBodyPos = *offset; 
+	generateCodeForStmtList(method, forStmt->block->stmtList, code, offset); 
+	//generate post statement 
+	if (forStmt->forClause->forPostStmt->postStmt != NULL) {
+		generateCodeForSimpleStmt(method, forStmt->forClause->forPostStmt->postStmt, code, offset); 
+	}
+	//reserve address of condition 
+	int conditionExprPos = *offset; 
+	//generate code for condition of for stmt
+	if (forStmt->forClause->forCondition->expression != NULL) {
+		generateCodeForExpression(method, forStmt->forClause->forCondition->expression, code, offset); 
+	}
+	else {
+		u1 = ICONST_1; 
+		writeU1ToArray(code, offset); 
+	}
+	//fix goto address 
+	s2 = conditionExprPos - gotoInstructionPos;
+	int* gotoOperandPos = (int*)malloc(sizeof(int)); 
+	*gotoOperandPos = gotoInstructionPos + 1;
+	writeS2ToArray(code, gotoOperandPos); 
+
+	//generate IFEQ instruction to check condition
+	int ifnePos = *offset; 
+	u1 = IFNE; 
+	writeU1ToArray(code, offset); 
+	//generete offset
+	s2 = forBodyPos - ifnePos; 
+	writeS2ToArray(code, offset); 
+
 }
 void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset){
 
