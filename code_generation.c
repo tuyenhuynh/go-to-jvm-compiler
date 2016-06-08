@@ -870,6 +870,19 @@ void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanSt
 		
 }
 
+void loadComparisonResultToStack(char* code, int* offset) {
+	s2 = htons(7);
+	writeS2ToArray(code, offset);
+	u1 = ICONST_0;
+	writeU1ToArray(code, offset);
+	u1 = GOTO;
+	writeU1ToArray(code, offset);
+	s2 = htons(4);
+	writeS2ToArray(code, offset);
+	u1 = ICONST_1;
+	writeU1ToArray(code, offset);
+}
+
 //totally 13 types of expression supported 
 void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code, int* offset){
 	switch (expr->exprType) {
@@ -906,6 +919,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 				u1 = IF_ICMPEQ;
 			}
 			writeU1ToArray(code, offset);
+
 			break;
 		}
 		case NE_EXPRESSION: {
@@ -933,16 +947,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 				u1 = IF_ICMPGT;
 			}
 			writeU1ToArray(code, offset);
-			s2 =  htons(7);
-			writeS2ToArray(code, offset); 
-			u1 =  ICONST_0;
-			writeU1ToArray(code, offset); 
-			u1 = GOTO; 
-			writeU1ToArray(code, offset); 
-			s2 = htons(4);
-			writeS2ToArray(code, offset); 
-			u1 = ICONST_1;
-			writeU1ToArray(code, offset); 
+			loadComparisonResultToStrack(code, offset); 
 			break; 
 		}
 		case GTE_EXPRESSION: {

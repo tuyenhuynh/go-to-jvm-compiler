@@ -54,8 +54,8 @@ void writeMethod(struct Method* method);
 void generateCode(struct Program* root); 
 void writeConstant(struct Constant* constant); 
 void writeField(struct Field* field); 
-
-void generateCodeForDefaultConstructor(); 
+void generateCodeForDefaultConstructor();
+void loadComparisonResultToStack(char* code, int* offset);
 char* generateCodeForMethod(struct Method* method, int* codeLength);  
 void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code, int *offset);  
 void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char* code, int* offset);  
