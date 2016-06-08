@@ -370,13 +370,13 @@ void writeSf4() {
 	Write((void*)&sf4, 4);
 }
 
-void writeU1ToArray(char* code, int* offset) { 
+void writeU1ToArray(char* code, int* offset) {
 	code[*offset] = u1;
 	*offset += 1; 
 }
 
 void writeU2ToArray(char* code, int* offset) {
-	unsigned char bytes[2];	
+	unsigned char bytes[2];
 	bytes[1] = (u2 >> 8) & 0xFF;
 	bytes[0] = u2 & 0xFF;
 	code[*offset] = bytes[0];
@@ -774,7 +774,7 @@ void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* c
 
 	//write command ifeq
 	int ifeqPos = *offset; 
-	int elsePos; 
+	int gotoPos; 
 	u1 = IFEQ; 
 	writeU1ToArray(code, offset);
 
@@ -785,24 +785,35 @@ void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* c
 	generateCodeForStmtList(method, ifStmt->block->stmtList, code, offset);
 	if (ifStmt->elseBlock != NULL) {
 		//generate code for else block
-		elsePos = *offset; 
+		gotoPos = *offset; 
 		u1 = GOTO;
 		writeU1ToArray(code, offset);
-		//reserve 2 bytes to for displacement of goto 
-		*offset += 2;
-
-		//save position of else block
-		int elseBlockPos = *offset;
+		// write temporary displacement value to offset 
+		s2 = htons(0); 
+		writeS2ToArray(code, offset);
 	}	
 	//reserve value of offset
 	int tmp = *offset; 
-	s2 = htons(*offset - ifeqPos);//htons();
+	s2 = htons(*offset - ifeqPos);
 	//fix the value of ifeq's operand
-	*offset = ifeqPos; 
+	*offset = ifeqPos +1 ; 
 	writeS2ToArray(code, offset); 
 	//restore value of offset for future instructions
 	*offset = tmp; 
-
+	if (ifStmt->elseBlock != NULL) {
+		if (ifStmt->elseBlock->ifStmt != NULL) {
+			generateCodeForIfStmt(method, ifStmt, code, offset); 
+		}
+		else if (ifStmt->elseBlock->block != NULL) {
+			generateCodeForStmtList(method, ifStmt->elseBlock->block->stmtList, code, offset); 
+		}
+		tmp = *offset;
+		s2 = htons(*offset - gotoPos); 
+		//fix value of goto's operand
+		*offset = gotoPos + 1; 
+		writeS2ToArray(code, offset); 
+		*offset = tmp; 
+	}
 }
 
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset){
