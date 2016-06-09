@@ -50,6 +50,7 @@ struct Method {
 	List* localVariablesTable; 
 	struct ParameterList* paramList; 
 	struct FunctionDecl* functionDecl; 
+	bool isStatic; 
 };
 
 struct Class {
