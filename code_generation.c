@@ -84,6 +84,11 @@ ARETURN = 0xB0,
 RETURN = 0xB1
 ;
 
+static unsigned short
+ACC_SUPER = 0x0020,
+ACC_PUBLIC = 0x0001, 
+ACC_STATIC = 0x0008;
+
 void generateCode(struct Program* root){
 	program = root;
 	// 0200 user can only write file
@@ -286,7 +291,13 @@ void generateCodeForDefaultConstructor() {
 }
 
 void writeMethod(struct Method* method) {
-	u2 = htons(ACC_PUBLIC);
+	char* methodName = method->constMethodref->const2->const1->utf8; 
+	if (strcmp(methodName, "main") == 0) {
+		u2 = htons(ACC_PUBLIC | ACC_STATIC); 
+	}
+	else {
+		u2 = htons(ACC_PUBLIC);
+	}
 	writeU2(); 
 
 	//write id of  constant utf8, which contains method's name 
@@ -318,7 +329,15 @@ void writeMethod(struct Method* method) {
 	u2 = 1000; 
 	writeU2(); 
 	//local variable count
-	int localVarsCount = list_size(method->localVariablesTable)+1; //include variable this(id = 0)
+	char* methodName = method->constMethodref->const2->const1->utf8; 
+	int localVarsCount;  
+	if (strcmp(methodName, "main") == 0) {
+		localVarsCount = list_size(method->localVariablesTable); 
+	}
+	else {
+		localVarsCount = list_size(method->localVariablesTable) + 1; 
+	}
+	
 	u2 = htons(localVarsCount); 
 	writeU2(); 
 	 
