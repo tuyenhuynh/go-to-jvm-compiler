@@ -839,17 +839,20 @@ void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char
 		generateCodeForSimpleStmt(method, forStmt->forClause->forPostStmt->postStmt, code, offset); 
 	}
 	//reserve address of condition 
-	int conditionExprPos = *offset; 
+	int conditionExprPos; 
+	conditionExprPos = *offset;
 	//generate code for condition of for stmt
-	if (forStmt->forClause->forCondition->expression != NULL) {
+	if (forStmt->forClause->forCondition->expression != NULL) {		
 		generateCodeForExpression(method, forStmt->forClause->forCondition->expression, code, offset); 
+		//conditionExprPos = *offset - 8; 
 	}
 	else {
 		u1 = ICONST_1; 
 		writeU1ToArray(code, offset); 
+		//calculate condition expr
 	}
 	//fix goto address 
-	s2 = conditionExprPos - gotoInstructionPos;
+	s2 = htons(conditionExprPos - gotoInstructionPos);
 	int* gotoOperandPos = (int*)malloc(sizeof(int)); 
 	*gotoOperandPos = gotoInstructionPos + 1;
 	writeS2ToArray(code, gotoOperandPos); 
@@ -859,9 +862,8 @@ void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char
 	u1 = IFNE; 
 	writeU1ToArray(code, offset); 
 	//generete offset
-	s2 = forBodyPos - ifnePos; 
+	s2 = htons(forBodyPos - ifnePos);
 	writeS2ToArray(code, offset); 
-
 }
 void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset){
 
@@ -910,35 +912,38 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 		case EQU_EXPRESSION: {
 			generateCodeForExpression(method, expr->leftExpr, code, offset); 
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				// TODO Need to store byte offset to jump on if condition is true or false
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IF_ICMPEQ;
 			}
 			writeU1ToArray(code, offset);
-
+			loadComparisonResultToStack(code, offset); 
 			break;
 		}
 		case NE_EXPRESSION: {
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 			// TODO
 
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IF_ICMPNE;
 			}
 			writeU1ToArray(code, offset);
+			loadComparisonResultToStack(code, offset); 
 			break;
 		}
 		case GT_EXPRESSION: {
 			generateCodeForExpression(method, expr->leftExpr, code, offset);
 			generateCodeForExpression(method, expr->rightExpr, code, offset); 
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				// TODO
 			}
@@ -947,57 +952,66 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 				u1 = IF_ICMPGT;
 			}
 			writeU1ToArray(code, offset);
-			loadComparisonResultToStrack(code, offset); 
+			loadComparisonResultToStack(code, offset); 
 			break; 
 		}
 		case GTE_EXPRESSION: {
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				// TODO
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IF_ICMPGE;
 			}
 			writeU1ToArray(code, offset);
+			loadComparisonResultToStack(code, offset);
 			break;
 		}
 		case LT_EXPRESSION: {
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				// TODO
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IF_ICMPLT;
 			}
 			writeU1ToArray(code, offset);
+			loadComparisonResultToStack(code, offset);
 			break;
 		}
 		case LTE_EXPRESSION: {
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			generateCodeForExpression(method, expr->leftExpr, code, offset);
+			generateCodeForExpression(method, expr->rightExpr, code, offset);
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				// TODO
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IF_ICMPLE;
 			}
 			writeU1ToArray(code, offset);
+			loadComparisonResultToStack(code , offset);
 			break;
 		}
 		case PLUS_EXPRESSION: {
 			generateCodeForExpression(method, expr->leftExpr, code, offset); // load left expr to stack
 			generateCodeForExpression(method, expr->rightExpr, code, offset); // load right expr to stack
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR) // perform operations
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				u1 = FADD;
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IADD;
 			}
-			else if (expr->leftExpr->exprType == STRING_EXPR && expr->rightExpr->exprType == STRING_EXPR)
+			else if (expr->leftExpr->exprType == STRING_EXPR)
 			{
 				// TODO
 			}
@@ -1007,11 +1021,11 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 		case MINUS_EXPRESSION: {
 			generateCodeForExpression(method, expr->leftExpr, code, offset);
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				u1 = FSUB;
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = ISUB;
 			}
@@ -1021,11 +1035,11 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 		case MUL_EXPRESSION: {
 			generateCodeForExpression(method, expr->leftExpr, code, offset);
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				u1 = FMUL;
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IMUL;
 			}
@@ -1035,11 +1049,11 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 		case DIV_EXPRESSION: {
 			generateCodeForExpression(method, expr->leftExpr, code, offset);
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
-			if (expr->leftExpr->exprType == FLOAT_EXPR && expr->rightExpr->exprType == FLOAT_EXPR)
+			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
 				u1 = FDIV;
 			}
-			else if (expr->leftExpr->exprType == DECIMAL_EXPR && expr->rightExpr->exprType == DECIMAL_EXPR)
+			if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
 				u1 = IDIV;
 			}
