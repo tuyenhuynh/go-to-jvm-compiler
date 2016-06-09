@@ -84,7 +84,6 @@ ARETURN = 0xB0,
 RETURN = 0xB1
 ;
 
-
 void generateCode(struct Program* root){
 	program = root;
 	// 0200 user can only write file
@@ -102,8 +101,8 @@ void generateCode(struct Program* root){
 		u2 = htons(0); 
 		writeU2();
 
-		//major version of jdk 5
-		u2 = htons(49);
+		//major version of jdk 8
+		u2 = htons(52);
 		writeU2();
 
 		writeConstantsTable(); 
@@ -1144,16 +1143,19 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 			u1 = ALOAD_0; 
 			writeU1ToArray(code, offset); 
 			//write arguments
-			struct Expression* expr = primaryExpr->funcCall->exprList->firstExpression; 
-			while (expr != NULL) {
-				generateCodeForExpression(method, expr, code, offset); 
-				expr = expr->nextExpr; 
+			struct FunctionCall* functionCall = primaryExpr->funcCall; 
+			if (functionCall->exprList != NULL) {
+				struct Expression* expr = functionCall->exprList->firstExpression;
+				while (expr != NULL) {
+					generateCodeForExpression(method, expr, code, offset);
+					expr = expr->nextExpr;
+				}
+				//
 			}
-			//
 			u1 = INVOKESPECIAL; 
 			writeU1ToArray(code, offset); 
 			//find constant method ref from constants table
-			struct Method*  method = getMethod(primaryExpr->funcCall->primaryExpr->identifier); 
+			struct Method*  method = getMethod(functionCall->primaryExpr->identifier); 
 			//write id of constant method ref
 			u2 = htons(method->constMethodref->id);
 			writeU2ToArray(code, offset); 
