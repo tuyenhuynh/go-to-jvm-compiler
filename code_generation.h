@@ -12,12 +12,6 @@ static char* classFileName = "Go.class";
 
 struct Program* program;
 
-static unsigned short
-ACC_SUPER = 0x0020,
-ACC_PUBLIC = 0x0001;
-
-extern int objectClass;
-
 int fd;
 unsigned char u1;
 unsigned short int u2;
@@ -27,9 +21,13 @@ int s4;
 float sf4;
 
 int fh; 
-struct Constant* constantCode; 
+
+extern struct Constant* constantCode; 
 extern struct Constant* constantClassString;
 extern struct Constant* objectConstructorMethodRef; 
+extern struct Constant* constantObjectClass;
+extern struct Constant* constantSourceFile;
+extern struct Constant* constantSourceFileName;
 
 void Write(void* data, int count);
 void writeU1(); 

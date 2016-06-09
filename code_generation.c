@@ -119,9 +119,18 @@ void generateCode(struct Program* root){
 		writeMethodsTable(); 
 
 		//write number of class's attributes(usally 0)
-		u2 = 0; 
+		u2 = htons(1); 
+		writeU2();
+		//write class's attributes
+		//index of attribute name
+		u2 = htons(constantSourceFile->id);
 		writeU2(); 
-		//write class's attributes(nothing to do)
+		//attribute length
+		u4 = htonl(2);
+		writeU4(); 
+		u2 = htons(constantSourceFileName->id);
+		writeU2(); 
+	
 	}
 	close(fh);
 }
@@ -151,7 +160,7 @@ void writeClassMetadata() {
 	writeU2();
 
 	//write parent class(Object); 
-	u2 = htons(objectClass);
+	u2 = htons(constantObjectClass->id);
 	writeU2();
 
 	//number of interface
@@ -225,7 +234,6 @@ void writeMethodsTable() {
 	}
 }
 
-
 void generateCodeForDefaultConstructor() {
 	u2 = htons(ACC_PUBLIC); 
 	writeU2(); 
@@ -292,7 +300,7 @@ void generateCodeForDefaultConstructor() {
 
 void writeMethod(struct Method* method) {
 	char* methodName = method->constMethodref->const2->const1->utf8; 
-	if (strcmp(methodName, "main") == 0) {
+	if (method->isStatic) {
 		u2 = htons(ACC_PUBLIC | ACC_STATIC); 
 	}
 	else {
@@ -326,12 +334,11 @@ void writeMethod(struct Method* method) {
 	u4 = htonl(attributeCodeLength); 
 	writeU4(); 
 	//stack's size
-	u2 = 1000; 
+	u2 = 100; 
 	writeU2(); 
 	//local variable count
-	char* methodName = method->constMethodref->const2->const1->utf8; 
 	int localVarsCount;  
-	if (strcmp(methodName, "main") == 0) {
+	if (method->isStatic) {
 		localVarsCount = list_size(method->localVariablesTable); 
 	}
 	else {
@@ -1158,26 +1165,30 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 			break;
 		}
 		case FUNCTION_CALL: {
-			//load referece to object of called method
-			u1 = ALOAD_0; 
-			writeU1ToArray(code, offset); 
-			//write arguments
-			struct FunctionCall* functionCall = primaryExpr->funcCall; 
-			if (functionCall->exprList != NULL) {
-				struct Expression* expr = functionCall->exprList->firstExpression;
-				while (expr != NULL) {
-					generateCodeForExpression(method, expr, code, offset);
-					expr = expr->nextExpr;
+			char* calleeName = primaryExpr->funcCall->primaryExpr->identifier; 
+			struct Method* calleeMethod = getMethod(calleeName); 
+			if (calleeMethod->isStatic) { //surely, every methods in this class is static 
+										  //load referece to object of called method
+				//fill stack with arguments 
+				struct FunctionCall* functionCall = primaryExpr->funcCall;
+				if (functionCall->exprList != NULL) {
+					struct Expression* expr = functionCall->exprList->firstExpression;
+					while (expr != NULL) {
+						generateCodeForExpression(method, expr, code, offset);
+						expr = expr->nextExpr;
+					}
+					//
 				}
-				//
+				u1 = INVOKESTATIC;
+				writeU1ToArray(code, offset);
+				//write id of constant method ref
+				u2 = htons(calleeMethod->constMethodref->id);
+				writeU2ToArray(code, offset);
 			}
-			u1 = INVOKESPECIAL; 
-			writeU1ToArray(code, offset); 
-			//find constant method ref from constants table
-			struct Method*  method = getMethod(functionCall->primaryExpr->identifier); 
-			//write id of constant method ref
-			u2 = htons(method->constMethodref->id);
-			writeU2ToArray(code, offset); 
+			else {
+				
+			}
+
 			break;
 		}
 		case EXPRESSION: {
