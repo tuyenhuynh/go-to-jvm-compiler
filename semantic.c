@@ -4,13 +4,16 @@
 #include "helpers.h"
 
 
-char* CLASS_NAME = "GO_CLASS";
+char* CLASS_NAME = "Go";
 int scope = 0;
-int objectClass; 
+
 
 struct Constant* constantCode; 
 struct Constant* constantClassString;
 struct Constant* objectConstructorMethodRef; 
+struct Constant* constantObjectClass; 
+struct Constant* constantSourceFile; 
+struct Constant* constantSourceFileName;
 
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
@@ -320,8 +323,7 @@ bool doSemantic(struct Program* program) {
 	semanticClass->methodsTable = methodsTable; 
 	
 	//add object class and it's init method to constants table
-	struct Constant* constantObjectClass = addObjectClassToConstantsTable();
-	objectClass = constantObjectClass->id; 
+	constantObjectClass = addObjectClassToConstantsTable();
 
 	//add Code constants table
 	constantCode = addUtf8ToConstantsTable("Code");
@@ -334,6 +336,9 @@ bool doSemantic(struct Program* program) {
 	//add constant type string 
 	constantClassString = addClassToConstantsTable("java/lang/String"); 
 
+	//
+	constantSourceFile = addUtf8ToConstantsTable("SourceFile"); 
+	constantSourceFileName = addUtf8ToConstantsTable("Go.java");
 	bool isOk = true; 
 	struct DeclarationList* declList = program->declList;
 	
@@ -421,8 +426,12 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		method->constMethodref = constMethodRef;
 		method->returnType = semanticReturnType;
 		method->paramList = paramList; 
-		method->functionDecl = functionDecl; 
+		method->functionDecl = functionDecl;
+		method->isStatic = true; 
 
+		char* methodName = method->constMethodref->const2->const1->utf8;
+		int isMethodMain = strcmp(methodName, "main") == 0;
+		
 		/*-----------------*/
 		//add method to methodsTable of class
 		hashtable_add(methodsTable, functionDecl->identifier, method);
@@ -1280,12 +1289,21 @@ bool addConstSpecToLocalVarsTable(struct ConstSpec* constSpec, struct Method* me
 bool addParamToLocalVarsTable(char* paramName, struct SemanticType* semanticType, struct Method* method) {
 	bool isOk = true;
 	List* variablesTable = method->localVariablesTable;
+	char* methodName = method->constMethodref->const2->const1->utf8; 
 	struct LocalVariable* localVariable = findActiveLocalVariableByScope(variablesTable, paramName, 1);
 	if (localVariable == NULL) {
 		localVariable = (struct LocalVariable*)malloc(sizeof(struct LocalVariable));
 		localVariable->name = paramName;
 		localVariable->semanticType = semanticType; 
-		localVariable->id = list_size(variablesTable) + 1;
+		if (method->isStatic) {
+			localVariable->id = list_size(variablesTable); 
+		}
+		else {
+			localVariable->id = list_size(variablesTable) + 1;
+		}
+
+		//cuz every method is currently s
+		localVariable->id = list_size(variablesTable);
 		localVariable->scope = 1;
 		list_add(variablesTable, localVariable);
 	}
@@ -1301,7 +1319,12 @@ struct LocalVariable* addVariableToLocalVarsTable(char* id, struct SemanticType*
 	//TODO : implement size for variable
 	if (findActiveLocalVariableByScope(method->localVariablesTable, id, scope) == NULL) {
 		localVariable = (struct LocalVariable*) malloc(sizeof(struct LocalVariable)); 
-		localVariable->id = list_size(method->localVariablesTable) + 1;
+		if (method->isStatic) {
+			localVariable->id = list_size(method->localVariablesTable);
+		}
+		else {
+			localVariable->id = list_size(method->localVariablesTable) + 1;
+		}
 		localVariable->scope = scope;
 		localVariable->name = id;
 		localVariable->isActive = true; 
