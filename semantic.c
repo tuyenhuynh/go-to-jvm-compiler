@@ -226,7 +226,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		case ID_EXPRESSION: {
 			//find type and idNum of identifier
 			struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, primaryExpr->identifier);
-			addUtf8ToConstantsTable(primaryExpr->identifier);
+			//addUtf8ToConstantsTable(primaryExpr->identifier);
 			if (variable == NULL) {
 				struct Field* field = getField(semanticClass, primaryExpr->identifier); 
 				if (field == NULL) {
@@ -444,7 +444,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		if (paramList != NULL) {
 			struct ParameterDeclare* param = paramList->firstParamDecl;
 			while (param != NULL && isOk) {
-				addUtf8ToConstantsTable(param->identifier); 
+				//addUtf8ToConstantsTable(param->identifier); 
 				struct SemanticType* paramSemanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType)); 
 				paramSemanticType->typeName = param->type->typeName; 
 				if (param->type->expr != NULL) {
@@ -454,7 +454,7 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 					paramSemanticType->arrayType = NONE_ARRAY; 
 				}
 				char* paramTypeStr = convertTypeToString(paramSemanticType);
-				addUtf8ToConstantsTable(paramTypeStr);
+				//addUtf8ToConstantsTable(paramTypeStr);
 				isOk = addParamToLocalVarsTable(param->identifier, paramSemanticType, method);
 				if (isOk) {
 					param = param->nextParamDecl;
@@ -1228,7 +1228,7 @@ bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method) 
 			semanticType->arrayType = NONE_ARRAY; 
 		}
 		char* typenameStr = convertTypeToString(semanticType); 
-		addUtf8ToConstantsTable(typenameStr); 
+		//addUtf8ToConstantsTable(typenameStr); 
 		
 		while (id != NULL && isOk) {
 			struct LocalVariable* variable = addVariableToLocalVarsTable(id->name, semanticType, method, true);
@@ -1267,10 +1267,10 @@ bool addConstSpecToLocalVarsTable(struct ConstSpec* constSpec, struct Method* me
 			semanticType->arrayType = NONE_ARRAY; 
 		}
 		char* typeNameStr = convertTypeToString(semanticType);
-		addUtf8ToConstantsTable(typeNameStr); 
+		//addUtf8ToConstantsTable(typeNameStr); 
 		while (id != NULL && isOk) {
 			// add utf8 to constant table
-			addUtf8ToConstantsTable(id->name);
+			//addUtf8ToConstantsTable(id->name);
 			isOk = (addVariableToLocalVarsTable(id->name, semanticType, method, false) != NULL );
 			id = id->nextId; 
 		}
