@@ -29,6 +29,12 @@ extern struct Constant* constantObjectClass;
 extern struct Constant* constantSourceFile;
 extern struct Constant* constantSourceFileName;
 
+extern struct Constant* constantClassRuntimeLib;
+extern struct Constant* printStringMethodRef;
+extern struct Constant* printIntegerMethodRef;
+extern struct Constant* printFloatMethodRef;
+
+
 void Write(void* data, int count);
 void writeU1(); 
 void writeU2(); 

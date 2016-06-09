@@ -21,6 +21,8 @@ HashTable* methodsTable;
 
 struct Constant* constantClass; 
 
+void addRuntimeLibConstant();
+struct Constant* addConstantMethodRefToConstantTable(struct Constant* clazz, struct Constant* nameAndType);
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method);
 struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primaryExpr, struct Method* method); 
 bool doSemantic(struct Program* program); 

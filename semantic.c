@@ -15,6 +15,31 @@ struct Constant* constantObjectClass;
 struct Constant* constantSourceFile; 
 struct Constant* constantSourceFileName;
 
+struct Constant* constantClassRuntimeLib;
+struct Constant* printStringMethodRef; 
+struct Constant* printIntegerMethodRef; 
+struct Constant* printFloatMethodRef; 
+
+struct Constant* addConstantMethodRefToConstantTable(struct Constant* clazz, struct Constant* nameAndType) {
+	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant)); 
+	constant->const1 = clazz; 
+	constant->const2 = nameAndType; 
+	constant->id = list_size(constantsTable) + 1; 
+	constant->type = CONSTANT_Methodref; 
+	list_add(constantsTable, constant); 
+	return constant; 
+}
+
+void addRuntimeLibConstant() {
+	constantClassRuntimeLib = addClassToConstantsTable("RuntimeLib"); 
+	struct Constant* printStringNameAndType = addNameAndTypeToConstantsTable("printString", "(Ljava/lang/String;)V"); 
+	struct Constant* printIntegerNameAndType = addNameAndTypeToConstantsTable("printInteger", "(I)V"); 
+	struct Constant* printFloatNameAndType = addNameAndTypeToConstantsTable("printFloat", "(F)V");
+	printStringMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, printStringNameAndType);
+	printIntegerMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, printIntegerNameAndType);
+	printFloatMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, printFloatNameAndType);
+}
+
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method) {
 	struct SemanticType* type = (struct SemanticType*) malloc(sizeof(struct SemanticType));
 	switch (expr->exprType) 
@@ -28,28 +53,10 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 			printf("Semantic error. Not operation not supported\n"); 
 			type->typeName = UNKNOWN_TYPE; 
 			break; 
-			/*
-			type = checkPrimaryExpressionType(expr->primaryExpr, method);
-
-			if (type->typeName != BOOL_TYPE_NAME)
-			{
-				printf("Semantic error. Operand must be bool type \n");
-				type->typeName = UNKNOWN_TYPE;
-			}
-			if (type->arrayType == ARRAY) {
-				printf("Semantic error. Array use as operand of NOT operator\n");
-				type->typeName = UNKNOWN_TYPE;
-			}
-			break;
-			*/
 		}
 		case PLUS_UNARY_EXPR:
 		case MINUS_UNARY_EXPR:
 		{
-			/*printf("Semantic error. ++/-- operation not supported\n");
-			type->typeName = UNKNOWN_TYPE;
-			break;
-*/
 			type = checkPrimaryExpressionType(expr->primaryExpr, method); 
 			if(type->typeName != FLOAT32_TYPE_NAME && type->typeName != INT_TYPE_NAME){
 				printf("Semantic error. Type of plus/minus unary expression should be int or float \n");
@@ -67,18 +74,6 @@ struct SemanticType* checkExpressionType(struct Expression* expr, struct Method*
 			printf("Semantic error. AND/OR operation not supported\n");
 			type->typeName = UNKNOWN_TYPE;
 			break;
-
-			//struct SemanticType* leftType = checkExpressionType(expr->leftExpr, method); 
-			//struct SemanticType* rightType = checkExpressionType(expr->rightExpr, method); 
-			//
-			//if (leftType->typeName == BOOL_TYPE_NAME &&
-			//	rightType->typeName == BOOL_TYPE_NAME) {
-			//	type->typeName = BOOL_TYPE_NAME;
-			//}else {
-			//	printf("Semantic error. Left and right operands of logical operator should be bool type \n");
-			//	type->typeName = UNKNOWN_TYPE;
-			//}
-			//break;
 		}
 		case EQU_EXPRESSION:
 		case NE_EXPRESSION:
@@ -335,6 +330,8 @@ bool doSemantic(struct Program* program) {
 	
 	//add constant type string 
 	constantClassString = addClassToConstantsTable("java/lang/String"); 
+
+	addRuntimeLibConstant(); 
 
 	//
 	constantSourceFile = addUtf8ToConstantsTable("SourceFile"); 
