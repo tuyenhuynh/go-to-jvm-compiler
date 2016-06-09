@@ -1026,6 +1026,11 @@ bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* met
 	bool isOk = true; 
 	while (expr != NULL&& isOk) {
 		struct SemanticType*  semanticType = checkExpressionType(expr, method); 
+
+		if (semanticType->arrayType == ARRAY) {
+			printf("Semantic error. Print array currently not supported by compiler\n");
+			isOk = false; 
+		}
 		if (semanticType->typeName != STRING_TYPE_NAME &&
 			semanticType->typeName != FLOAT32_TYPE_NAME
 			&& semanticType->typeName != INT_TYPE_NAME) {
