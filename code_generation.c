@@ -103,11 +103,11 @@ void generateCode(struct Program* root){
 		writeU4();
 
 		//minor version
-		u2 = htons(0); 
+		u2 = htons(3); 
 		writeU2();
 
 		//major version of jdk 8
-		u2 = htons(52);
+		u2 = htons(0x2D);
 		writeU2();
 
 		writeConstantsTable(); 
@@ -891,8 +891,39 @@ void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char
 	writeS2ToArray(code, offset); 
 }
 void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset){
+	struct ExpressionList* exprList = printStmt->expressionList;
+	struct Expression* expr = exprList->firstExpression; 
+	while (expr != NULL) {
+		if (expr->semanticType->typeName == INT_TYPE_NAME) {
+			generateCodeForExpression(method, expr, code, offset); 
+			u1 = INVOKESTATIC;
+			writeU1ToArray(code, offset);
+			//write id of constant method ref print integer
+			u2 = htons(printIntegerMethodRef->id);
+			writeU2ToArray(code, offset);
+		}
+		else if (expr->semanticType->typeName == FLOAT32_TYPE_NAME) {
+			generateCodeForExpression(method, expr, code, offset);
+			u1 = INVOKESTATIC;
+			writeU1ToArray(code, offset);
+			//write id of constant method ref print integer
+			u2 = htons(printFloatMethodRef->id);
+			writeU2ToArray(code, offset);
+		}
+		else if (expr->semanticType->typeName == STRING_TYPE_NAME) {
+			generateCodeForExpression(method, expr, code, offset);
+			u1 = INVOKESTATIC;
+			writeU1ToArray(code, offset);
+			//write id of constant method ref print integer
+			u2 = htons(printStringMethodRef->id);
+			writeU2ToArray(code, offset);
+		}
+		expr = expr->nextExpr; 
+	}
 
 }
+
+
 void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanStmt, char* code, int* offset){
 		
 }
