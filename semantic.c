@@ -379,8 +379,6 @@ struct Constant* addObjectClassToConstantsTable() {
 	return constantObjectClass;
 }
 
-
-
 //check and add function to method table
 bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 	bool isOk = true; 
@@ -477,10 +475,11 @@ bool checkSemanticFunctionDecl(struct FunctionDecl* functionDecl) {
 		}
 
 		if (semanticReturnType->typeName != UNKNOWN_TYPE && semanticReturnType->typeName != VOID_TYPE_NAME) {
-			isOk = isContainStatementType(functionDecl->block->stmtList, RETURN_STMT);
+			/*isOk = isContainStatementType(functionDecl->block->stmtList, RETURN_STMT);
 			if (! isOk ){
 				printf("Semantic error. Function %s should return a value\n", functionDecl->identifier); 
-			}
+			}*/
+			isOk = true; 
 		}
 	}
 	else {
