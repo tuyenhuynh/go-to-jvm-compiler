@@ -517,7 +517,6 @@ char* generateCodeForMethod(struct Method* method,int* codeLength){
 }
 
 void generateCodeForVarDecl(struct Method* method, struct VarDecl* varDecl, char* code, int* offset){
-	bool isOk = true;
 	//one line declaration
 	if (varDecl->varSpec != NULL) {
 		generateCodeForVarSpec(method, varDecl->varSpec, code, offset);
@@ -630,7 +629,18 @@ void generateCodeForArrayInitialization(struct Method* method,int  localArrayVar
 }
 
 void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code, int* offset){
-	
+	//one line constant declaration
+	if (constDecl->constSpec != NULL) {
+		generateCodeForVarSpec(method, constDecl->constSpec, code, offset);
+	}
+	else {
+		//multiline constant declaration ( in parenthesises)
+		struct ConstSpec* constSpec = constDecl->constSpecList->firstConstSpec; 
+		while (constSpec != NULL) {
+			generateCodeForConstSpec(method, constSpec, code, offset);
+			constSpec = constSpec->nextConstSpec;
+		}
+	}
 }
 
 void generateCodeForConstSpec(struct Method* method, struct ConstSpec* constSpec, char* code, int* offset){
