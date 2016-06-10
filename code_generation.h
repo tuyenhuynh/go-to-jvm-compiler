@@ -70,7 +70,9 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* co
 void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code, int* offset);  
 void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* code, int* offset);  
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset);  
-void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset);  
+void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset);
+void generateCodeForForStmtWithExpr(struct Method* method, struct ForStmt* forStmt, char* code, int* offset); 
+void generateCodeForInfinitiveFor(struct Method* method, struct ForStmt* forStmt, char* code, int* offset);
 void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset);  
 void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanStmt, char* code, int*  offset);  
 void generateCodeForExpression(struct Method* method, struct Expression* expr, char* code, int* offset);  

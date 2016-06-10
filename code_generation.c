@@ -719,7 +719,16 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* co
 			break; 
 		}
 		case FOR_STMT: {
-			generateCodeForForStmt(method, stmt->forStmt, code, offset); 
+			struct ForStmt* forStmt = stmt->forStmt;
+			if (forStmt->forClause != NULL) {
+				generateCodeForStandardForStmt(method, stmt->forStmt, code, offset); 
+			}
+			else if (forStmt->expr != NULL) {
+				generateCodeForForStmtWithExpr(method, stmt->forStmt, code, offset); 
+			}
+			else {
+				generateCodeForInfinitiveFor(method, stmt->forStmt, code, offset); 
+			}
 			break; 
 		}
 		case PRINT_STMT: {
@@ -907,9 +916,58 @@ void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* c
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset){
 		
 }
-void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset){
+
+void generateCodeForInfinitiveFor(struct Method* method, struct ForStmt* forStmt, char* code, int* offset) { 
+	//generate code for body of for statement
+	int forBodyPos = *offset;
+	generateCodeForStmtList(method, forStmt->block->stmtList, code, offset);
+	int gotoInstructionPos = *offset;
+	u1 = GOTO;
+	writeU1ToArray(code, offset);
+	//generete offset
+	s2 = htons(forBodyPos - gotoInstructionPos);
+	writeS2ToArray(code, offset);
+}
+
+void generateCodeForForStmtWithExpr(struct Method* method, struct ForStmt* forStmt, char* code, int* offset) {
+	//generate code for goto statement and reserve it's address 
+	int gotoInstructionPos = *offset;
+	u1 = GOTO;
+	writeU1ToArray(code, offset);
+	s2 = htons(0);
+	writeS2ToArray(code, offset);
+	
+	//generate code for body of for statement
+	int forBodyPos = *offset;
+	generateCodeForStmtList(method, forStmt->block->stmtList, code, offset);
+	
+	//reserve address of condition 
+	int conditionExprPos;
+	conditionExprPos = *offset;
+	//generate code for condition of for statment 
+	generateCodeForExpression(method, forStmt->expr, code, offset);
+	
+	//fix goto address 
+	s2 = htons(conditionExprPos - gotoInstructionPos);
+	int* gotoOperandPos = (int*)malloc(sizeof(int));
+	*gotoOperandPos = gotoInstructionPos + 1;
+	writeS2ToArray(code, gotoOperandPos);
+
+	//generate IFEQ instruction to check condition
+	int ifnePos = *offset;
+	u1 = IFNE;
+	writeU1ToArray(code, offset);
+	//generete offset
+	s2 = htons(forBodyPos - ifnePos);
+	writeS2ToArray(code, offset);
+
+}
+
+
+void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset){
 	//generate code for initial statement 
 	struct ForClause* forClause = forStmt->forClause; 
+
 	if (forClause->forInitStmt->initStmt != NULL) {
 		struct SimpleStmt* simpleStmt = forClause->forInitStmt->initStmt; 
 		generateCodeForSimpleStmt(method, simpleStmt, code, offset); 		
@@ -953,6 +1011,8 @@ void generateCodeForForStmt(struct Method* method, struct ForStmt* forStmt, char
 	//generete offset
 	s2 = htons(forBodyPos - ifnePos);
 	writeS2ToArray(code, offset); 
+
+
 }
 void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset){
 	struct ExpressionList* exprList = printStmt->expressionList;

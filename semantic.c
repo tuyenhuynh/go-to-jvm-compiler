@@ -1003,9 +1003,9 @@ bool checkSemanticForStmt(struct ForStmt* forStmt, struct Method* method) {
 			}
 		}
 	}
-	else {
-		printf("Semantic error. For statement type while not support\n");
-		isOk = false; 
+	else if (forStmt->expr != NULL){
+		//for with expression (while)
+		isOk = checkExpressionType(forStmt->expr, method);
 	}
 	//check semantic block
 	if (isOk) {
