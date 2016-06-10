@@ -564,9 +564,14 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 		}
 		u1 = ASTORE; 
 		writeU1ToArray(code, offset); 
-		int idNum = varSpec->idListType->identifierList->firstId->idNum;
-		u1 = idNum;
-		writeU1ToArray(code, offset); 
+		int localArrayVarId = varSpec->idListType->identifierList->firstId->idNum;
+		u1 = localArrayVarId;
+		writeU1ToArray(code, offset);  
+
+		//init array's value
+		if (varSpec->exprList != NULL) {
+			generateCodeForArrayInitialization(method, localArrayVarId, varSpec->exprList, code, offset);
+		}
 	}
 	else { //none array declaration
 		struct IdentifierList* idList = varSpec->idListType->identifierList; 
@@ -575,7 +580,6 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 			struct Identifier* id = idList->firstId; 
 			struct Expression* expr = exprList->firstExpression; 
 			while (id != NULL) {
-				
 				generateCodeForSingleAssignment(method, id->idNum, expr, code, offset); 
 				id = id->nextId; 
 				expr = expr->nextExpr; 
@@ -584,6 +588,47 @@ void generateCodeForVarSpec(struct Method* method, struct VarSpec* varSpec, char
 	}
 }
 	
+void generateCodeForArrayInitialization(struct Method* method,int  localArrayVarId, 
+	struct ExpressionList* exprList, char* code, int *offset) {
+	struct Expression* expr = exprList->firstExpression; 
+	for (int i = 0; i < exprList->size; ++i) {
+		//TODO: generate code id is field, not local variable
+
+		//gen code to load array reference to stack operand
+		u1 = ALOAD;
+		writeU1ToArray(code, offset);
+		u1 = localArrayVarId;
+		writeU1ToArray(code, offset);
+
+		//gen code to define array index ;
+		u1 = ILOAD; 
+		writeU1ToArray(code, offset);
+		u1 = i; 
+		writeU1ToArray(code, offset); 
+
+		//generate code for right expression
+		generateCodeForExpression(method, expr, code, offset);
+
+		//store value on top of stack to local variable
+		switch (expr->semanticType->typeName) {
+			case INT_TYPE_NAME: {
+				u1 = IASTORE;
+				break;
+			}
+			case FLOAT32_TYPE_NAME: {
+				u1 = FASTORE;
+				break;
+			}
+			case STRING_TYPE_NAME: {
+				u1 = AASTORE;
+				break;
+			}
+		}
+		writeU1ToArray(code, offset);
+		expr = expr->nextExpr; 
+	}
+}
+
 void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code, int* offset){
 	
 }
@@ -677,6 +722,7 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* co
 		}			  
 	}
 }
+
 void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simpleStmt, char* code, int* offset){
 	switch (simpleStmt->stmtType) {
 		case EXPR_SIMPLE_STMT: {
@@ -806,15 +852,21 @@ void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* c
 	s2 = htons(0);
 	writeS2ToArray(code,offset);
 	//generate code for block if condition is correct
+	bool isContainReturn = false;
 	generateCodeForStmtList(method, ifStmt->block->stmtList, code, offset);
 	if (ifStmt->elseBlock != NULL) {
-		//generate code for else block
-		gotoPos = *offset; 
-		u1 = GOTO;
-		writeU1ToArray(code, offset);
-		// write temporary displacement value to offset 
-		s2 = htons(0); 
-		writeS2ToArray(code, offset);
+		if (ifStmt->block->stmtList != 0) {
+			//block of else
+			isContainReturn = isContainStatementType(ifStmt->block->stmtList, RETURN_STMT);
+		}
+		if (!isContainReturn) {
+			gotoPos = *offset;
+			u1 = GOTO;
+			writeU1ToArray(code, offset);
+			// write temporary displacement value to offset 
+			s2 = htons(0);
+			writeS2ToArray(code, offset);
+		}
 	}	
 	//reserve value of offset
 	int tmp = *offset; 
@@ -831,12 +883,14 @@ void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* c
 		else if (ifStmt->elseBlock->block != NULL) {
 			generateCodeForStmtList(method, ifStmt->elseBlock->block->stmtList, code, offset); 
 		}
-		tmp = *offset;
-		s2 = htons(*offset - gotoPos); 
-		//fix value of goto's operand
-		*offset = gotoPos + 1; 
-		writeS2ToArray(code, offset); 
-		*offset = tmp; 
+		if (!isContainReturn) {
+			tmp = *offset;
+			s2 = htons(*offset - gotoPos);
+			//fix value of goto's operand
+			*offset = gotoPos + 1;
+			writeS2ToArray(code, offset);
+			*offset = tmp;
+		}
 	}
 }
 
@@ -1083,7 +1137,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = ISUB;
+				u1 = IMUL;
 			}
 			writeU1ToArray(code, offset);
 			break;
@@ -1097,7 +1151,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = IMUL;
+				u1 = ISUB;
 			}
 			writeU1ToArray(code, offset);
 			break;
