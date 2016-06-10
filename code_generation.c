@@ -25,9 +25,9 @@ DUP = 0x58,
 DUP2 = 0x5C,
 IADD = 0x60,
 FADD = 0x62,
-IMUL = 0x64,
+IMUL = 0x68,
 FMUL = 0x6A,
-ISUB = 0x68,
+ISUB = 0x64,
 FSUB = 0x66,
 IDIV = 0x6C,
 FDIV = 0x6e,
@@ -1137,7 +1137,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = IMUL;
+				u1 = ISUB;
 			}
 			writeU1ToArray(code, offset);
 			break;
@@ -1151,7 +1151,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = ISUB;
+				u1 = IMUL;
 			}
 			writeU1ToArray(code, offset);
 			break;
