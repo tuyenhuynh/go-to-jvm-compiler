@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
 			bool semanticResult = doSemantic(root);
 			if (semanticResult) {
 				printf("Semantic checking successful\n");
-				printProgram(argv[2]);
-				printConstantsTable(); 
+				//printProgram(argv[2]);
+				//printConstantsTable(); 
 				generateCode(root);
 			}
 			else {
