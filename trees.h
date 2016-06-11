@@ -300,6 +300,8 @@ struct SwitchBody {
 struct ExpressionCaseClauseList {
 	struct ExpressionCaseClause *firstExprCaseClause;
 	struct ExpressionCaseClause *lastExprCaseClause;
+	int caseCount; 
+	int defaultCount; 
 };
 
 struct ExpressionCaseClause {
