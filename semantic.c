@@ -892,7 +892,8 @@ bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, struct Method*  meth
 			if (primaryExpr != NULL && primaryExpr->identifier != 0) {
 				//what do to with semanticType (probably nothing :v)
 				initExprSemanticType = checkExpressionType(switchStmt->initialAndExpression->expression, method);
-				if (initExprSemanticType->typeName == UNKNOWN_TYPE) {
+				if (initExprSemanticType->typeName != INT_TYPE_NAME) {
+					printf("Semantic error. Non-integer value used as index in expession of switch statement\n"); 
 					isOk = false;
 				}
 			}
@@ -905,16 +906,24 @@ bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, struct Method*  meth
 	//empty switch initial statement and expression -> nothing to do :v
 
 	//check semantic of switch's body
+	if (switchStmt->switchBody == NULL) {
+		printf("Semantic error. Body of switch statement is empty\n");
+		isOk = false; 
+	}
 	if (isOk) {
 		if (switchStmt->switchBody->eccl != NULL) {
-			scope++; 
-			struct ExpressionCaseClause* ecc = switchStmt->switchBody->eccl->firstExprCaseClause; 
-			
+			scope++;
+			struct ExpressionCaseClauseList* exprCaseClauseList = switchStmt->switchBody->eccl; 
+			struct ExpressionCaseClause* ecc = exprCaseClauseList->firstExprCaseClause; 			
 			while (ecc != NULL && isOk) {
 				isOk = checkSemanticExpressionCaseClause(ecc, initExprSemanticType->typeName, method);
 				ecc = ecc->nextExprCaseClause; 
 			}
 			scope--; 
+			if (exprCaseClauseList->defaultCount > 1) {
+				printf("Semantic error. Multiple default in switch\n");
+				isOk = false; 
+			}
 		} 
 	}
 	return isOk;
@@ -929,19 +938,14 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum Ty
 		struct Expression* expr = exprList->firstExpression; 
 		struct SemanticType* semanticType = NULL; 
 		while (expr != NULL && isOk) {	
-			semanticType  = checkExpressionType(expr, method); 
-			if (identifierType != UNKNOWN_TYPE) {
-				if (semanticType->typeName != identifierType) {
-					printf("Semantic error. Semantic type of switch's identifier and case's value are different\n");
-					isOk = false;
-				}
+			semanticType  = checkExpressionType(expr, method);
+			if (expr->exprType != PRIMARY || expr->primaryExpr->exprType != DECIMAL_EXPR) {
+				printf("Semantic error. Value of expression in case is non-integer type\n");
+				isOk = false;
 			}
-			else {
-				//expression and init of switch is empty (switch {...})
-				if (semanticType->typeName != BOOL_TYPE_NAME) {
-					printf("Semantic error. Type of case's expression must be bool-type\n"); 
-					isOk = false; 
-				}
+			if (semanticType->typeName != INT_TYPE_NAME) {
+				printf("Semantic error. Value of expression in case is non-integer type\n");
+				isOk = false;
 			}
 			if (isOk) {
 				expr = expr->nextExpr; 
