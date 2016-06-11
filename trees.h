@@ -226,6 +226,16 @@ struct Statement {
 	struct ScanStatement *scanStatement;
 	struct PrintStatement *printStatement;
 	struct Statement* nextStatement; 
+	struct BreakStmt* breakStmt;
+	struct ContinueStmt* continueStmt; 
+};
+
+struct BreakStmt{
+	int gotoPosition; 
+};
+
+struct ContinueStmt {
+	int gotoPosition; 
 };
 
 struct StatementList {
