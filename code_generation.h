@@ -82,5 +82,7 @@ void generateCodeForArrayElementAssignment(struct Method*  method,
 struct PrimaryExpression* arrayExpr, struct Expression* indexExpr, struct Expression* expr, char* code, int* offset); 
 void generateCodeForArrayInitialization(struct Method* method, int  localArrayVarId,
 struct ExpressionList* exprList, char* code, int *offset); 
-
+void fillBreakAndFContinueJumpAddress(char* code, struct StatementList* stmtList, int forStart, int forEnd);
+void generateTempCodeForGotoInstruction(char* code, int* offset);
+void fixOffset(char* code, int gotoPosition, int jumpTargetAddress); 
 #endif //_CODE_GENERATION_H_

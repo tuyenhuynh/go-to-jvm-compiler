@@ -98,6 +98,7 @@ void generateCode(struct Program* root){
 		return; 
 	}
 	else {
+		printf("Generating code...\n"); 
 		//magic number
 		u4 = htonl(0xCAFEBABE);
 		writeU4();
@@ -433,10 +434,10 @@ void writeS2ToArray(char* code, int* offset) {
 
 void writeS4ToArray(char* code, int* offset) {
 	char bytes[4];
-	bytes[0] = (u4 >> 24) & 0xFF;
-	bytes[1] = (u4 >> 16) & 0xFF;
-	bytes[2] = (u4 >> 8) & 0xFF;
-	bytes[3] = u4 & 0xFF;
+	bytes[3] = (u4 >> 24) & 0xFF;
+	bytes[2] = (u4 >> 16) & 0xFF;
+	bytes[1] = (u4 >> 8) & 0xFF;
+	bytes[0] = u4 & 0xFF;
 	code[*offset] = bytes[0];
 	code[*offset + 1] = bytes[1];
 	code[*offset + 2] = bytes[2];
@@ -698,11 +699,15 @@ void generateCodeForStmt(struct Method* method, struct Statement* stmt, char* co
 			break; 
 		}
 		case BREAK_STMT: {
-			//TODO: implement this
+			stmt->breakStmt = (struct BreakStmt*) malloc(sizeof(struct BreakStmt)); 
+			stmt->breakStmt->gotoPosition = *offset; 
+			generateTempCodeForGotoInstruction(code, offset);
 			break; 
 		}
 		case CONTINUE_STMT: {
-			//TODO: implement this
+			stmt->continueStmt = (struct ContinueStmt*)malloc(sizeof(struct ContinueStmt));
+			stmt->continueStmt->gotoPosition = *offset; 
+			generateTempCodeForGotoInstruction(code, offset);
 			break; 
 		}
 		case BLOCK: {
@@ -792,6 +797,47 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 		default: {
 			// other type of assignment statements currently not supported
 		}
+	}
+}
+
+
+void generateTempCodeForGotoInstruction(char* code, int* offset) {
+	int gotoInstructionPos = *offset; 
+	u1 = GOTO;
+	writeU1ToArray(code, offset); 
+	s2 = htons(0); 
+	writeS2ToArray(code, offset); 
+}
+
+void fixOffset(char* code, int gotoPosition, int jumpTargetAddress) {
+	int* operandPos = (int*)malloc(sizeof(int)); 
+	*operandPos = gotoPosition + 1;
+	s2 = htons(jumpTargetAddress - gotoPosition); 
+	writeS2ToArray(code, operandPos); 
+}
+
+void fillBreakAndFContinueJumpAddress(char* code, struct StatementList* stmtList, int forStart, int forEnd) {
+	struct Statement* stmt = stmtList->firstStmt;
+	while (stmt != NULL) {
+		if (stmt->stmtType == CONTINUE_STMT) {
+			fixOffset(code, stmt->continueStmt->gotoPosition, forStart); 
+		}
+		else if (stmt->stmtType == BREAK_STMT) {
+			fixOffset(code, stmt->breakStmt->gotoPosition, forEnd); 
+		}
+		else if (stmt->stmtType == IF_STMT) {
+			struct IfStmt* ifStmt = stmt->ifStmt;
+			fillBreakAndFContinueJumpAddress(code, ifStmt->block->stmtList, forStart, forEnd);
+			if (ifStmt->elseBlock != NULL) {
+				if (ifStmt->elseBlock->block != NULL) {
+					fillBreakAndFContinueJumpAddress(code, ifStmt->elseBlock->block->stmtList, forStart, forEnd);
+				}
+				else {
+					fillBreakAndFContinueJumpAddress(code, ifStmt->elseBlock->ifStmt->block->stmtList, forStart, forEnd);
+				}
+			}
+		}
+		stmt = stmt->nextStatement;
 	}
 }
 
@@ -914,7 +960,7 @@ void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* c
 }
 
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset){
-		
+	
 }
 
 void generateCodeForInfinitiveFor(struct Method* method, struct ForStmt* forStmt, char* code, int* offset) { 
@@ -973,7 +1019,7 @@ void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forSt
 		generateCodeForSimpleStmt(method, simpleStmt, code, offset); 		
 	}
 	//generate code for goto statement and reserve it's address 
-	int gotoInstructionPos = *offset;
+	int forStartAddress = *offset;
 	u1 = GOTO; 
 	writeU1ToArray(code, offset); 
 	s2 = htons(0); 
@@ -991,7 +1037,6 @@ void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forSt
 	//generate code for condition of for stmt
 	if (forStmt->forClause->forCondition->expression != NULL) {		
 		generateCodeForExpression(method, forStmt->forClause->forCondition->expression, code, offset); 
-		//conditionExprPos = *offset - 8; 
 	}
 	else {
 		u1 = ICONST_1; 
@@ -999,9 +1044,9 @@ void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forSt
 		//calculate condition expr
 	}
 	//fix goto address 
-	s2 = htons(conditionExprPos - gotoInstructionPos);
+	s2 = htons(conditionExprPos - forStartAddress);
 	int* gotoOperandPos = (int*)malloc(sizeof(int)); 
-	*gotoOperandPos = gotoInstructionPos + 1;
+	*gotoOperandPos = forStartAddress + 1;
 	writeS2ToArray(code, gotoOperandPos); 
 
 	//generate IFEQ instruction to check condition
@@ -1011,9 +1056,10 @@ void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forSt
 	//generete offset
 	s2 = htons(forBodyPos - ifnePos);
 	writeS2ToArray(code, offset); 
-
-
+	int forEndAddress = *offset; 
+	fillBreakAndFContinueJumpAddress(code, forStmt->block->stmtList, forStartAddress, forEndAddress); 
 }
+
 void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset){
 	struct ExpressionList* exprList = printStmt->expressionList;
 	struct Expression* expr = exprList->firstExpression; 
