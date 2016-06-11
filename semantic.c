@@ -829,7 +829,7 @@ bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method) {
 			}
 			isOk = false; 
 		}
-		else {
+		/*else {
 			if (isContainStatementType(ifStmt->block->stmtList, BREAK_STMT)) {
 				printf("Semantic Error. Invalid break statement inside if statement\n");
 				isOk = false;
@@ -844,7 +844,7 @@ bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method) {
 					isOk = checkSemanticElseBlock(ifStmt->elseBlock, method);
 				}
 			}
-		}
+		}*/
 	}	
 	return isOk;
 }
@@ -869,8 +869,6 @@ bool checkSemanticElseBlock(struct ElseBlock* elseBlock, struct Method* method) 
 	}
 	return isOk;
 }
-
-
 
 bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, struct Method*  method) {
 	bool isOk = true;
