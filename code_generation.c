@@ -403,49 +403,40 @@ void writeU1ToArray(char* code, int* offset) {
 
 void writeU2ToArray(char* code, int* offset) {
 	unsigned char bytes[2];
-	bytes[1] = (u2 >> 8) & 0xFF;
-	bytes[0] = u2 & 0xFF;
-	code[*offset] = bytes[0];
-	code[*offset + 1] = bytes[1];
+	code[*offset] = u2 & 0xFF;
+	code[*offset + 1] = (u2 >> 8) & 0xFF;
 	*offset += 2; 
 }
 
 void writeU4ToArray(char* code, int* offset) {
-	unsigned char bytes[4];
-	bytes[3] = (u4 >> 24) & 0xFF;
-	bytes[2] = (u4 >> 16) & 0xFF;
-	bytes[1] = (u4 >> 8) & 0xFF;
-	bytes[0] = u4 & 0xFF;
-	code[*offset] = bytes[0];
-	code[*offset + 1] = bytes[1];
-	code[*offset + 2] = bytes[2]; 
-	code[*offset + 3] = bytes[3]; 
+	code[*offset] = u4 & 0xFF;
+	code[*offset + 1] = (u4 >> 8) & 0xFF;
+	code[*offset + 2] = (u4 >> 16) & 0xFF;
+	code[*offset + 3] = (u4 >> 24) & 0xFF;
 	*offset += 4; 
 }
 
 void writeS2ToArray(char* code, int* offset) {
-	char bytes[2];
-	bytes[1] = (s2 >> 8) & 0xFF;
-	bytes[0] = s2 & 0xFF;
-	code[*offset] = bytes[0];
-	code[*offset + 1] = bytes[1];
+	code[*offset] = s2 & 0xFF;
+	code[*offset + 1] = (s2 >> 8) & 0xFF;
 	*offset += 2; 
 }
 
 void writeS4ToArray(char* code, int* offset) {
-	char bytes[4];
-	bytes[3] = (u4 >> 24) & 0xFF;
-	bytes[2] = (u4 >> 16) & 0xFF;
-	bytes[1] = (u4 >> 8) & 0xFF;
-	bytes[0] = u4 & 0xFF;
-	code[*offset] = bytes[0];
-	code[*offset + 1] = bytes[1];
-	code[*offset + 2] = bytes[2];
-	code[*offset + 3] = bytes[3];
+	code[*offset] = s4 & 0xFF;
+	code[*offset + 1] = (s4 >> 8) & 0xFF;
+	code[*offset + 2] = (s4 >> 16) & 0xFF;
+	code[*offset + 3] = (s4 >> 24) & 0xFF;
 	*offset += 4; 
 }
 void writeSf4ToArray(char* code, int* offset) {
-	writeS4ToArray(code, offset); 
+	int* floatToIntPointer = (int*)&sf4; 
+	int intSf4 = *floatToIntPointer; 
+	code[*offset] = intSf4 & 0xFF;
+	code[*offset + 1] = (intSf4 >> 8) & 0xFF;
+	code[*offset + 2] = (intSf4 >> 16) & 0xFF;
+	code[*offset + 3] = (intSf4 >> 24) & 0xFF;
+	*offset += 4;
 }
 
 void writeConstant(struct Constant* constant) {
