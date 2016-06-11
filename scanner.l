@@ -126,7 +126,8 @@ DECIMAL		[0-9]+
 									return FLOAT_NUMBER;
 								}
 0[xX][0-9a-fA-F]+				{
-									return HEXADECIMAL_NUMBER;
+									yylval.decValue = hex_decimal(yytext); 
+									return DECIMAL_NUMBER;
 									
 								}
 0[1-7][0-7]*					{
