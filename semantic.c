@@ -875,6 +875,11 @@ bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, struct Method*  meth
 
 	struct SemanticType* initExprSemanticType = (struct SemanticType*) malloc(sizeof(struct SemanticType)); 
 	initExprSemanticType->typeName = UNKNOWN_TYPE; 
+	if (switchStmt->initialAndExpression->switchType == WITH_INITIAL_STMT) {
+		printf("Semantic error. Switch can not start with initial statement without expression\n");
+		return false;
+	}
+
 	if (switchStmt->initialAndExpression != NULL)
 	{	
 		if (switchStmt->initialAndExpression->initialStmt != NULL) {

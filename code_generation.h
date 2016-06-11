@@ -88,4 +88,5 @@ void fixOffset(char* code, int gotoPosition, int jumpTargetAddress);
 void fixDefaultDefinitionPosition(char* code, int lookupswitchInstructionPos, int defaultDeclPos, int defaultDefPos); 
 void fixCaseDefinitionPosition(char* code, int lookupswitchInstructionPos, int caseDeclPos, int caseDefPos);
 void generateCodeForSwitchStmtWithExpression(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset);
+void generateCodeToCheckForCondition(char* code, int *offset, int forBodyPos);
 #endif //_CODE_GENERATION_H_
