@@ -85,4 +85,7 @@ struct ExpressionList* exprList, char* code, int *offset);
 void fillBreakAndFContinueJumpAddress(char* code, struct StatementList* stmtList, int forStart, int forEnd);
 void generateTempCodeForGotoInstruction(char* code, int* offset);
 void fixOffset(char* code, int gotoPosition, int jumpTargetAddress); 
+void fixDefaultDefinitionPosition(char* code, int lookupswitchInstructionPos, int defaultDeclPos, int defaultDefPos); 
+void fixCaseDefinitionPosition(char* code, int lookupswitchInstructionPos, int caseDeclPos, int caseDefPos);
+void generateCodeForSwitchStmtWithExpression(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset);
 #endif //_CODE_GENERATION_H_

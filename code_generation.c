@@ -429,6 +429,7 @@ void writeS4ToArray(char* code, int* offset) {
 	code[*offset + 3] = (s4 >> 24) & 0xFF;
 	*offset += 4; 
 }
+
 void writeSf4ToArray(char* code, int* offset) {
 	int* floatToIntPointer = (int*)&sf4; 
 	int intSf4 = *floatToIntPointer; 
@@ -951,7 +952,105 @@ void generateCodeForIfStmt(struct Method* method, struct IfStmt* ifStmt, char* c
 }
 
 void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset){
-	
+	struct SwitchInitialAndExpression* initAndExpr = switchStmt->initialAndExpression; 
+	if (initAndExpr->switchType == WITH_INITIAL_STMT) {
+		
+	}
+	else if (initAndExpr->switchType == WITH_EXPRESSION) {
+		generateCodeForSwitchStmtWithExpression(method, switchStmt,  code, offset); 
+	}
+	else {
+		//with init statement and expr 
+		generateCodeForSimpleStmt(method, initAndExpr->initialStmt, code, offset); 
+		generateCodeForSwitchStmtWithExpression(method, switchStmt, code, offset); 
+	}
+}
+
+void generateCodeForSwitchStmtWithExpression(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset) {
+	struct SwitchInitialAndExpression* initAndExpr = switchStmt->initialAndExpression;
+	//generate index (expression of switch statement)
+	struct PrimaryExpression* primaryExpr = initAndExpr->expression->primaryExpr; 
+	generateCodeForPrimaryExpression(method, primaryExpr, code, offset); 
+	int lookupswitchInstructionPos = *offset; 
+	u1 = LOOKUPSWITCH; 
+	writeU1ToArray(code, offset);
+	//calculate and fill  padding bytes with value of 0 (0 to 3 byte of padding)
+	int paddingCount  = 3 - lookupswitchInstructionPos%4 ;
+	u1 = 0;
+	for (int i = 0; i < paddingCount; ++i) {
+		writeU1ToArray(code, offset); 
+	}
+
+	//write temporary  default lookup  info
+	int defaultDisplacementDeclarationPosition = *offset;
+	s4 = htons(0);
+	writeS4ToArray(code, offset);
+
+	//write lookup data of cases
+	int caseCountPosition = *offset; 
+	s4 = htonl(switchStmt->switchBody->eccl->caseCount);
+	writeS4ToArray(code, offset); 
+	struct ExpressionCaseClauseList* exprCaseClauseList = switchStmt->switchBody->eccl; 
+	struct ExpressionCaseClause* exprCaseClause = exprCaseClauseList->firstExprCaseClause;
+	int caseCount = exprCaseClauseList->caseCount; 
+	int caseExpression[100];
+	int currentCase= 0; 
+	//find all keys (expressions of case)
+	while (exprCaseClause != NULL) {
+		if (exprCaseClause->expreSwitchCase->exprList != NULL) {
+			//case
+			struct Expression* expr = exprCaseClause->expreSwitchCase->exprList->firstExpression; 
+			caseExpression[currentCase] = expr->primaryExpr->decNumber; 
+			currentCase++; 
+		}
+		exprCaseClause = exprCaseClause->nextExprCaseClause; 
+	}
+
+	s4 = 0; 
+	int caseDisplacementDeclarationPosition[100]; 
+	for (int i = 0; i < caseCount; ++i) {
+		s4 = htonl(caseExpression[i]);
+		writeS4ToArray(code, offset); 
+		caseDisplacementDeclarationPosition[i] = *offset; 
+		s4 = htonl(0);
+		writeS4ToArray(code, offset); 
+	}
+
+	//generate code and fix lookup info
+	exprCaseClause = exprCaseClauseList->firstExprCaseClause; 
+	currentCase = 0; 
+	while (exprCaseClause != NULL) {
+		if (exprCaseClause->expreSwitchCase->exprList != NULL) {
+			//case 
+			//fix case position 
+			int caseDefPos = *offset; 
+			fixCaseDefinitionPosition(code, lookupswitchInstructionPos, caseDisplacementDeclarationPosition[currentCase], caseDefPos); 			
+			currentCase += 1; 
+		}
+		else {
+			//default
+			//fix default position
+			int defaultDefPos = *offset; 
+			fixDefaultDefinitionPosition(code, lookupswitchInstructionPos, defaultDisplacementDeclarationPosition, defaultDefPos); 
+		}
+		//generate code for statement list 
+		generateCodeForStmtList(method, exprCaseClause->stmtList, code, offset); 
+		exprCaseClause = exprCaseClause->nextExprCaseClause; 
+	}
+}
+
+void fixDefaultDefinitionPosition(char* code, int lookupswitchInstructionPos, int defaultDeclPos, int defaultDefPos) {
+	int* casePos = (int*)malloc(sizeof(int));
+	s4 = htonl(defaultDefPos - lookupswitchInstructionPos);
+	*casePos = defaultDeclPos;
+	writeS4ToArray(code, casePos);
+}
+
+void fixCaseDefinitionPosition(char* code, int lookupswitchInstructionPos, int caseDeclPos, int caseDefPos) {
+	int* casePos = (int*)malloc(sizeof(int));
+	s4 = htonl(caseDefPos - lookupswitchInstructionPos); 
+	*casePos = caseDeclPos;
+	writeS4ToArray(code, casePos);
 }
 
 void generateCodeForInfinitiveFor(struct Method* method, struct ForStmt* forStmt, char* code, int* offset) { 
