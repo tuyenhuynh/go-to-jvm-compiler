@@ -708,16 +708,38 @@ struct ExpressionCaseClauseList *CreateExpressionCaseClauseList(struct Expressio
 	struct ExpressionCaseClauseList *Result = (struct ExpressionCaseClauseList *)malloc(sizeof(struct ExpressionCaseClauseList));
 	Result->firstExprCaseClause = _exprCaseClause;
 	Result->lastExprCaseClause = _exprCaseClause;
+	if (_exprCaseClause->expreSwitchCase->exprList != NULL) {
+		Result->caseCount = 1;
+		Result->defaultCount = 0;
+	}
+	else {
+		Result->defaultCount = 1;
+		Result->caseCount = 0;
+	}
 	return Result;
 }
 
 struct ExpressionCaseClauseList *AppendToExpressionCaseClauseList(struct ExpressionCaseClauseList *_eccl, struct ExpressionCaseClause *_exprCaseClause) {
 	if (_eccl == NULL) {
-		_eccl = CreateExpressionCaseClauseList(_exprCaseClause); 
+		_eccl = CreateExpressionCaseClauseList(_exprCaseClause);
+		if (_exprCaseClause->expreSwitchCase->exprList != NULL) {
+			_eccl->caseCount = 1;
+			_eccl->defaultCount = 0; 
+		}
+		else {
+			_eccl->defaultCount = 1; 
+			_eccl->caseCount = 0; 
+		}
 	}
 	else {
 		_eccl->lastExprCaseClause->nextExprCaseClause = _exprCaseClause; 
 		_eccl->lastExprCaseClause = _exprCaseClause; 
+		if (_exprCaseClause->expreSwitchCase->exprList != NULL) {
+			_eccl->caseCount += 1;
+		}
+		else {
+			_eccl->defaultCount += 1;
+		}
 	}
 	return _eccl; 
 }
