@@ -14,6 +14,7 @@ struct Program* program;
 
 int fd;
 unsigned char u1;
+char s1;
 unsigned short int u2;
 unsigned int u4;
 short int s2;
@@ -44,6 +45,7 @@ void writeS4();
 void writeSf4(); 
 void writeString(char* str);
 void writeU1ToArray(char* code, int* offset);
+void writeS1ToArray(char* code, int* offset);
 void writeU2ToArray(char* code, int* offset);
 void writeU4ToArray(char* code, int* offset);
 void writeS2ToArray(char* code, int* offset);

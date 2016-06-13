@@ -401,6 +401,11 @@ void writeU1ToArray(char* code, int* offset) {
 	*offset += 1; 
 }
 
+void writeS1ToArray(char*code, int* offset) {
+	code[*offset] = s1;
+	*offset += 1;
+}
+
 void writeU2ToArray(char* code, int* offset) {
 	unsigned char bytes[2];
 	code[*offset] = u2 & 0xFF;
@@ -748,25 +753,25 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 		case INC_SIMPLE_STMT: {
 			//TODO: implement situation when operand of this operation is class's field 
 			u1 = IINC;
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			//get id of variable in local var table 
 			u1 = simpleStmt->expr->primaryExpr->semanticType->idNum; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			//write constant 1 
 			u1 = 1; 
-			writeU1(); 
+			writeU1ToArray(code, offset); 
 			break; 
 		}
 		case DEC_SIMPLE_STMT: {
 			//TODO: implement situation when operand of this operation is class's field 
 			u1 = IINC;
-			writeU1();
+			writeU1ToArray(code, offset);
 			//get id of variable in local var table 
 			u1 = simpleStmt->expr->primaryExpr->semanticType->idNum;
-			writeU1();
+			writeU1ToArray(code, offset);
 			//write constant 1 
-			u1 = 1;
-			writeU1();
+			s1 = -1;
+			writeS1ToArray(code, offset);
 			break; 
 		}
 		case ASSIGN_STMT: {			
@@ -965,6 +970,7 @@ void generateCodeForSwitchStmt(struct Method* method, struct SwitchStmt* switchS
 
 void generateCodeForSwitchStmtWithExpression(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset) {
 	struct SwitchInitialAndExpression* initAndExpr = switchStmt->initialAndExpression;
+	int switchStartAddress = *offset; 
 	//generate index (expression of switch statement)
 	struct PrimaryExpression* primaryExpr = initAndExpr->expression->primaryExpr; 
 	generateCodeForPrimaryExpression(method, primaryExpr, code, offset); 
@@ -1034,6 +1040,14 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 		generateCodeForStmtList(method, exprCaseClause->stmtList, code, offset); 
 		exprCaseClause = exprCaseClause->nextExprCaseClause; 
 	}
+	int switchEndAddress = *offset;
+	exprCaseClause = exprCaseClauseList->firstExprCaseClause; 
+	while (exprCaseClause != NULL) {
+		if(exprCaseClause->stmtList != NULL) {
+			fillBreakAndFContinueJumpAddress(code, exprCaseClause->stmtList, switchStartAddress, switchEndAddress);
+		}
+	}
+
 }
 
 void fixDefaultDefinitionPosition(char* code, int lookupswitchInstructionPos, int defaultDeclPos, int defaultDefPos) {
@@ -1048,30 +1062,6 @@ void fixCaseDefinitionPosition(char* code, int lookupswitchInstructionPos, int c
 	s4 = htonl(caseDefPos - lookupswitchInstructionPos); 
 	*casePos = caseDeclPos;
 	writeS4ToArray(code, casePos);
-}
-
-void generateCodeForInfinitiveFor(struct Method* method, struct ForStmt* forStmt, char* code, int* offset) { 
-	//generate code for body of for statement
-	int forStartAddress = *offset;
-	generateTempCodeForGotoInstruction(code, offset);
-
-	//generate code for body of for statement
-	int forBodyPos = *offset; 
-	generateCodeForStmtList(method, forStmt->block->stmtList, code, offset);
-	
-	//generate code for condition
-	int conditionPos = *offset; 
-	u1  = ICONST_1;
-	writeU1ToArray(code, offset);
-	
-	//fix offset of goto statement
-	fixOffset(code, forStartAddress, conditionPos);
-	
-	//generate code to check condition of for statement
-	generateCodeToCheckForCondition(code, offset, forBodyPos); 
-
-	fillBreakAndFContinueJumpAddress(code, forStmt->block->stmtList, forStartAddress, *offset);
-
 }
 
 void generateCodeForForStmtWithExpr(struct Method* method, struct ForStmt* forStmt, char* code, int* offset) {
@@ -1102,6 +1092,29 @@ void generateCodeForForStmtWithExpr(struct Method* method, struct ForStmt* forSt
 
 }
 
+void generateCodeForInfinitiveFor(struct Method* method, struct ForStmt* forStmt, char* code, int* offset) {
+	//generate code for body of for statement
+	int forStartAddress = *offset;
+	generateTempCodeForGotoInstruction(code, offset);
+
+	//generate code for body of for statement
+	int forBodyPos = *offset;
+	generateCodeForStmtList(method, forStmt->block->stmtList, code, offset);
+
+	//generate code for condition
+	int conditionPos = *offset;
+	u1 = ICONST_1;
+	writeU1ToArray(code, offset);
+
+	//fix offset of goto statement
+	fixOffset(code, forStartAddress, conditionPos);
+
+	//generate code to check condition of for statement
+	generateCodeToCheckForCondition(code, offset, forBodyPos);
+
+	fillBreakAndFContinueJumpAddress(code, forStmt->block->stmtList, forStartAddress, *offset);
+
+}
 
 void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forStmt, char* code, int* offset){
 	//generate code for initial statement 
@@ -1111,6 +1124,7 @@ void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forSt
 		struct SimpleStmt* simpleStmt = forClause->forInitStmt->initStmt; 
 		generateCodeForSimpleStmt(method, simpleStmt, code, offset); 		
 	}
+
 	//generate code for goto statement and reserve it's address 
 	int forStartAddress = *offset;
 	generateTempCodeForGotoInstruction(code, offset); 
@@ -1132,8 +1146,7 @@ void generateCodeForStandardForStmt(struct Method* method, struct ForStmt* forSt
 	}
 	else {
 		u1 = ICONST_1; 
-		writeU1ToArray(code, offset); 
-		//calculate condition expr
+		writeU1ToArray(code, offset);
 	}
 
 	//fix goto address 
@@ -1160,30 +1173,36 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* prin
 	struct ExpressionList* exprList = printStmt->expressionList;
 	struct Expression* expr = exprList->firstExpression; 
 	while (expr != NULL) {
-		if (expr->semanticType->typeName == INT_TYPE_NAME) {
-			generateCodeForExpression(method, expr, code, offset); 
-			u1 = INVOKESTATIC;
-			writeU1ToArray(code, offset);
-			//write id of constant method ref print integer
-			u2 = htons(printIntegerMethodRef->id);
-			writeU2ToArray(code, offset);
+		if (expr->semanticType->arrayType == ARRAY) {
+			
 		}
-		else if (expr->semanticType->typeName == FLOAT32_TYPE_NAME) {
-			generateCodeForExpression(method, expr, code, offset);
-			u1 = INVOKESTATIC;
-			writeU1ToArray(code, offset);
-			//write id of constant method ref print integer
-			u2 = htons(printFloatMethodRef->id);
-			writeU2ToArray(code, offset);
+		else {
+			if (expr->semanticType->typeName == INT_TYPE_NAME) {
+				generateCodeForExpression(method, expr, code, offset);
+				u1 = INVOKESTATIC;
+				writeU1ToArray(code, offset);
+				//write id of constant method ref print integer
+				u2 = htons(printIntegerMethodRef->id);
+				writeU2ToArray(code, offset);
+			}
+			else if (expr->semanticType->typeName == FLOAT32_TYPE_NAME) {
+				generateCodeForExpression(method, expr, code, offset);
+				u1 = INVOKESTATIC;
+				writeU1ToArray(code, offset);
+				//write id of constant method ref print integer
+				u2 = htons(printFloatMethodRef->id);
+				writeU2ToArray(code, offset);
+			}
+			else if (expr->semanticType->typeName == STRING_TYPE_NAME) {
+				generateCodeForExpression(method, expr, code, offset);
+				u1 = INVOKESTATIC;
+				writeU1ToArray(code, offset);
+				//write id of constant method ref print integer
+				u2 = htons(printStringMethodRef->id);
+				writeU2ToArray(code, offset);
+			}
 		}
-		else if (expr->semanticType->typeName == STRING_TYPE_NAME) {
-			generateCodeForExpression(method, expr, code, offset);
-			u1 = INVOKESTATIC;
-			writeU1ToArray(code, offset);
-			//write id of constant method ref print integer
-			u2 = htons(printStringMethodRef->id);
-			writeU2ToArray(code, offset);
-		}
+		
 		expr = expr->nextExpr; 
 	}
 
