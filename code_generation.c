@@ -1,7 +1,7 @@
 #include "code_generation.h"
 // ===== JVM OPCODES
 
-unsigned short
+unsigned char
 ICONST_M1 = 0x2, // REMOVE THIS (SIGNED) 
 ICONST_0 = 0x3,
 ICONST_1 = 0x4,
@@ -407,7 +407,6 @@ void writeS1ToArray(char*code, int* offset) {
 }
 
 void writeU2ToArray(char* code, int* offset) {
-	unsigned char bytes[2];
 	code[*offset] = u2 & 0xFF;
 	code[*offset + 1] = (u2 >> 8) & 0xFF;
 	*offset += 2; 
@@ -629,7 +628,7 @@ void generateCodeForArrayInitialization(struct Method* method,int  localArrayVar
 void generateCodeForConstDecl(struct Method* method, struct ConstDecl* constDecl, char* code, int* offset){
 	//one line constant declaration
 	if (constDecl->constSpec != NULL) {
-		generateCodeForVarSpec(method, constDecl->constSpec, code, offset);
+		generateCodeForConstSpec(method, constDecl->constSpec, code, offset);
 	}
 	else {
 		//multiline constant declaration ( in parenthesises)
@@ -1046,6 +1045,7 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 		if(exprCaseClause->stmtList != NULL) {
 			fillBreakAndFContinueJumpAddress(code, exprCaseClause->stmtList, switchStartAddress, switchEndAddress);
 		}
+		exprCaseClause = exprCaseClause->nextExprCaseClause; 
 	}
 
 }
