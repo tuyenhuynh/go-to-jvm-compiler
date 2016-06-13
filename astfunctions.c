@@ -668,6 +668,18 @@ struct StatementList *CreateStmtList(struct Statement *_stmt) {
 	return Result;
 }
 
+struct CaseStmtList * CreateCaseStmtList(struct StatementList* _stmtList) {
+	struct CaseStmtList* Result = (struct CaseStmtList*) malloc(sizeof(struct CaseStmtList)); 
+	if (_stmtList == NULL) {
+		_stmtList = (struct StatementList*) malloc(sizeof(struct StatementList)); 
+		_stmtList->firstStmt = NULL; 
+		_stmtList->lastStmt = NULL; 
+		_stmtList->size = 0; 
+	}
+	Result->stmtList = _stmtList; 
+	return Result; 
+}
+
 struct StatementList *AppendToStmtList(struct StatementList *_stmtList, struct Statement *_stmt) {
 	if (_stmtList == NULL) {
 		_stmtList = CreateStmtList(_stmt); 
@@ -744,10 +756,10 @@ struct ExpressionCaseClauseList *AppendToExpressionCaseClauseList(struct Express
 	return _eccl; 
 }
 
-struct ExpressionCaseClause *CreateExpressionCaseClause(struct ExpressionSwitchCase *_expreSwitchCase, struct StatementList *_stmtList) {
+struct ExpressionCaseClause *CreateExpressionCaseClause(struct ExpressionSwitchCase *_expreSwitchCase, struct CaseStmtList *_caseStmtList) {
 	struct ExpressionCaseClause *Result = (struct ExpressionCaseClause *)malloc(sizeof(struct ExpressionCaseClause));
 	Result->expreSwitchCase = _expreSwitchCase;
-	Result->stmtList = _stmtList;
+	Result->stmtList = _caseStmtList->stmtList;
 	Result->nextExprCaseClause = NULL; 
 	return Result;
 

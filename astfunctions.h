@@ -65,6 +65,7 @@ struct ElseBlock * CreateElseBlockFromIfStmt(struct IfStmt * _ifStmt);
 struct ElseBlock * CreateElseBlockFromBlock(struct Block * _block);
 struct Block * CreateBlock(struct StatementList * _stmtList);
 struct StatementList * CreateStmtList(struct Statement * _stmt);
+struct CaseStmtList * CreateCaseStmtList(struct StatementList* _stmtList); 
 struct StatementList * AppendToStmtList(struct StatementList * _stmtList, struct Statement * _stmt);
 struct SwitchStmt * CreateSwitchStatement(struct  SwitchInitialAndExpression * _initialAndExpression, struct SwitchBody * _switchBody);
 struct SwitchInitialAndExpression *CreateSwitchInitialAndExpression(enum SwitchInitialExpressionType _type,
@@ -76,7 +77,7 @@ struct ExpressionCaseClauseList * CreateExpressionCaseClauseList(struct Expressi
 
 struct ExpressionCaseClauseList * AppendToExpressionCaseClauseList(struct ExpressionCaseClauseList * _eccl, struct ExpressionCaseClause * _exprCaseClause);
 
-struct ExpressionCaseClause * CreateExpressionCaseClause(struct ExpressionSwitchCase * _expreSwitchCase, struct StatementList * _stmtList);
+struct ExpressionCaseClause * CreateExpressionCaseClause(struct ExpressionSwitchCase * _expreSwitchCase, struct CaseStmtList * _caseStmtList);
 
 struct ExpressionSwitchCase * CreateExprSwitchCase(struct ExpressionList * _exprList);
 

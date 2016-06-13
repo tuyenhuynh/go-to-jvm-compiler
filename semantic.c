@@ -919,7 +919,8 @@ bool checkSemanticSwitchStmt(struct SwitchStmt* switchStmt, struct Method*  meth
 		if (switchStmt->switchBody->eccl != NULL) {
 			scope++;
 			struct ExpressionCaseClauseList* exprCaseClauseList = switchStmt->switchBody->eccl; 
-			struct ExpressionCaseClause* ecc = exprCaseClauseList->firstExprCaseClause; 			
+			struct ExpressionCaseClause* ecc = exprCaseClauseList->firstExprCaseClause;
+						
 			while (ecc != NULL && isOk) {
 				isOk = checkSemanticExpressionCaseClause(ecc, initExprSemanticType->typeName, method);
 				ecc = ecc->nextExprCaseClause; 
@@ -942,6 +943,7 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum Ty
 		struct ExpressionList* exprList = ecc->expreSwitchCase->exprList; 
 		struct Expression* expr = exprList->firstExpression; 
 		struct SemanticType* semanticType = NULL; 
+
 		while (expr != NULL && isOk) {	
 			semanticType  = checkExpressionType(expr, method);
 			if (expr->exprType != PRIMARY || expr->primaryExpr->exprType != DECIMAL_EXPR) {
@@ -959,6 +961,21 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum Ty
 	}
 	if (isOk) {
 		//check semantic body of case 
+		//add break statement to end of list
+		struct Statement* lastStmt = ecc->stmtList->lastStmt;
+		struct Statement* firstStmt = ecc->stmtList->firstStmt;
+		struct Statement* breakStmt = (struct Statement*) malloc(sizeof(struct Statement));
+		breakStmt->stmtType = BREAK_STMT;
+		breakStmt->nextStatement = NULL;
+		if (lastStmt == NULL) {
+			ecc->stmtList->firstStmt = breakStmt;
+			ecc->stmtList->lastStmt = breakStmt;
+		}
+		else {
+			ecc->stmtList->lastStmt->nextStatement = breakStmt;
+			ecc->stmtList->lastStmt = breakStmt;
+		}
+		ecc->stmtList->size += 1; 
 		struct Statement* stmt = ecc->stmtList->firstStmt;
 		if (isContainStatementType(ecc->stmtList, CONTINUE_STMT)) {
 			printf("Semantic error. Invalid continue statement in body of switch statement\n"); 

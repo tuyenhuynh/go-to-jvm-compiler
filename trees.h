@@ -244,6 +244,10 @@ struct StatementList {
 	int size;
 };
 
+struct CaseStmtList {
+	struct StatementList* stmtList; 
+};
+
 struct SimpleStmt {
 	enum StatementType stmtType;
 	struct Expression *expr;

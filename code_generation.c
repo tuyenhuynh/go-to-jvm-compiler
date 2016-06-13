@@ -796,7 +796,6 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 	}
 }
 
-
 void generateTempCodeForGotoInstruction(char* code, int* offset) {
 	int gotoInstructionPos = *offset; 
 	u1 = GOTO;
@@ -1021,6 +1020,7 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 	//generate code and fix lookup info
 	exprCaseClause = exprCaseClauseList->firstExprCaseClause; 
 	currentCase = 0; 
+
 	while (exprCaseClause != NULL) {
 		if (exprCaseClause->expreSwitchCase->exprList != NULL) {
 			//case 
@@ -1031,7 +1031,7 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 		}
 		else {
 			//default
-			//fix default position
+			//fix position of default
 			int defaultDefPos = *offset; 
 			fixDefaultDefinitionPosition(code, lookupswitchInstructionPos, defaultDisplacementDeclarationPosition, defaultDefPos); 
 		}
@@ -1047,7 +1047,6 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 		}
 		exprCaseClause = exprCaseClause->nextExprCaseClause; 
 	}
-
 }
 
 void fixDefaultDefinitionPosition(char* code, int lookupswitchInstructionPos, int defaultDeclPos, int defaultDefPos) {

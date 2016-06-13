@@ -107,6 +107,8 @@
 
 	struct ElseBlock *ElseBlockUnion;
 
+	struct CaseStmtList* CaseStmtListUnion; 
+
 	struct StatementList *StmtListUnion;
 
 	struct SwitchBody *SwitchBodyUnion;
@@ -174,6 +176,7 @@
 %type<ForStmtUnion> for_statement
 %type<IfStmtExprUnion> if_statement_expression
 %type<ElseBlockUnion> else_block
+%type<CaseStmtListUnion> case_statement_list
 %type<StmtListUnion> statement_list
 %type<SwitchBodyUnion> switch_body
 %type<EcclUnion> expression_case_clause_list
@@ -415,8 +418,13 @@ expression_case_clause_list:
 	; 
 
 expression_case_clause: 
-	expression_switch_case ':' statement_list				{$$ = CreateExpressionCaseClause($1, $3);}
+	expression_switch_case ':' case_statement_list			{$$ = CreateExpressionCaseClause($1, $3);}
 	; 
+
+case_statement_list:
+															{$$ = CreateCaseStmtList(NULL);}
+	|statement_list 										{$$ = CreateCaseStmtList($1);}
+	;										
 
 expression_switch_case: 
 	CASE expression_list									{$$ = CreateExprSwitchCase($2);}
