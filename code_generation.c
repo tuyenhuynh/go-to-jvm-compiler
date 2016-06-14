@@ -393,7 +393,9 @@ void writeS4() {
 }
 
 void writeSf4() {
-	Write((void*)&sf4, 4);
+	int*tmp = (int*)&sf4; 
+	int value = htonl(*tmp); 
+	Write((void*)&value, 4);
 }
 
 void writeU1ToArray(char* code, int* offset) {
@@ -427,10 +429,12 @@ void writeS2ToArray(char* code, int* offset) {
 }
 
 void writeS4ToArray(char* code, int* offset) {
-	code[*offset] = s4 & 0xFF;
-	code[*offset + 1] = (s4 >> 8) & 0xFF;
-	code[*offset + 2] = (s4 >> 16) & 0xFF;
-	code[*offset + 3] = (s4 >> 24) & 0xFF;
+	int*tmp = (int*)&sf4; 
+	int value = *tmp; 
+	code[*offset] = value & 0xFF;
+	code[*offset + 1] = (value >> 8) & 0xFF;
+	code[*offset + 2] = (value >> 16) & 0xFF;
+	code[*offset + 3] = (value >> 24) & 0xFF;
 	*offset += 4; 
 }
 
@@ -448,6 +452,8 @@ void writeConstant(struct Constant* constant) {
 	u1 = constant->type; 
 	Write((void*)&u1, 1); 
 	int length; 
+	int*tmp; 
+	int tmpValue; 
 	switch (constant->type) {
 	case CONSTANT_Utf8:
 		length = strlen(constant->utf8);
@@ -462,8 +468,8 @@ void writeConstant(struct Constant* constant) {
 		Write((void*)&s4, 4);
 		break;
 	case CONSTANT_Float:
-		sf4 = htonl(constant->floatValue); 
-		Write((void*)&sf4, 4); 
+		sf4 = constant->floatValue; 
+		writeSf4(); 
 		break; 
 	case CONSTANT_String: 
 	case CONSTANT_Class:
