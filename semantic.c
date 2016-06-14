@@ -838,13 +838,15 @@ bool checkSemanticIfStmt(struct IfStmt* ifStmt, struct Method* method) {
 				printf("Semantic Error. Invalid continue statement inside if statement\n");
 				isOk = false;
 			}
-			if (isOk) {
-				isOk = checkSemanticBlock(ifStmt->block, method);
-				if (isOk && ifStmt->elseBlock != NULL) {
-					isOk = checkSemanticElseBlock(ifStmt->elseBlock, method);
-				}
-			}
+			
 		}*/
+		//check semantic block of if
+		if (isOk) {
+			isOk = checkSemanticBlock(ifStmt->block, method);
+			if (isOk && ifStmt->elseBlock != NULL) {
+				isOk = checkSemanticElseBlock(ifStmt->elseBlock, method);
+			}
+		}
 	}	
 	return isOk;
 }
