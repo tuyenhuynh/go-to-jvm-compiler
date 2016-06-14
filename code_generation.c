@@ -1191,40 +1191,73 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* prin
 	struct Expression* expr = exprList->firstExpression; 
 	while (expr != NULL) {
 		if (expr->semanticType->arrayType == ARRAY) {
-			
+			struct LocalVariable* var = findeLocalVariableById(method->localVariablesTable, expr->semanticType->idNum); 
+			int arraySize = var->semanticType->arraySize;
+			enum Typenames typeName = expr->semanticType->typeName;
+			for (int i = 0; i < arraySize; ++i) {
+				//generate code to load element
+				//load array id
+				u1 = ALOAD; 
+				writeU1ToArray(code, offset);
+				u1 = expr->semanticType->idNum; 
+				writeU1ToArray(code, offset);
+				//load index
+				u1 = SIPUSH; 
+				writeU1ToArray(code, offset); 
+				s2 = htons(i); 
+				writeS2ToArray(code, offset); 
+				//load element
+				switch (typeName) {
+					case INT_TYPE_NAME: {
+						u1 = IALOAD;
+						break;
+					}
+					case FLOAT32_TYPE_NAME: {
+						u1 = FALOAD;
+					}
+					default: {
+						u1 = AALOAD;
+					}
+				}
+				writeU1ToArray(code, offset); 
+				//call print
+				if (typeName == INT_TYPE_NAME) {
+					generateCodeToCallPrint(code, offset, printIntegerMethodRef->id);
+				}
+				else if (expr->semanticType->typeName == FLOAT32_TYPE_NAME) {
+					generateCodeToCallPrint(code, offset, printFloatMethodRef->id);
+				}
+				else if (expr->semanticType->typeName == STRING_TYPE_NAME) {
+					generateCodeToCallPrint(code, offset, printStringMethodRef->id);
+				}
+			}
 		}
 		else {
 			if (expr->semanticType->typeName == INT_TYPE_NAME) {
 				generateCodeForExpression(method, expr, code, offset);
-				u1 = INVOKESTATIC;
-				writeU1ToArray(code, offset);
-				//write id of constant method ref print integer
-				u2 = htons(printIntegerMethodRef->id);
-				writeU2ToArray(code, offset);
+				generateCodeToCallPrint(code, offset, printIntegerMethodRef->id);
 			}
 			else if (expr->semanticType->typeName == FLOAT32_TYPE_NAME) {
 				generateCodeForExpression(method, expr, code, offset);
-				u1 = INVOKESTATIC;
-				writeU1ToArray(code, offset);
-				//write id of constant method ref print integer
-				u2 = htons(printFloatMethodRef->id);
-				writeU2ToArray(code, offset);
+				generateCodeToCallPrint(code, offset, printFloatMethodRef->id);
 			}
 			else if (expr->semanticType->typeName == STRING_TYPE_NAME) {
 				generateCodeForExpression(method, expr, code, offset);
-				u1 = INVOKESTATIC;
-				writeU1ToArray(code, offset);
-				//write id of constant method ref print integer
-				u2 = htons(printStringMethodRef->id);
-				writeU2ToArray(code, offset);
+				generateCodeToCallPrint(code, offset, printStringMethodRef->id);
 			}
 		}
 		
 		expr = expr->nextExpr; 
 	}
-
 }
 
+void generateCodeToCallPrint(char* code, int* offset, int printMethodRefId) {
+	u1 = INVOKESTATIC;
+	writeU1ToArray(code, offset);
+	//write id of constant method ref print integer
+	u2 = htons(printMethodRefId);
+	writeU2ToArray(code, offset);
+}
 
 void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanStmt, char* code, int* offset){
 		
@@ -1500,28 +1533,23 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 		case FUNCTION_CALL: {
 			char* calleeName = primaryExpr->funcCall->primaryExpr->identifier; 
 			struct Method* calleeMethod = getMethod(calleeName); 
-			if (calleeMethod->isStatic) { //surely, every methods in this class is static 
-										  //load referece to object of called method
-				//fill stack with arguments 
-				struct FunctionCall* functionCall = primaryExpr->funcCall;
-				if (functionCall->exprList != NULL) {
-					struct Expression* expr = functionCall->exprList->firstExpression;
-					while (expr != NULL) {
-						generateCodeForExpression(method, expr, code, offset);
-						expr = expr->nextExpr;
-					}
-					//
+			//surely, every methods in this class is static 
+			//load referece to object of called method
+			//fill stack with arguments 
+			struct FunctionCall* functionCall = primaryExpr->funcCall;
+			if (functionCall->exprList != NULL) {
+				struct Expression* expr = functionCall->exprList->firstExpression;
+				while (expr != NULL) {
+					generateCodeForExpression(method, expr, code, offset);
+					expr = expr->nextExpr;
 				}
-				u1 = INVOKESTATIC;
-				writeU1ToArray(code, offset);
-				//write id of constant method ref
-				u2 = htons(calleeMethod->constMethodref->id);
-				writeU2ToArray(code, offset);
+				//
 			}
-			else {
-				
-			}
-
+			u1 = INVOKESTATIC;
+			writeU1ToArray(code, offset);
+			//write id of constant method ref
+			u2 = htons(calleeMethod->constMethodref->id);
+			writeU2ToArray(code, offset);
 			break;
 		}
 		case EXPRESSION: {

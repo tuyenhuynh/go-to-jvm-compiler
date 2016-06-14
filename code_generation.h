@@ -92,4 +92,5 @@ void fixCaseDefinitionPosition(char* code, int lookupswitchInstructionPos, int c
 void generateCodeForSwitchStmtWithExpression(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset);
 void generateCodeToCheckForCondition(char* code, int *offset, int forBodyPos);
 void sortCaseExpression(struct ExpressionCaseClause* exprCaseClauseList[], int count);
+void generateCodeToCallPrint(char* code, int* offset, int printMethodRefId);
 #endif //_CODE_GENERATION_H_
