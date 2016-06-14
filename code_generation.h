@@ -93,4 +93,5 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 void generateCodeToCheckForCondition(char* code, int *offset, int forBodyPos);
 void sortCaseExpression(struct ExpressionCaseClause* exprCaseClauseList[], int count);
 void generateCodeToCallPrint(char* code, int* offset, int printMethodRefId);
+void genereteCodeForLogicalOperatorWithInt(char* code, int* offset, unsigned char opcode);
 #endif //_CODE_GENERATION_H_

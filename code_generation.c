@@ -1294,7 +1294,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			break; 
 		}
 		case MINUS_UNARY_EXPR : {
-			generateCodeForPrimaryExpression(method, expr->primaryExpr, code, offset); // for right expression or for left or for primary expression?
+			generateCodeForPrimaryExpression(method, expr->primaryExpr, code, offset); 
 			if (expr->primaryExpr->exprType == FLOAT_EXPR)
 			{
 				u1 = FNEG;
@@ -1315,10 +1315,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = IF_ICMPEQ;
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPEQ);
 			}
-			writeU1ToArray(code, offset);
-			loadComparisonResultToStack(code, offset); 
 			break;
 		}
 		case NE_EXPRESSION: {
@@ -1331,10 +1329,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = IF_ICMPNE;
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPNE);
 			}
-			writeU1ToArray(code, offset);
-			loadComparisonResultToStack(code, offset); 
 			break;
 		}
 		case GT_EXPRESSION: {
@@ -1342,14 +1338,12 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			generateCodeForExpression(method, expr->rightExpr, code, offset); 
 			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
-				// TODO
+				
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = IF_ICMPGT;
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPGT);
 			}
-			writeU1ToArray(code, offset);
-			loadComparisonResultToStack(code, offset); 
 			break; 
 		}
 		case GTE_EXPRESSION: {
@@ -1361,10 +1355,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = IF_ICMPGE;
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPGE);
 			}
-			writeU1ToArray(code, offset);
-			loadComparisonResultToStack(code, offset);
 			break;
 		}
 		case LT_EXPRESSION: {
@@ -1376,10 +1368,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = IF_ICMPLT;
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPLT);
 			}
-			writeU1ToArray(code, offset);
-			loadComparisonResultToStack(code, offset);
 			break;
 		}
 		case LTE_EXPRESSION: {
@@ -1391,10 +1381,8 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
-				u1 = IF_ICMPLE;
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPLE); 
 			}
-			writeU1ToArray(code, offset);
-			loadComparisonResultToStack(code , offset);
 			break;
 		}
 		case PLUS_EXPRESSION: {
@@ -1468,6 +1456,12 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			//some expressions are currently unsupported
 		}
 	}	
+}
+
+void genereteCodeForLogicalOperatorWithInt(char* code, int* offset, unsigned char opcode) {
+	u1 = opcode;
+	writeU1ToArray(code, offset);
+	loadComparisonResultToStack(code, offset);
 }
 
 void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpression* primaryExpr, char* code, int* offset){
