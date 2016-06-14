@@ -1311,7 +1311,12 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
-				// TODO Need to store byte offset to jump on if condition is true or false
+				u1 = FCMPG; 
+				writeU1ToArray(code, offset); 
+				u1 = ICONST_0; 
+				writeU1ToArray(code, offset);
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPEQ); 
+
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
@@ -1324,8 +1329,7 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
-			// TODO
-
+				//TODO: generate code for this
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
@@ -1338,7 +1342,11 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			generateCodeForExpression(method, expr->rightExpr, code, offset); 
 			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
-				
+				u1 = FCMPG;
+				writeU1ToArray(code, offset);
+				u1 = ICONST_1;
+				writeU1ToArray(code, offset);
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPEQ);
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
@@ -1351,7 +1359,11 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
-				// TODO
+				u1 = FCMPG;
+				writeU1ToArray(code, offset);
+				u1 = ICONST_0;
+				writeU1ToArray(code, offset);
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPGE);
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
@@ -1364,7 +1376,11 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
-				// TODO
+				u1 = FCMPG;
+				writeU1ToArray(code, offset);
+				u1 = ICONST_M1;
+				writeU1ToArray(code, offset);
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPEQ);
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
@@ -1377,7 +1393,11 @@ void generateCodeForExpression(struct Method* method, struct Expression* expr, c
 			generateCodeForExpression(method, expr->rightExpr, code, offset);
 			if (expr->leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME)
 			{
-				// TODO
+				u1 = FCMPG;
+				writeU1ToArray(code, offset);
+				u1 = ICONST_0;
+				writeU1ToArray(code, offset);
+				genereteCodeForLogicalOperatorWithInt(code, offset, IF_ICMPLE);
 			}
 			else if (expr->leftExpr->semanticType->typeName == INT_TYPE_NAME)
 			{
