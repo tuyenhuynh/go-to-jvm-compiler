@@ -597,10 +597,10 @@ void generateCodeForArrayInitialization(struct Method* method,int  localArrayVar
 		writeU1ToArray(code, offset);
 
 		//gen code to define array index ;
-		u1 = ILOAD; 
+		u1 = SIPUSH; 
 		writeU1ToArray(code, offset);
-		u1 = i; 
-		writeU1ToArray(code, offset); 
+		s2 = htons(i); 
+		writeS2ToArray(code, offset); 
 
 		//generate code for right expression
 		generateCodeForExpression(method, expr, code, offset);
