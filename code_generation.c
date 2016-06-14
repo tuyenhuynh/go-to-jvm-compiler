@@ -994,23 +994,36 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 	struct ExpressionCaseClauseList* exprCaseClauseList = switchStmt->switchBody->eccl; 
 	struct ExpressionCaseClause* exprCaseClause = exprCaseClauseList->firstExprCaseClause;
 	int caseCount = exprCaseClauseList->caseCount; 
-	int caseExpression[100];
+	int caseIndex[100];
 	int currentCase= 0; 
-	//find all keys (expressions of case)
+	//find all case clause
+	struct ExpressionCaseClause* caseClauses[100];
+	struct ExpressionCaseClause* defaultClause = NULL; 
 	while (exprCaseClause != NULL) {
 		if (exprCaseClause->expreSwitchCase->exprList != NULL) {
-			//case
-			struct Expression* expr = exprCaseClause->expreSwitchCase->exprList->firstExpression; 
-			caseExpression[currentCase] = expr->primaryExpr->decNumber; 
-			currentCase++; 
+			caseClauses[currentCase] = exprCaseClause; 
+			currentCase++;
 		}
-		exprCaseClause = exprCaseClause->nextExprCaseClause; 
+		else {
+			defaultClause = exprCaseClause; 
+		}
+		exprCaseClause = exprCaseClause->nextExprCaseClause;
+	}
+	
+	//sort case clauses by key
+	sortCaseExpression(caseClauses, caseCount);
+
+	//find all keys (expressions of case)
+	currentCase = 0; 
+	for (int i = 0; i < caseCount; ++i) {
+		caseIndex[i] = caseClauses[i]->expreSwitchCase->exprList->firstExpression->primaryExpr->decNumber; 
 	}
 
+	//declare temporary position of default and case
 	s4 = 0; 
 	int caseDisplacementDeclarationPosition[100]; 
 	for (int i = 0; i < caseCount; ++i) {
-		s4 = htonl(caseExpression[i]);
+		s4 = htonl(caseIndex[i]);
 		writeS4ToArray(code, offset); 
 		caseDisplacementDeclarationPosition[i] = *offset; 
 		s4 = htonl(0);
@@ -1018,34 +1031,39 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 	}
 
 	//generate code and fix lookup info
-	exprCaseClause = exprCaseClauseList->firstExprCaseClause; 
-	currentCase = 0; 
-
-	while (exprCaseClause != NULL) {
-		if (exprCaseClause->expreSwitchCase->exprList != NULL) {
-			//case 
-			//fix case position 
-			int caseDefPos = *offset; 
-			fixCaseDefinitionPosition(code, lookupswitchInstructionPos, caseDisplacementDeclarationPosition[currentCase], caseDefPos); 			
-			currentCase += 1; 
-		}
-		else {
-			//default
-			//fix position of default
-			int defaultDefPos = *offset; 
-			fixDefaultDefinitionPosition(code, lookupswitchInstructionPos, defaultDisplacementDeclarationPosition, defaultDefPos); 
-		}
+	for (int i = 0; i < caseCount; ++i) {
+		int caseDefPos = *offset;
+		fixCaseDefinitionPosition(code, lookupswitchInstructionPos, caseDisplacementDeclarationPosition[i], caseDefPos);
 		//generate code for statement list 
-		generateCodeForStmtList(method, exprCaseClause->stmtList, code, offset); 
-		exprCaseClause = exprCaseClause->nextExprCaseClause; 
+		generateCodeForStmtList(method, caseClauses[i]->stmtList, code, offset);
 	}
+	//fix position of default
+	int defaultDefPos = *offset;
+	fixDefaultDefinitionPosition(code, lookupswitchInstructionPos, defaultDisplacementDeclarationPosition, defaultDefPos);
+	//generate code for default stmt
+	if (defaultClause != NULL) {
+		generateCodeForStmtList(method, defaultClause->stmtList, code, offset);
+	}
+
+	//fix operand of break instruction
 	int switchEndAddress = *offset;
-	exprCaseClause = exprCaseClauseList->firstExprCaseClause; 
-	while (exprCaseClause != NULL) {
-		if(exprCaseClause->stmtList != NULL) {
-			fillBreakAndFContinueJumpAddress(code, exprCaseClause->stmtList, switchStartAddress, switchEndAddress);
+	for (int i = 0; i < caseCount; ++i) {
+		fillBreakAndFContinueJumpAddress(code, caseClauses[i]->stmtList, switchStartAddress, switchEndAddress);
+	}
+}
+
+void sortCaseExpression(struct ExpressionCaseClause* exprCaseClauseList[], int count) {
+	for (int i = 0; i < count; ++i) {
+		for (int j = i + 1; j < count; ++j) {
+			struct ExpressionCaseClause* firstClause = exprCaseClauseList[i];
+			struct ExpressionCaseClause* secondClause = exprCaseClauseList[j];
+			int firstIndex = firstClause->expreSwitchCase->exprList->firstExpression->primaryExpr->decNumber; 
+			int secondIndex = secondClause->expreSwitchCase->exprList->firstExpression->primaryExpr->decNumber; 
+			if (firstIndex >= secondIndex) {
+				exprCaseClauseList[i] = secondClause;
+				exprCaseClauseList[j] = firstClause;
+			}
 		}
-		exprCaseClause = exprCaseClause->nextExprCaseClause; 
 	}
 }
 

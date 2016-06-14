@@ -91,4 +91,5 @@ void fixDefaultDefinitionPosition(char* code, int lookupswitchInstructionPos, in
 void fixCaseDefinitionPosition(char* code, int lookupswitchInstructionPos, int caseDeclPos, int caseDefPos);
 void generateCodeForSwitchStmtWithExpression(struct Method* method, struct SwitchStmt* switchStmt, char* code, int* offset);
 void generateCodeToCheckForCondition(char* code, int *offset, int forBodyPos);
+void sortCaseExpression(struct ExpressionCaseClause* exprCaseClauseList[], int count);
 #endif //_CODE_GENERATION_H_
