@@ -221,7 +221,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 		}
 		case ID_EXPRESSION: {
 			//find type and idNum of identifier
-			struct LocalVariable* variable = findActiveLocalVariableById(method->localVariablesTable, primaryExpr->identifier);
+			struct LocalVariable* variable = findActiveLocalVariableByName(method->localVariablesTable, primaryExpr->identifier);
 			//addUtf8ToConstantsTable(primaryExpr->identifier);
 			if (variable == NULL) {
 				struct Field* field = getField(semanticClass, primaryExpr->identifier); 
@@ -1046,13 +1046,9 @@ bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* met
 	while (expr != NULL&& isOk) {
 		struct SemanticType*  semanticType = checkExpressionType(expr, method); 
 
-		if (semanticType->arrayType == ARRAY) {
-			printf("Semantic error. Print array currently not supported by compiler\n");
-			isOk = false; 
-		}
 		if (semanticType->typeName != STRING_TYPE_NAME &&
-			semanticType->typeName != FLOAT32_TYPE_NAME
-			&& semanticType->typeName != INT_TYPE_NAME) {
+			semanticType->typeName != FLOAT32_TYPE_NAME && 
+			semanticType->typeName != INT_TYPE_NAME) {
 			printf("Semantic error. Invalid argument in print statement in function %s\n", method->constMethodref->const2->const1->utf8); 
 			isOk = false; 
 		}
@@ -1178,7 +1174,6 @@ bool checkSemanticVarSpec(struct VarSpec* varSpec, struct Method* method)
 			}
 			//check id and values 
 			if (isOk && varSpec->exprList != 0) {
-				addIntegerToConstantsTable(type->expr->primaryExpr->decNumber); 
 				struct Type* type = varSpec->idListType->type;
 				if (varSpec->idListType->identifierList->size != 1) {
 					printf("Semantic error. Array initialization should contain only 1 array variable\n");
@@ -1407,7 +1402,7 @@ void cloneVariable(struct LocalVariable* dest, struct LocalVariable* source) {
 	dest->semanticType->idNum = source->semanticType->idNum; 	
 }
 
-struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName) {
+struct LocalVariable* findActiveLocalVariableByName(List* variablesTable, char* varName) {
 	struct LocalVariable* result = NULL; 
 	struct LocalVariable* variable = NULL; 
 	int size = list_size(variablesTable);
@@ -1418,6 +1413,22 @@ struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* va
 		//this check is strong enough to detect the needed variable
 		if (strcmp(variable->name, varName) == 0 && variable->isActive ) {
 			result = variable; 
+		}
+	}
+
+	return result;
+}
+
+struct LocalVariable* findeLocalVariableById(List* variablesTable, int id) {
+	struct LocalVariable* result = NULL;
+	struct LocalVariable* variable = NULL;
+	int size = list_size(variablesTable);
+	bool found = false;
+	for (int i = 0; i < size; ++i) {
+		list_get_at(variablesTable, i, &variable);
+		//this check is strong enough to detect the needed variable
+		if (variable->id == id) {
+			result = variable;
 		}
 	}
 
@@ -1485,7 +1496,7 @@ bool checkSemanticConstSpec(struct ConstSpec* constSpec, struct Method* method) 
 								else {
 									if (primaryExpr->exprType == ID_EXPRESSION) {
 										struct LocalVariable* variable =
-											findActiveLocalVariableById(method->localVariablesTable, primaryExpr->identifier);
+											findActiveLocalVariableByName(method->localVariablesTable, primaryExpr->identifier);
 										if (variable->isMutable) {
 											printf("Value of constant %s cannot be a variable\n", id->name);
 											isOk = false;
@@ -1522,7 +1533,7 @@ bool checkSemanticConstSpec(struct ConstSpec* constSpec, struct Method* method) 
 						else {
 							if (primaryExpr->exprType == ID_EXPRESSION) {
 								struct LocalVariable* variable =
-									findActiveLocalVariableById(method->localVariablesTable, primaryExpr->identifier);
+									findActiveLocalVariableByName(method->localVariablesTable, primaryExpr->identifier);
 								if (variable->isMutable) {
 									printf("Value of constant %s cannot be a variable\n", id->name);
 									isOk = false;

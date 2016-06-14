@@ -52,7 +52,8 @@ bool addLocalVariableToTable(struct VarDecl* varDecl, struct Method* method);
 struct LocalVariable* findActiveLocalVariableByScope(List* variablesTable, char* varName, int scope);
 //for tree printing purpose
 struct LocalVariable* findLocalVariableByScope(List* variablesTable, char* varName, int scope);
-struct LocalVariable* findActiveLocalVariableById(List* variablesTable, char* varName);
+struct LocalVariable* findActiveLocalVariableByName(List* variablesTable, char* varName);
+struct LocalVariable* findLocalVariableById(List* variablesTable, int id);
 struct LocalVariable* addVariableToLocalVarsTable(char* id, struct SemanticType* type, struct Method* method, bool isMutable);
 bool addVarSpecToLocalVarsTable(struct VarSpec* varSpec, struct Method* method);
 bool addConstantToLocalConstantTable(char* constName, HashTable* localConstTable, struct Method* method); 
