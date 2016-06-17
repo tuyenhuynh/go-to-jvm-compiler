@@ -34,7 +34,9 @@ extern struct Constant* constantClassRuntimeLib;
 extern struct Constant* printStringMethodRef;
 extern struct Constant* printIntegerMethodRef;
 extern struct Constant* printFloatMethodRef;
-
+extern struct Constant* scanStringMethodRef;
+extern struct Constant* scanIntegerMethodRef;
+extern struct Constant* scanFloatMethodRef;
 
 void Write(void* data, int count);
 void writeU1(); 

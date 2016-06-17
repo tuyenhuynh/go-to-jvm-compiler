@@ -335,7 +335,7 @@ void writeMethod(struct Method* method) {
 	u4 = htonl(attributeCodeLength); 
 	writeU4(); 
 	//stack's size
-	u2 = 100; 
+	u2 = htons(100);
 	writeU2(); 
 	//local variable count
 	int localVarsCount;  
@@ -452,8 +452,6 @@ void writeConstant(struct Constant* constant) {
 	u1 = constant->type; 
 	Write((void*)&u1, 1); 
 	int length; 
-	int*tmp; 
-	int tmpValue; 
 	switch (constant->type) {
 	case CONSTANT_Utf8:
 		length = strlen(constant->utf8);
@@ -1197,7 +1195,7 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* prin
 	struct Expression* expr = exprList->firstExpression; 
 	while (expr != NULL) {
 		if (expr->semanticType->arrayType == ARRAY) {
-			struct LocalVariable* var = findeLocalVariableById(method->localVariablesTable, expr->semanticType->idNum); 
+			struct LocalVariable* var = findLocalVariableById(method->localVariablesTable, expr->semanticType->idNum);
 			int arraySize = var->semanticType->arraySize;
 			enum Typenames typeName = expr->semanticType->typeName;
 			for (int i = 0; i < arraySize; ++i) {
@@ -1265,8 +1263,89 @@ void generateCodeToCallPrint(char* code, int* offset, int printMethodRefId) {
 	writeU2ToArray(code, offset);
 }
 
-void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanStmt, char* code, int* offset){
-		
+void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanStmt, char* code, int* offset) {
+	struct Identifier* identifier = scanStmt->identifierList->firstId; 
+	while (identifier != NULL) {
+		struct LocalVariable* localVariable = findLocalVariableById(method->localVariablesTable, identifier->idNum); 
+		struct SemanticType* semanticType = localVariable->semanticType; 
+		unsigned char storeInstruction; 
+		unsigned short scanMethodId;
+		if (semanticType->arrayType == ARRAY) {
+			int length = semanticType->arraySize; 
+			for (int i = 0; i < length; ++i) {
+				
+				//gen code to load array reference to stack operand
+				u1 = ALOAD;
+				writeU1ToArray(code, offset);
+				u1 = identifier->idNum;
+				writeU1ToArray(code, offset);
+
+				//gen code to define array index ; 
+				u1 = BIPUSH; 
+				writeU1ToArray(code, offset); 
+				s1 = i; 
+				writeS1ToArray(code, offset); 
+
+				//generate code for right expression
+				//get value from input screen
+				u1 = INVOKESTATIC;
+				writeU1ToArray(code, offset);
+
+
+
+
+				//store value on top of stack to local variable
+				switch (semanticType->typeName) {
+				case INT_TYPE_NAME: {
+						scanMethodId = scanIntegerMethodRef->id; 
+						storeInstruction = IASTORE; 
+						break;
+					}
+					case FLOAT32_TYPE_NAME: {
+						storeInstruction = FASTORE;
+						scanMethodId = scanFloatMethodRef->id; 
+						break;
+					}
+					case STRING_TYPE_NAME: {
+						storeInstruction = AASTORE;
+						scanMethodId = scanStringMethodRef->id; 
+						break;
+					}
+				}
+				s2 = htons(scanMethodId);
+				writeS2ToArray(code, offset);
+				u1 = storeInstruction; 
+				writeU1ToArray(code, offset); 
+			}
+		}
+		else {
+
+			u1 = INVOKESTATIC;
+			writeU1ToArray(code, offset);
+
+			if (semanticType->typeName == INT_TYPE_NAME) {
+				u2 = htons(scanIntegerMethodRef->id);
+				u1 = ISTORE; 
+			}
+			else if (semanticType->typeName == FLOAT32_TYPE_NAME) {
+				u2 = htons(scanFloatMethodRef->id);
+				u1 = FSTORE; 
+			}
+			else {//string type name
+				u2 = htons(scanStringMethodRef->id);
+				u1 = ASTORE; 
+			}
+			//write id of constant method ref
+			writeU2ToArray(code, offset);
+
+			//store value from operand stack to variable
+			writeU1ToArray(code, offset); 
+
+			u1 = identifier->idNum; 
+			writeU1ToArray(code, offset); 
+		}
+		identifier = identifier->nextId; 
+	}
 }
 
 void loadComparisonResultToStack(char* code, int* offset) {

@@ -18,6 +18,9 @@ struct Constant* constantClassRuntimeLib;
 struct Constant* printStringMethodRef; 
 struct Constant* printIntegerMethodRef; 
 struct Constant* printFloatMethodRef; 
+struct Constant* scanStringMethodRef; 
+struct Constant* scanIntegerMethodRef; 
+struct Constant* scanFloatMethodRef; 
 
 struct Constant* addConstantMethodRefToConstantTable(struct Constant* clazz, struct Constant* nameAndType) {
 	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant)); 
@@ -34,9 +37,16 @@ void addRuntimeLibConstant() {
 	struct Constant* printStringNameAndType = addNameAndTypeToConstantsTable("printString", "(Ljava/lang/String;)V"); 
 	struct Constant* printIntegerNameAndType = addNameAndTypeToConstantsTable("printInteger", "(I)V"); 
 	struct Constant* printFloatNameAndType = addNameAndTypeToConstantsTable("printFloat", "(F)V");
+	struct Constant* scanStringNameAndType = addNameAndTypeToConstantsTable("scanString", "()Ljava/lang/String;");
+	struct Constant* scanIntegerNameAndType = addNameAndTypeToConstantsTable("scanInteger", "()I");
+	struct Constant* scanFloatNameAndType = addNameAndTypeToConstantsTable("scanFloat", "()F"); 
+
 	printStringMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, printStringNameAndType);
 	printIntegerMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, printIntegerNameAndType);
 	printFloatMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, printFloatNameAndType);
+	scanStringMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, scanStringNameAndType); 
+	scanIntegerMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, scanIntegerNameAndType);
+	scanFloatMethodRef = addConstantMethodRefToConstantTable(constantClassRuntimeLib, scanFloatNameAndType);
 }
 
 struct SemanticType* checkExpressionType(struct Expression* expr, struct Method* method) {
@@ -1066,11 +1076,13 @@ bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method
 	struct Identifier* id = idList->firstId; 
 	bool isOk = true;
 	while (id != NULL&& isOk) {
-		if (findLocalVariableByScope(method->localVariablesTable, id->name, scope) == NULL) {
+		struct LocalVariable* var = findLocalVariableByScope(method->localVariablesTable, id->name, scope); 
+		if (var == NULL) {
 			printf("Semantic error. Unknown identifier %s in scan statement id method %s\n", id->name, method->constMethodref->const2->const1->utf8);
 			isOk = false;
 		}
 		else {
+			id->idNum = var->id; 
 			id = id->nextId; 
 		}
 	}
@@ -1421,7 +1433,7 @@ struct LocalVariable* findActiveLocalVariableByName(List* variablesTable, char* 
 	return result;
 }
 
-struct LocalVariable* findeLocalVariableById(List* variablesTable, int id) {
+struct LocalVariable* findLocalVariableById(List* variablesTable, int id) {
 	struct LocalVariable* result = NULL;
 	struct LocalVariable* variable = NULL;
 	int size = list_size(variablesTable);
