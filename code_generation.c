@@ -868,7 +868,6 @@ void generateCodeForSingleAssignment(struct Method*  method, int localVarId, str
 
 void generateCodeForArrayElementAssignment(struct Method*  method, 
 	struct PrimaryExpression* arrayExpr, struct Expression* indexExpr , struct Expression* expr, char* code, int* offset) {
-	//TODO: generate code id is field, not local variable
 	
 	//gen code to load array reference to stack operand
 	u1 = ALOAD; 
@@ -1264,87 +1263,130 @@ void generateCodeToCallPrint(char* code, int* offset, int printMethodRefId) {
 }
 
 void generateCodeForScanStmt(struct Method* method, struct ScanStatement* scanStmt, char* code, int* offset) {
-	struct Identifier* identifier = scanStmt->identifierList->firstId; 
-	while (identifier != NULL) {
-		struct LocalVariable* localVariable = findLocalVariableById(method->localVariablesTable, identifier->idNum); 
-		struct SemanticType* semanticType = localVariable->semanticType; 
+	struct Expression* expr = scanStmt->expressionList->firstExpression; 
+	while (expr != NULL) {
 		unsigned char storeInstruction; 
 		unsigned short scanMethodId;
-		if (semanticType->arrayType == ARRAY) {
-			int length = semanticType->arraySize; 
-			for (int i = 0; i < length; ++i) {
-				
-				//gen code to load array reference to stack operand
-				u1 = ALOAD;
-				writeU1ToArray(code, offset);
-				u1 = identifier->idNum;
-				writeU1ToArray(code, offset);
 
-				//gen code to define array index ; 
-				u1 = BIPUSH; 
-				writeU1ToArray(code, offset); 
-				s1 = i; 
-				writeS1ToArray(code, offset); 
+		struct PrimaryExpression* primaryExpr = expr->primaryExpr; 
+		if (primaryExpr->exprType == PE_COMPOSITE) {
+			//gen code to load array reference to stack operand
+			u1 = ALOAD;
+			writeU1ToArray(code, offset);
 
-				//generate code for right expression
-				//get value from input screen
-				u1 = INVOKESTATIC;
-				writeU1ToArray(code, offset);
+			//array's id
+			u1 = primaryExpr->primaryExpr->semanticType->idNum; 
+			writeU1ToArray(code, offset);
+
+			//gen code to define array index ; 
+			generateCodeForExpression(method, primaryExpr->expr, code, offset);
+
+			//generate code for right expression
+			u1 = INVOKESTATIC; 
+			writeU1ToArray(code, offset); 
 
 
+			//store value on top of stack to local variable
+			switch (expr->semanticType->typeName) {
+			case INT_TYPE_NAME: {
+					u1 = IASTORE;
+					u2 = htons(scanIntegerMethodRef->id); 
+					break;
+				}
+				case FLOAT32_TYPE_NAME: {
+					u1 = FASTORE;
+					u2 = htons(scanFloatMethodRef->id); 
+					break;
+				}
+				case STRING_TYPE_NAME: {
+					u1 = AASTORE;
+					u2 = htons(scanStringMethodRef->id); 
+					break;
+				}
+			}
 
+			//write static method's id
+			writeU2ToArray(code, offset); 
 
-				//store value on top of stack to local variable
-				switch (semanticType->typeName) {
-				case INT_TYPE_NAME: {
-						scanMethodId = scanIntegerMethodRef->id; 
-						storeInstruction = IASTORE; 
+			//write store command
+			writeU1ToArray(code, offset);
+		}
+		else {
+			struct SemanticType* semanticType = expr->semanticType; 
+			int varId = expr->primaryExpr->semanticType->idNum;
+
+			if (semanticType->arrayType == ARRAY) {
+				int length = semanticType->arraySize;
+				for (int i = 0; i < length; ++i) {
+
+					//gen code to load array reference to stack operand
+					u1 = ALOAD;
+					writeU1ToArray(code, offset);
+					u1 = varId;
+					writeU1ToArray(code, offset);
+
+					//gen code to define array index ; 
+					u1 = BIPUSH;
+					writeU1ToArray(code, offset);
+					s1 = i;
+					writeS1ToArray(code, offset);
+
+					//generate code for right expression
+					//get value from input screen
+					u1 = INVOKESTATIC;
+					writeU1ToArray(code, offset);
+
+					//store value on top of stack to local variable
+					switch (semanticType->typeName) {
+					case INT_TYPE_NAME: {
+						scanMethodId = scanIntegerMethodRef->id;
+						storeInstruction = IASTORE;
 						break;
 					}
 					case FLOAT32_TYPE_NAME: {
 						storeInstruction = FASTORE;
-						scanMethodId = scanFloatMethodRef->id; 
+						scanMethodId = scanFloatMethodRef->id;
 						break;
 					}
 					case STRING_TYPE_NAME: {
 						storeInstruction = AASTORE;
-						scanMethodId = scanStringMethodRef->id; 
+						scanMethodId = scanStringMethodRef->id;
 						break;
 					}
+					}
+					s2 = htons(scanMethodId);
+					writeS2ToArray(code, offset);
+					u1 = storeInstruction;
+					writeU1ToArray(code, offset);
 				}
-				s2 = htons(scanMethodId);
-				writeS2ToArray(code, offset);
-				u1 = storeInstruction; 
-				writeU1ToArray(code, offset); 
+			}
+			else {
+				u1 = INVOKESTATIC;
+				writeU1ToArray(code, offset);
+
+				if (semanticType->typeName == INT_TYPE_NAME) {
+					u2 = htons(scanIntegerMethodRef->id);
+					u1 = ISTORE;
+				}
+				else if (semanticType->typeName == FLOAT32_TYPE_NAME) {
+					u2 = htons(scanFloatMethodRef->id);
+					u1 = FSTORE;
+				}
+				else {//string type name
+					u2 = htons(scanStringMethodRef->id);
+					u1 = ASTORE;
+				}
+				//write id of constant method ref
+				writeU2ToArray(code, offset);
+
+				//store value from operand stack to variable
+				writeU1ToArray(code, offset);
+
+				u1 = varId;
+				writeU1ToArray(code, offset);
 			}
 		}
-		else {
-
-			u1 = INVOKESTATIC;
-			writeU1ToArray(code, offset);
-
-			if (semanticType->typeName == INT_TYPE_NAME) {
-				u2 = htons(scanIntegerMethodRef->id);
-				u1 = ISTORE; 
-			}
-			else if (semanticType->typeName == FLOAT32_TYPE_NAME) {
-				u2 = htons(scanFloatMethodRef->id);
-				u1 = FSTORE; 
-			}
-			else {//string type name
-				u2 = htons(scanStringMethodRef->id);
-				u1 = ASTORE; 
-			}
-			//write id of constant method ref
-			writeU2ToArray(code, offset);
-
-			//store value from operand stack to variable
-			writeU1ToArray(code, offset); 
-
-			u1 = identifier->idNum; 
-			writeU1ToArray(code, offset); 
-		}
-		identifier = identifier->nextId; 
+		expr = expr->nextExpr; 
 	}
 }
 
