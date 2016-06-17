@@ -504,7 +504,7 @@ print_statement:
 	; 
 
 scan_statement:
-	SCANLN '(' identifier_list ')'						{$$ = CreateScanStmt ($3) ; }
+	SCANLN '(' expression_list ')'						{$$ = CreateScanStmt ($3) ; }
 	; 									
 
 %%

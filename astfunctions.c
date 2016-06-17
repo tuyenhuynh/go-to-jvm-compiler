@@ -969,9 +969,9 @@ struct PrintStatement * CreatePrintStmt(struct ExpressionList * _expressionList)
 	return Result; 
 }
 
-struct ScanStatement * CreateScanStmt(struct IdentifierList* _identifierList) {
+struct ScanStatement * CreateScanStmt(struct ExpressionList* _expressionList) {
 	struct ScanStatement * Result = (struct ScanStatement*) malloc(sizeof (struct ScanStatement));
-	Result->identifierList = _identifierList; 
+	Result->expressionList = _expressionList; 
 	
 	return Result; 
 

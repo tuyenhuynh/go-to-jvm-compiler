@@ -374,7 +374,7 @@ struct PrintStatement {
 };
 
 struct ScanStatement {
-	struct IdentifierList *identifierList;
+	struct ExpressionList *expressionList;
 };
 
 #endif// _TREES_H_

@@ -662,7 +662,7 @@ void printScanStmt(int parentId, struct ScanStatement* scanStmt){
 	if (scanStmt != NULL) {
 		int id = ++maxId;
 		printEdgeWithDestName(parentId, id, "SCAN");
-		printIdentifierList(id, scanStmt->identifierList);
+		printExpressionList(id, scanStmt->expressionList);
 	}
 }
 
