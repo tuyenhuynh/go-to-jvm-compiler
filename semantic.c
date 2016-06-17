@@ -339,9 +339,9 @@ bool doSemantic(struct Program* program) {
 	constantClassString = addClassToConstantsTable("java/lang/String"); 
 
 	//add addition constants to print string
-	openSquareParenthesis = addUtf8ToConstantsTable("["); 
-	closeSquareParenthesis = addUtf8ToConstantsTable("]"); 
-	space = addUtf8ToConstantsTable(" "); 
+	openSquareParenthesis = addStringToConstantsTable("["); 
+	closeSquareParenthesis = addStringToConstantsTable("]"); 
+	space = addStringToConstantsTable(" "); 
 
 	addRuntimeLibConstant(); 
 
