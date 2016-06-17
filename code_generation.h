@@ -38,6 +38,10 @@ extern struct Constant* scanStringMethodRef;
 extern struct Constant* scanIntegerMethodRef;
 extern struct Constant* scanFloatMethodRef;
 
+extern struct Constant* openSquareParenthesis;
+extern struct Constant* closeSquareParenthesis;
+extern struct Constant* space;
+
 void Write(void* data, int count);
 void writeU1(); 
 void writeU2(); 
@@ -96,4 +100,5 @@ void generateCodeToCheckForCondition(char* code, int *offset, int forBodyPos);
 void sortCaseExpression(struct ExpressionCaseClause* exprCaseClauseList[], int count);
 void generateCodeToCallPrint(char* code, int* offset, int printMethodRefId);
 void genereteCodeForLogicalOperatorWithInt(char* code, int* offset, unsigned char opcode);
+void printConstantString(char*code, int* offset, unsigned char constantId);
 #endif //_CODE_GENERATION_H_

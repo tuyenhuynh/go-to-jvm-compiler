@@ -1189,6 +1189,22 @@ void generateCodeToCheckForCondition(char* code, int *offset, int forBodyPos) {
 	writeS2ToArray(code, offset);
 }
 
+void printConstantString(char*code, int* offset, unsigned char constantId) {
+
+	//write instruction LDC (to load int/float/string reference) 
+	u1 = LDC;
+	writeU1ToArray(code, offset);
+	//get id of constant int/float/string reference from constants table
+	u1 = constantId; 
+	writeU1ToArray(code, offset);
+
+	u1 = INVOKESTATIC;
+	writeU1ToArray(code, offset);
+
+	u2 = htons(printStringMethodRef->id);
+	writeU2ToArray(code, offset); 
+}
+
 void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* printStmt, char* code, int* offset){
 	struct ExpressionList* exprList = printStmt->expressionList;
 	struct Expression* expr = exprList->firstExpression; 
@@ -1197,6 +1213,9 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* prin
 			struct LocalVariable* var = findLocalVariableById(method->localVariablesTable, expr->semanticType->idNum);
 			int arraySize = var->semanticType->arraySize;
 			enum Typenames typeName = expr->semanticType->typeName;
+
+			printConstantString(code, offset, openSquareParenthesis->id); 
+
 			for (int i = 0; i < arraySize; ++i) {
 				//generate code to load element
 				//load array id
@@ -1217,6 +1236,7 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* prin
 					}
 					case FLOAT32_TYPE_NAME: {
 						u1 = FALOAD;
+						break; 
 					}
 					default: {
 						u1 = AALOAD;
@@ -1233,7 +1253,13 @@ void generateCodeForPrintStmt(struct Method* method, struct PrintStatement* prin
 				else if (expr->semanticType->typeName == STRING_TYPE_NAME) {
 					generateCodeToCallPrint(code, offset, printStringMethodRef->id);
 				}
+
+				printConstantString(code, offset, space->id);
+
 			}
+
+			printConstantString(code, offset, closeSquareParenthesis->id);
+
 		}
 		else {
 			if (expr->semanticType->typeName == INT_TYPE_NAME) {
@@ -1660,7 +1686,8 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 					break; 
 				}
 				case FLOAT32_TYPE_NAME: {
-					u1 = FALOAD; 
+					u1 = FALOAD;
+					break; 
 				}
 				default: {
 					u1 = AALOAD; 
