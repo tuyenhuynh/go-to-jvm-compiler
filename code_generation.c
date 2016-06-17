@@ -592,8 +592,6 @@ void generateCodeForArrayInitialization(struct Method* method,int  localArrayVar
 	struct ExpressionList* exprList, char* code, int *offset) {
 	struct Expression* expr = exprList->firstExpression; 
 	for (int i = 0; i < exprList->size; ++i) {
-		//TODO: generate code id is field, not local variable
-
 		//gen code to load array reference to stack operand
 		u1 = ALOAD;
 		writeU1ToArray(code, offset);
@@ -754,7 +752,6 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 			break; 
 		}
 		case INC_SIMPLE_STMT: {
-			//TODO: implement situation when operand of this operation is class's field 
 			u1 = IINC;
 			writeU1ToArray(code, offset); 
 			//get id of variable in local var table 
@@ -766,7 +763,6 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 			break; 
 		}
 		case DEC_SIMPLE_STMT: {
-			//TODO: implement situation when operand of this operation is class's field 
 			u1 = IINC;
 			writeU1ToArray(code, offset);
 			//get id of variable in local var table 
@@ -845,7 +841,6 @@ void generateCodeForSingleAssignment(struct Method*  method, int localVarId, str
 	generateCodeForExpression(method, expr, code, offset);
 
 	//store value on top of stack to local variable
-	//TODO: generate code id is field, not local variable
 	switch (expr->semanticType->typeName) {
 		case INT_TYPE_NAME: {
 			u1 = ISTORE;
@@ -1645,7 +1640,6 @@ void generateCodeForPrimaryExpression(struct Method* method, struct PrimaryExpre
 			break;
 		}
 		case ID_EXPRESSION: {
-			//TODO: implementation loading field if ID_EXPRESSION is class's field
 			switch (primaryExpr->semanticType->typeName) {
 				case INT_TYPE_NAME: {
 					//write command
