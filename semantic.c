@@ -21,6 +21,9 @@ struct Constant* printFloatMethodRef;
 struct Constant* scanStringMethodRef; 
 struct Constant* scanIntegerMethodRef; 
 struct Constant* scanFloatMethodRef; 
+struct Constant* openSquareParenthesis; 
+struct Constant* closeSquareParenthesis;
+struct Constant* space; 
 
 struct Constant* addConstantMethodRefToConstantTable(struct Constant* clazz, struct Constant* nameAndType) {
 	struct Constant* constant = (struct Constant*) malloc(sizeof(struct Constant)); 
@@ -246,9 +249,7 @@ struct SemanticType* checkPrimaryExpressionType(struct PrimaryExpression* primar
 				}
 			}
 			else {
-				type->typeName = variable->semanticType->typeName;
-				type->arrayType = variable->semanticType->arrayType; 
-				type->idNum = variable->id; 
+				type = variable->semanticType; 
 			}
 			break;
 		}
@@ -337,6 +338,11 @@ bool doSemantic(struct Program* program) {
 	//add constant type string 
 	constantClassString = addClassToConstantsTable("java/lang/String"); 
 
+	//add addition constants to print string
+	openSquareParenthesis = addUtf8ToConstantsTable("["); 
+	closeSquareParenthesis = addUtf8ToConstantsTable("]"); 
+	space = addUtf8ToConstantsTable(" "); 
+
 	addRuntimeLibConstant(); 
 
 	//
@@ -361,7 +367,6 @@ bool doSemantic(struct Program* program) {
 		}
 	}
 
-	//TODO: yield an error if function main not found
 	//check semantic main function (function without parameters)
 	return isOk; 
 }
@@ -1072,19 +1077,21 @@ bool checkSemanticPrintStmt(struct PrintStatement* printStmt, struct Method* met
 }
 
 bool checkSemanticScanStmt(struct ScanStatement* scanStmt, struct Method* method) {
-	struct IdentifierList* idList = scanStmt->identifierList;
-	struct Identifier* id = idList->firstId; 
+	
+	struct ExpressionList* exprList = scanStmt->expressionList; 
+	struct Expression* expr = exprList->firstExpression; 
 	bool isOk = true;
-	while (id != NULL&& isOk) {
-		struct LocalVariable* var = findLocalVariableByScope(method->localVariablesTable, id->name, scope); 
-		if (var == NULL) {
-			printf("Semantic error. Unknown identifier %s in scan statement id method %s\n", id->name, method->constMethodref->const2->const1->utf8);
-			isOk = false;
+	while (expr != NULL&& isOk) {
+		struct SemanticType* semanticType = checkExpressionType(expr, method); 
+		if (semanticType->typeName == UNKNOWN_TYPE) {
+			printf("Semantic error. Unknown expression type in scan statement\n"); 
 		}
 		else {
-			id->idNum = var->id; 
-			id = id->nextId; 
+			if ( !(expr->exprType == PRIMARY && (expr->primaryExpr->exprType == ID_EXPRESSION|| expr->primaryExpr->exprType == PE_COMPOSITE))) {
+				printf("Semantic error. Invalid expression in scan statement\n");
+			}
 		}
+		expr = expr->nextExpr; 
 	}
 	return isOk; 
 }
@@ -1358,7 +1365,8 @@ struct LocalVariable* addVariableToLocalVarsTable(char* id, struct SemanticType*
 		localVariable->scope = scope;
 		localVariable->name = id;
 		localVariable->isActive = true; 
-		localVariable->isMutable = isMutable; 
+		localVariable->isMutable = isMutable;
+		semanticType->idNum = localVariable->id;
 		localVariable->semanticType = semanticType;
 		list_add(method->localVariablesTable, localVariable);
 	}
