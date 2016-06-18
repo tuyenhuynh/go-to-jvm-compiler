@@ -429,7 +429,7 @@ void writeS2ToArray(char* code, int* offset) {
 }
 
 void writeS4ToArray(char* code, int* offset) {
-	int*tmp = (int*)&sf4; 
+	int*tmp = (int*)&s4; 
 	int value = *tmp; 
 	code[*offset] = value & 0xFF;
 	code[*offset + 1] = (value >> 8) & 0xFF;
@@ -982,7 +982,7 @@ void generateCodeForSwitchStmtWithExpression(struct Method* method, struct Switc
 
 	//write temporary  default lookup  info
 	int defaultDisplacementDeclarationPosition = *offset;
-	s4 = htons(0);
+	s4 = htonl(0);
 	writeS4ToArray(code, offset);
 
 	//write lookup data of cases
