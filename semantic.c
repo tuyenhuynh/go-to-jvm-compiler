@@ -978,21 +978,24 @@ bool checkSemanticExpressionCaseClause(struct ExpressionCaseClause *ecc, enum Ty
 	}
 	if (isOk) {
 		//check semantic body of case 
-		//add break statement to end of list
-		struct Statement* lastStmt = ecc->stmtList->lastStmt;
-		struct Statement* firstStmt = ecc->stmtList->firstStmt;
-		struct Statement* breakStmt = (struct Statement*) malloc(sizeof(struct Statement));
-		breakStmt->stmtType = BREAK_STMT;
-		breakStmt->nextStatement = NULL;
-		if (lastStmt == NULL) {
-			ecc->stmtList->firstStmt = breakStmt;
-			ecc->stmtList->lastStmt = breakStmt;
+		//check whether this is case or default
+		if (ecc->expreSwitchCase->exprList != NULL) {
+			//add break statement to end of list
+			struct Statement* lastStmt = ecc->stmtList->lastStmt;
+			struct Statement* firstStmt = ecc->stmtList->firstStmt;
+			struct Statement* breakStmt = (struct Statement*) malloc(sizeof(struct Statement));
+			breakStmt->stmtType = BREAK_STMT;
+			breakStmt->nextStatement = NULL;
+			if (lastStmt == NULL) {
+				ecc->stmtList->firstStmt = breakStmt;
+				ecc->stmtList->lastStmt = breakStmt;
+			}
+			else {
+				ecc->stmtList->lastStmt->nextStatement = breakStmt;
+				ecc->stmtList->lastStmt = breakStmt;
+			}
+			ecc->stmtList->size += 1;
 		}
-		else {
-			ecc->stmtList->lastStmt->nextStatement = breakStmt;
-			ecc->stmtList->lastStmt = breakStmt;
-		}
-		ecc->stmtList->size += 1; 
 		struct Statement* stmt = ecc->stmtList->firstStmt;
 		if (isContainStatementType(ecc->stmtList, CONTINUE_STMT)) {
 			printf("Semantic error. Invalid continue statement in body of switch statement\n"); 
