@@ -771,8 +771,6 @@ bool checkSemanticSimpleStmt(struct SimpleStmt* simpleStmt, struct Method* metho
 		case MINUS_ASSIGN_STMT:
 		case MUL_ASSIGN_STMT:
 		case DIV_ASSIGN_STMT: {
-			printf("Semantic error. Operation assignment with arithmetic not supported\n");
-			return false; 
 			if (exprListSize(simpleStmt->exprListLeft) == 1 && exprListSize(simpleStmt->exprListRight) == 1)
 			{
 				return checkSemanticAssignStmt(simpleStmt->exprListLeft->firstExpression, simpleStmt->exprListRight->firstExpression, method);

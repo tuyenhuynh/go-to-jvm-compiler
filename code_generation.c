@@ -235,6 +235,8 @@ void writeMethodsTable() {
 	}
 }
 
+
+
 void generateCodeForDefaultConstructor() {
 	u2 = htons(ACC_PUBLIC); 
 	writeU2(); 
@@ -790,10 +792,105 @@ void generateCodeForSimpleStmt(struct Method* method, struct SimpleStmt*  simple
 			} 
 			break; 
 		}
+		case PLUS_ASSIGN_STMT:
+		case MINUS_ASSIGN_STMT:
+		case MUL_ASSIGN_STMT:
+		case DIV_ASSIGN_STMT:{
+			struct Expression* leftExpr = simpleStmt->exprListLeft->firstExpression; 
+			struct Expression* rightExpr = simpleStmt->exprListRight->firstExpression; 
+			
+			//assign to a variable
+			if (leftExpr->exprType == PRIMARY && leftExpr->primaryExpr->exprType== ID_EXPRESSION) {
+				//calculate value of expression to the right of '='
+				generateCodeForExpression(method, leftExpr, code, offset);
+				generateCodeForExpression(method, rightExpr, code, offset);
+				u1 = findInstructionForSugarSyntax(simpleStmt->stmtType, leftExpr->semanticType->typeName); 
+				
+				writeU1ToArray(code, offset);
+
+				//generate code to move value on stack operand to 
+				//store value on top of stack to local variable
+				if (leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME) {
+					u1 = FSTORE; 
+				}
+				else {
+					u1 = ISTORE; 
+				}
+				writeU1ToArray(code, offset);
+
+				//id of local variable
+				u1 = leftExpr->semanticType->idNum; 
+				writeU1ToArray(code, offset);
+			}
+			else {
+				//array element assignment
+				//gen code to load array reference to stack operand
+				struct PrimaryExpression* arrayExpr = leftExpr->primaryExpr->primaryExpr; 
+				struct Expression* indexExpr = leftExpr->primaryExpr->expr; 
+				u1 = ALOAD;
+				writeU1ToArray(code, offset);
+				u1 = arrayExpr->semanticType->idNum;
+				writeU1ToArray(code, offset);
+
+				//gen code to define array index ; 
+				generateCodeForExpression(method, indexExpr, code, offset);
+
+				//generate code for right expression
+				generateCodeForExpression(method, leftExpr, code, offset);
+				generateCodeForExpression(method, rightExpr, code, offset); 
+				u1 = findInstructionForSugarSyntax(simpleStmt->stmtType, leftExpr->semanticType->typeName); 
+				writeU1ToArray(code, offset); 
+
+				//store value on top of stack to local variable
+				if (leftExpr->semanticType->typeName == INT_TYPE_NAME) {
+					u1 = IASTORE; 
+				}
+				else if (leftExpr->semanticType->typeName == FLOAT32_TYPE_NAME) {
+					u1 = FASTORE; 
+				}
+				writeU1ToArray(code, offset);
+			}
+
+			break; 
+		}
 		default: {
 			// other type of assignment statements currently not supported
 		}
 	}
+}
+
+unsigned char findInstructionForSugarSyntax(enum StatementType stmtType, enum TypeNames exprSemanticType) {
+	unsigned char instruction; 
+	if (exprSemanticType == FLOAT32_TYPE_NAME) {
+		if (stmtType == PLUS_ASSIGN_STMT) {
+			instruction = FADD;
+		}
+		else if (stmtType == MINUS_ASSIGN_STMT) {
+			instruction = FSUB;
+		}
+		else if (stmtType == MUL_ASSIGN_STMT) {
+			instruction = FMUL;
+		}
+		else if (stmtType == DIV_ASSIGN_STMT) {
+			instruction = FDIV;
+		}
+	}
+	else {
+		//int type name
+		if (stmtType == PLUS_ASSIGN_STMT) {
+			instruction = IADD;
+		}
+		else if (stmtType == MINUS_ASSIGN_STMT) {
+			instruction = ISUB;
+		}
+		else if (stmtType == MUL_ASSIGN_STMT) {
+			instruction = IMUL;
+		}
+		else if (stmtType == DIV_ASSIGN_STMT) {
+			instruction = IDIV;
+		}
+	}
+	return instruction; 
 }
 
 void generateTempCodeForGotoInstruction(char* code, int* offset) {

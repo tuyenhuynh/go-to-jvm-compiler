@@ -101,4 +101,5 @@ void sortCaseExpression(struct ExpressionCaseClause* exprCaseClauseList[], int c
 void generateCodeToCallPrint(char* code, int* offset, int printMethodRefId);
 void genereteCodeForLogicalOperatorWithInt(char* code, int* offset, unsigned char opcode);
 void printConstantString(char*code, int* offset, unsigned char constantId);
+unsigned char findInstructionForSugarSyntax(enum StatementType stmtType, enum TypeNames exprSemanticType);
 #endif //_CODE_GENERATION_H_
