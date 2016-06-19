@@ -76,8 +76,21 @@ DECIMAL		[0-9]+
 
 "scan"	{return	SCANLN; }
 "print"	{return PRINTLN; }
-\"(\\.|[^\\"])*\"	{ 		yylval.string = (char*)malloc(strlen(yytext) + 1);
-							strcpy(yylval.string, yytext);
+
+\"(\\.|[^\\"])*\"	{ 		
+							int textLength = strlen(yytext);
+							yylval.string = (char*)malloc(textLength);
+							strncpy(yylval.string, yytext+1, textLength - 2);
+							yylval.string[textLength-2] = 0;  
+							return STRING_LITERAL;
+					}
+
+
+\'(\\.|[^\\"])*\'	{ 		
+							int textLength = strlen(yytext);
+							yylval.string = (char*)malloc(textLength);
+							strncpy(yylval.string, yytext+1, textLength - 2);
+							yylval.string[textLength-2] = 0;  
 							return STRING_LITERAL;
 					}
 
